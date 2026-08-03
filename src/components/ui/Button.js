@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 
 const variants = {
-  primary: 'bg-gradient-primary text-white hover:opacity-90 glow-yellow',
-  secondary: 'bg-secondary-accent text-white hover:bg-blue-700',
+  primary: 'bg-gradient-primary text-white hover:opacity-90 glow-gold',
+  secondary: 'bg-secondary-accent text-primary-bg hover:opacity-90',
   outline: 'border border-border text-text-primary hover:bg-surface',
   ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface',
   success: 'bg-success text-white hover:opacity-90',

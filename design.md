@@ -71,11 +71,21 @@ Pengguna harus langsung merasakan atmosfer konser ketika membuka website.
 
 # Color System
 
-Website menggunakan Dark Mode sebagai identitas utama.
+Website menggunakan tema Dark Luxury sebagai identitas utama.
+
+Perpaduan warna terinspirasi dari:
+
+Luxury
+Premium Event
+Golden Stage Lighting
+Elegant Night
+Modern Minimalism
+
+Warna utama menggunakan hitam sebagai dasar dengan aksen emas lembut dan putih hangat.
 
 ## Primary Background
 
-`#09090B`
+`#0f0c06`
 
 Digunakan sebagai background utama.
 
@@ -83,45 +93,48 @@ Digunakan sebagai background utama.
 
 ## Secondary Background
 
-`#18181B`
+`#111111`
 
-Digunakan pada section, sidebar, modal, dan card.
+Digunakan pada section, sidebar, modal, card, dan navbar ketika di-scroll.
 
 ---
 
 ## Surface
 
-`#27272A`
+`#1A1A1A`
 
-Digunakan pada hover state dan active state.
-
----
-
-## Primary Accent (Red)
-
-`#EF4444`
-
-Digunakan untuk:
-
-* CTA utama
-* Badge Featured
-* Highlight
-* Status Sold Out
-* Important Action
+Digunakan pada card hover, dropdown, popup, dan elemen aktif.
 
 ---
 
-## Secondary Accent (Blue)
+## Primary Accent (Gold)
 
-`#2563EB`
+`#D6AF78`
 
 Digunakan untuk:
 
-* Filter aktif
-* Link
-* Secondary Button
-* Informasi
-* Active Navigation
+CTA utama
+Highlight
+Featured Badge
+Hover Button
+Active Navigation
+Decorative Line
+Icon penting
+
+---
+
+## Secondary Accent (Ivory)
+
+`#F5EEE4`
+
+Digunakan untuk:
+
+Secondary Button
+Section Highlight
+Border tertentu
+Icon
+Informasi penting
+Card Accent
 
 ---
 
@@ -131,17 +144,17 @@ Gunakan gradient hanya pada elemen penting.
 
 Contoh:
 
-`#2563EB → #EF4444`
+`#D6AF78 → #F5EEE4`
 
-Gradient digunakan untuk:
+Gradient digunakan pada:
 
-* Hero
-* CTA
-* Banner
-* Glow
-* Decorative Elements
+Hero
+CTA
+Banner
+Decorative Glow
+Premium Badge
 
-Jangan gunakan gradient pada seluruh website.
+Jangan menggunakan gradient pada seluruh halaman.
 
 ---
 
@@ -153,15 +166,15 @@ Primary
 
 Secondary
 
-`#A1A1AA`
+`#D4D4D8`   
 
 Muted
 
-`#71717A`
+`#A1A1AA`
 
 Border
 
-`rgba(255,255,255,0.08)`
+`rgba(214,175,120,0.15)`
 
 Success
 
@@ -179,12 +192,14 @@ Error
 
 # Color Usage Rules
 
-* Hitam mendominasi sekitar **75%** tampilan.
-* Merah sekitar **15%**.
-* Biru sekitar **10%**.
-* Merah dan biru hanya sebagai aksen.
-* Hindari penggunaan warna selain tiga warna utama.
-* Gunakan glow merah atau biru secara tipis agar menyerupai pencahayaan panggung konser.
+* Hitam (#000000) mendominasi sekitar 75% tampilan.
+* Gold (#D6AF78) sekitar 15% sebagai identitas visual.
+* Ivory (#F5EEE4) sekitar 10% untuk memberi keseimbangan dan kesan bersih.
+* Jangan menggunakan warna mencolok selain warna sistem.
+* Gunakan efek glow emas secara halus pada Hero, CTA, dan elemen penting.
+* Gunakan warna Gold sebagai warna utama untuk tombol utama, link aktif, badge, dan navigasi aktif.
+* Gunakan warna Ivory untuk memberi kontras yang elegan pada elemen sekunder.
+* Seluruh tampilan harus terasa eksklusif, mewah, modern, dan tetap minimalis.
 
 ---
 
@@ -373,6 +388,8 @@ Filter yang tersedia:
 * Tanggal Konser
 * Rentang Harga
 * Status Tiket
+
+Gunakan API https://wilayah.id/ untuk filternya
 
 Contoh daerah:
 

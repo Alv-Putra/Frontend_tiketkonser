@@ -73,13 +73,13 @@ export default function Hero() {
 
       <button
         onClick={prev}
-        className="absolute left-5 top-1/2 z-20 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
+        className="absolute left-5 top-1/2 z-30 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
       >
         <ChevronLeft size={24} />
       </button>
       <button
         onClick={next}
-        className="absolute right-5 top-1/2 z-20 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
+        className="absolute right-5 top-1/2 z-30 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
       >
         <ChevronRight size={24} />
       </button>

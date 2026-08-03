@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Music, Calendar, SlidersHorizontal, X, DollarSign, TicketCheck } from 'lucide-react';
 
-const cities = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Bali', 'Medan', 'Makassar'];
 const genres = ['Pop', 'Rock', 'Jazz', 'Electronic', 'Hip Hop', 'R&B', 'Indie', 'Metal', 'Dangdut', 'K-Pop'];
 const priceRanges = [
   { label: 'Semua Harga', min: 0, max: Infinity },
@@ -18,7 +17,11 @@ const sortOptions = ['Terbaru', 'Terdekat', 'Harga Termurah', 'Harga Termahal', 
 
 export default function SearchFilter({ onFilterChange }) {
   const [search, setSearch] = useState('');
+  const [province, setProvince] = useState('');
+  const [provinces, setProvinces] = useState([]);
   const [city, setCity] = useState('');
+  const [cities, setCities] = useState([]);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [genre, setGenre] = useState('');
   const [date, setDate] = useState('');
   const [priceRange, setPriceRange] = useState('');
@@ -26,8 +29,27 @@ export default function SearchFilter({ onFilterChange }) {
   const [sort, setSort] = useState('Terbaru');
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleFilter = () => {
-    onFilterChange?.({ search, city, genre, date, priceRange, ticketStatus, sort });
+  useEffect(() => {
+    fetch('https://wilayah.id/api/provinces.json')
+      .then((r) => r.json())
+      .then((res) => setProvinces(res.data || []))
+      .catch(() => setProvinces([]));
+  }, []);
+
+  const handleProvince = (code) => {
+    setProvince(code);
+    setCity('');
+    triggerChange('city', '');
+    if (!code) {
+      setCities([]);
+      return;
+    }
+    setLoadingCities(true);
+    fetch(`https://wilayah.id/api/regencies/${code}.json`)
+      .then((r) => r.json())
+      .then((res) => setCities(res.data || []))
+      .catch(() => setCities([]))
+      .finally(() => setLoadingCities(false));
   };
 
   const triggerChange = (key, value) => {
@@ -36,7 +58,9 @@ export default function SearchFilter({ onFilterChange }) {
 
   const resetFilters = () => {
     setSearch('');
+    setProvince('');
     setCity('');
+    setCities([]);
     setGenre('');
     setDate('');
     setPriceRange('');
@@ -48,7 +72,7 @@ export default function SearchFilter({ onFilterChange }) {
   const hasFilters = city || genre || date || priceRange || ticketStatus !== 'Semua Status';
 
   return (
-    <section className="py-12 -mt-20 relative z-30">
+    <section className="py-30 -mt-5 relative z-20">
       <div className="max-w-7xl mx-auto px-5 md:px-10 xl:px-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -84,18 +108,33 @@ export default function SearchFilter({ onFilterChange }) {
               animate={{ opacity: 1, height: 'auto' }}
               className="mt-4 pt-4 border-t border-border"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 <div>
                   <label className="block text-xs text-text-muted mb-2 flex items-center gap-1.5">
-                    <MapPin size={14} /> Kota
+                    <MapPin size={14} /> Provinsi
+                  </label>
+                  <select
+                    value={province}
+                    onChange={(e) => handleProvince(e.target.value)}
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors"
+                  >
+                    <option value="">Semua Provinsi</option>
+                    {provinces.map((p) => <option key={p.code} value={p.code}>{p.name}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-text-muted mb-2 flex items-center gap-1.5">
+                    <MapPin size={14} /> Kota / Daerah
                   </label>
                   <select
                     value={city}
                     onChange={(e) => { setCity(e.target.value); triggerChange('city', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors"
+                    disabled={!province}
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors disabled:opacity-50"
                   >
-                    <option value="">Semua Kota</option>
-                    {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+                    <option value="">{loadingCities ? 'Memuat...' : province ? 'Semua Daerah' : 'Pilih provinsi dulu'}</option>
+                    {cities.map((c) => <option key={c.code} value={c.name}>{c.name}</option>)}
                   </select>
                 </div>
 
@@ -106,7 +145,7 @@ export default function SearchFilter({ onFilterChange }) {
                   <select
                     value={genre}
                     onChange={(e) => { setGenre(e.target.value); triggerChange('genre', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors"
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors"
                   >
                     <option value="">Semua Genre</option>
                     {genres.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -121,7 +160,7 @@ export default function SearchFilter({ onFilterChange }) {
                     type="date"
                     value={date}
                     onChange={(e) => { setDate(e.target.value); triggerChange('date', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors [color-scheme:dark]"
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors [color-scheme:dark]"
                   />
                 </div>
 
@@ -132,7 +171,7 @@ export default function SearchFilter({ onFilterChange }) {
                   <select
                     value={priceRange}
                     onChange={(e) => { setPriceRange(e.target.value); triggerChange('priceRange', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors"
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors"
                   >
                     {priceRanges.map((p) => <option key={p.label} value={p.label}>{p.label}</option>)}
                   </select>
@@ -145,7 +184,7 @@ export default function SearchFilter({ onFilterChange }) {
                   <select
                     value={ticketStatus}
                     onChange={(e) => { setTicketStatus(e.target.value); triggerChange('ticketStatus', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors"
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors"
                   >
                     {ticketStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -158,7 +197,7 @@ export default function SearchFilter({ onFilterChange }) {
                   <select
                     value={sort}
                     onChange={(e) => { setSort(e.target.value); triggerChange('sort', e.target.value); }}
-                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-secondary-accent/50 transition-colors"
+                    className="w-full bg-surface border border-border rounded-[12px] px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary-accent/50 transition-colors"
                   >
                     {sortOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>

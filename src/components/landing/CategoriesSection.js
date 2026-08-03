@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 import { Music, Mic2, PartyPopper, Heart, Star, Radio } from 'lucide-react';
 
 const categories = [
-  { name: 'Pop', icon: Music, count: 24, color: 'from-blue-500/20 to-blue-600/10' },
-  { name: 'Rock', icon: Mic2, count: 18, color: 'from-red-500/20 to-red-600/10' },
-  { name: 'Festival', icon: PartyPopper, count: 12, color: 'from-purple-500/20 to-purple-600/10' },
-  { name: 'Jazz & Blues', icon: Heart, count: 9, color: 'from-amber-500/20 to-amber-600/10' },
-  { name: 'K-Pop', icon: Star, count: 15, color: 'from-pink-500/20 to-pink-600/10' },
-  { name: 'Electronic', icon: Radio, count: 11, color: 'from-cyan-500/20 to-cyan-600/10' },
+  { name: 'Pop', icon: Music, count: 24, color: 'from-primary-accent/20 to-primary-accent/5' },
+  { name: 'Rock', icon: Mic2, count: 18, color: 'from-secondary-accent/15 to-secondary-accent/5' },
+  { name: 'Festival', icon: PartyPopper, count: 12, color: 'from-primary-accent/15 to-secondary-accent/10' },
+  { name: 'Jazz & Blues', icon: Heart, count: 9, color: 'from-secondary-accent/20 to-primary-accent/5' },
+  { name: 'K-Pop', icon: Star, count: 15, color: 'from-primary-accent/10 to-secondary-accent/15' },
+  { name: 'Electronic', icon: Radio, count: 11, color: 'from-primary-accent/20 to-secondary-accent/5' },
 ];
 
 export default function CategoriesSection() {

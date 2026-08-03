@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-bg: #000000;
-  --color-secondary-bg: #0D0D0D;
-  --color-surface: #1C1C1E;
-  --color-primary-accent: #FACC15;
-  --color-secondary-accent: #3B82F6;
+  --color-primary-bg: #0f0c06;
+  --color-secondary-bg: #111111;
+  --color-surface: #1A1A1A;
+  --color-primary-accent: #D6AF78;
+  --color-secondary-accent: #F5EEE4;
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A1A1AA;
-  --color-text-muted: #71717A;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text-secondary: #D4D4D8;
+  --color-text-muted: #A1A1AA;
+  --color-border: rgba(214, 175, 120, 0.15);
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
-  --font-sans: 'Nunito', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Inter', monospace;
   --radius-small: 12px;
   --radius-medium: 18px;
   --radius-large: 24px;
@@ -27,38 +27,34 @@ html {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #27272A transparent;
+  scrollbar-color: #1A1A1A transparent;
 }
 
 body {
-  background-color: #000000;
+  background-color: #0f0c06;
   color: #FFFFFF;
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(135deg, #3B82F6, #FACC15);
+    background: linear-gradient(135deg, #D6AF78, #F5EEE4);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .glow-yellow {
-    box-shadow: 0 0 20px rgba(250, 204, 21, 0.15), 0 0 40px rgba(250, 204, 21, 0.05);
-  }
-
-  .glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 40px rgba(59, 130, 246, 0.05);
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(214, 175, 120, 0.15), 0 0 40px rgba(214, 175, 120, 0.05);
   }
 
   .bg-gradient-primary {
-    background: linear-gradient(135deg, #3B82F6, #FACC15);
+    background: linear-gradient(135deg, #D6AF78, #F5EEE4);
   }
 
   .bg-gradient-hero {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%, #000000 100%);
+    background: linear-gradient(180deg, rgba(15, 12, 6, 0) 0%, rgba(15, 12, 6, 0.8) 50%, #0f0c06 100%);
   }
 }
