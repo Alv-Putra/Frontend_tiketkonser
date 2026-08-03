@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Toast from '@/components/ui/Toast';
 import EmptyState from '@/components/ui/EmptyState';
+import Pagination from '@/components/admin/Pagination';
 
 const initialArtists = [
   { id: 1, name: 'Tulus', genre: 'Pop', country: 'Indonesia', events: 12 },
@@ -21,16 +22,23 @@ const initialArtists = [
 export default function ArtistManagement() {
   const [artists, setArtists] = useState(initialArtists);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [form, setForm] = useState({ name: '', genre: '', country: '' });
 
+  const PAGE_SIZE = 10;
+
   const filtered = artists.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase()) ||
     a.genre.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const openCreate = () => {
     setEditing(null);
@@ -74,23 +82,24 @@ export default function ArtistManagement() {
       <div className="bg-secondary-bg border border-border rounded-[18px] p-6">
         <div className="relative mb-4">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" placeholder="Cari artis..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full max-w-xs bg-surface border border-border rounded-[12px] pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors" />
+          <input type="text" placeholder="Cari artis..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full max-w-xs bg-surface border border-border rounded-[12px] pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors" />
         </div>
 
         {filtered.length === 0 ? (
           <EmptyState title="Tidak ada artis" description="Coba pencarian lain atau buat artis baru." actionLabel="Tambah Artis" onAction={openCreate} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {['Nama', 'Genre', 'Negara', 'Event', 'Aksi'].map((h) => (
-                    <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((artist) => (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    {['Nama', 'Genre', 'Negara', 'Event', 'Aksi'].map((h) => (
+                      <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map((artist) => (
                   <tr key={artist.id} className="border-b border-border/50 hover:bg-surface/30 transition-colors">
                     <td className="px-4 py-3 text-sm text-text-primary font-medium">{artist.name}</td>
                     <td className="px-4 py-3 text-sm text-text-secondary">{artist.genre}</td>
@@ -107,6 +116,8 @@ export default function ArtistManagement() {
               </tbody>
             </table>
           </div>
+          <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
+          </>
         )}
       </div>
 

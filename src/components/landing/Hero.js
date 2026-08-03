@@ -7,25 +7,25 @@ import Button from '@/components/ui/Button';
 
 const slides = [
   {
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1600&q=80',
-    name: 'Olivia Rodrigo',
+    image: 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+    name: 'Guns N Roses',
     date: '15 Agustus 2026',
     venue: 'Gelora Bung Karno',
   },
   {
-    image: 'https://images.unsplash.com/photo-1524650359799-842906ca1c06?w=1600&q=80',
-    name: 'Coldplay',
+    image: 'https://dynamicmedia.livenationinternational.com/x/t/a/f868fd4b-afa3-4943-ac01-0f1900d6c2f3.jpg',
+    name: 'Westlife',
     date: '22 September 2026',
     venue: 'Stadion Utama GBK',
   },
   {
-    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=80',
-    name: 'Arctic Monkeys',
+    image: 'https://dynamicmedia.livenationinternational.com/l/w/v/19637ec1-9fb2-454b-a744-28c7d1bf3d91.jpg?format=webp&width=1080&quality=75',
+    name: 'Oasis',
     date: '10 Oktober 2026',
     venue: 'Istora Senayan',
   },
   {
-    image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800b?w=1600&q=80',
+    image: 'https://dynamicmedia.livenationinternational.com/Media/b/m/i/5ca47483-ed3a-4916-88e6-8e9bc688a42a.jpg?format=webp&width=1080&quality=75',
     name: 'Taylor Swift',
     date: '5 November 2026',
     venue: 'Stadion Madya',

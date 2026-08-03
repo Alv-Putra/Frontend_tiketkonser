@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Toast from '@/components/ui/Toast';
 import EmptyState from '@/components/ui/EmptyState';
+import Pagination from '@/components/admin/Pagination';
 
 const initialConcerts = [
   { id: 1, title: 'Java Jazz Festival 2026', artist: 'Various Artists', date: '15-17 Mei 2026', venue: 'JIExpo Kemayoran, Jakarta', status: 'Tersedia', quota: 3700, sold: 2350 },
@@ -20,18 +21,24 @@ const initialConcerts = [
 export default function ConcertManagement() {
   const [concerts, setConcerts] = useState(initialConcerts);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [form, setForm] = useState({ title: '', artist: '', date: '', venue: '', status: 'Tersedia', quota: '', sold: '0' });
 
+  const PAGE_SIZE = 10;
   const statusOptions = ['Tersedia', 'Habis Terjual', 'Dibatalkan'];
 
   const filtered = concerts.filter((c) =>
     c.title.toLowerCase().includes(search.toLowerCase()) ||
     c.artist.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const openCreate = () => {
     setEditing(null);
@@ -83,7 +90,7 @@ export default function ConcertManagement() {
             type="text"
             placeholder="Cari konser..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full max-w-xs bg-surface border border-border rounded-[12px] pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors"
           />
         </div>
@@ -91,17 +98,18 @@ export default function ConcertManagement() {
         {filtered.length === 0 ? (
           <EmptyState title="Tidak ada konser" description="Coba pencarian lain atau buat konser baru." actionLabel="Tambah Konser" onAction={openCreate} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {['Judul', 'Artis', 'Tanggal', 'Tempat', 'Status', 'Kuota', 'Terjual', 'Aksi'].map((h) => (
-                    <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((concert) => (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    {['Judul', 'Artis', 'Tanggal', 'Tempat', 'Status', 'Kuota', 'Terjual', 'Aksi'].map((h) => (
+                      <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map((concert) => (
                   <tr key={concert.id} className="border-b border-border/50 hover:bg-surface/30 transition-colors">
                     <td className="px-4 py-3 text-sm text-text-primary font-medium">{concert.title}</td>
                     <td className="px-4 py-3 text-sm text-text-secondary">{concert.artist}</td>
@@ -123,6 +131,8 @@ export default function ConcertManagement() {
               </tbody>
             </table>
           </div>
+          <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
+          </>
         )}
       </div>
 
