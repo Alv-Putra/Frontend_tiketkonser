@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Calendar, Clock, Users, Download, ChevronLeft, Smartphone, QrCode, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -11,16 +11,16 @@ const concertData = {
   1: {
     id: 1,
     title: 'Java Jazz Festival 2026',
-    artist: 'Various Artists',
+    artist: 'Guns N Roses',
     date: '15-17 Mei 2026',
     time: '14:00 - 23:00 WIB',
     venue: 'JIExpo Kemayoran, Jakarta',
     priceStart: 350000,
-    image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80',
+    image: 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
     status: 'Available',
     featured: true,
-    description: 'Java Jazz Festival 2026 kembali hadir dengan lineup yang lebih spektakuler! Festival jazz terbesar di Asia Tenggara ini akan menampilkan ratusan musisi jazz nasional dan internasional.',
-    lineup: ['Tulus', 'Raisa', 'Tompi', 'Barry Likumahuwa', 'Andien', 'International Guest Stars'],
+    description: 'Java Jazz Festival 2026 kembali hadir lebih spektakuler dengan Guns N Roses sebagai headliner! Festival musik terbesar di Asia Tenggara ini akan memanjakan penonton dengan penampilan legendaris dan ratusan musisi papan atas.',
+    lineup: ['Guns N Roses', 'Musisi Jazz Nasional', 'Musisi Jazz Internasional'],
     ticketClasses: [
       { name: 'VIP', price: 1500000, quota: 200, sold: 150 },
       { name: 'Category 1', price: 850000, quota: 500, sold: 400 },
@@ -30,6 +30,165 @@ const concertData = {
     faq: [
       { q: 'Apakah anak-anak boleh masuk?', a: 'Anak-anak di atas 5 tahun diperbolehkan masuk dengan tiket masuk.' },
       { q: 'Apakah tersedia area parkir?', a: 'Tersedia area parkir yang luas di kompleks JIExpo.' },
+    ],
+  },
+  2: {
+    id: 2,
+    title: 'Coldplay: Music of the Spheres',
+    artist: 'Coldplay',
+    date: '20 Juni 2026',
+    time: '19:30 - 22:30 WIB',
+    venue: 'Gelora Bung Karno, Jakarta',
+    priceStart: 850000,
+    image: 'https://dynamicmedia.livenationinternational.com/b/z/w/1f16b59d-09c9-432d-ad90-39fcc1a6f25a.jpg',
+    status: 'Sold Out',
+    featured: true,
+    description: 'Coldplay kembali ke Indonesia lewat tur dunia Music of the Spheres! Pertunjukan penuh visual spektakuler, lagu-lagu ikonik, dan pengalaman konser yang tak terlupakan di Gelora Bung Karno.',
+    lineup: ['Coldplay', 'Special Guest'],
+    ticketClasses: [
+      { name: 'Ultimate', price: 2500000, quota: 500, sold: 500 },
+      { name: 'CAT 1', price: 1500000, quota: 1500, sold: 1500 },
+      { name: 'CAT 2', price: 850000, quota: 3000, sold: 3000 },
+    ],
+    faq: [
+      { q: 'Apakah tiket masih tersedia?', a: 'Maaf, seluruh tiket untuk konser ini sudah habis terjual.' },
+      { q: 'Apakah tersedia tribune?', a: 'Seluruh kategori tiket menggunakan standing area di lapangan GBK.' },
+    ],
+  },
+  3: {
+    id: 3,
+    title: 'Festival Musik Indonesia 2026',
+    artist: 'Backstreet Boys',
+    date: '3-5 Juli 2026',
+    time: '13:00 - 22:00 WIB',
+    venue: 'Lapangan Rampal, Malang',
+    priceStart: 200000,
+    image: 'https://dynamicmedia.livenationinternational.com/t/r/j/4ff345c9-05b8-455b-9970-900cc6a6320e.jpg?format=webp&width=1080&quality=75',
+    status: 'Available',
+    featured: true,
+    description: 'Festival Musik Indonesia 2026 menghadirkan Backstreet Boys sebagai bintang utama! Tiga hari penuh musik, panggung megah, dan penampil yang tak boleh dilewatkan di Lapangan Rampal.',
+    lineup: ['Backstreet Boys', 'Penampil Lokal', 'DJ Performance'],
+    ticketClasses: [
+      { name: 'VIP', price: 750000, quota: 1000, sold: 700 },
+      { name: 'Reguler', price: 350000, quota: 3000, sold: 2000 },
+      { name: 'Early Bird', price: 200000, quota: 2000, sold: 2000 },
+    ],
+    faq: [
+      { q: 'Apakah area VIP dekat dengan panggung?', a: 'Ya, area VIP berada paling dekat dengan panggung utama.' },
+      { q: 'Berapa durasi festival setiap harinya?', a: 'Festival berlangsung dari siang hingga malam setiap harinya.' },
+    ],
+  },
+  4: {
+    id: 4,
+    title: 'Michael Learns To Rock Reunion Tour',
+    artist: 'Michael Learns To Rock',
+    date: '12 Agustus 2026',
+    time: '19:00 - 22:00 WIB',
+    venue: 'Stadion Utama GBK, Jakarta',
+    priceStart: 500000,
+    image: 'https://dynamicmedia.livenationinternational.com/d/q/q/97fa78ed-62e1-4f35-ab15-ccd9ee3d2545.jpg?format=webp&width=1080&quality=75',
+    status: 'Available',
+    featured: false,
+    description: 'Legenda musik pop Michael Learns To Rock kembali tampil dalam Reunion Tour! Saksikan lagu-lagu hits era 90-an seperti That\'s Why You Go Away dan Paint My Love secara live.',
+    lineup: ['Michael Learns To Rock', 'Opening Act'],
+    ticketClasses: [
+      { name: 'VIP', price: 1500000, quota: 500, sold: 300 },
+      { name: 'CAT 1', price: 900000, quota: 1000, sold: 650 },
+      { name: 'CAT 2', price: 500000, quota: 2000, sold: 1100 },
+    ],
+    faq: [
+      { q: 'Apakah tersedia kursi?', a: 'Kategori VIP dan CAT 1 menggunakan kursi bernomor, CAT 2 standing area.' },
+      { q: 'Kapan pintu dibuka?', a: 'Pintu dibuka pukul 17.00 WIB, konser dimulai pukul 19.00 WIB.' },
+    ],
+  },
+  5: {
+    id: 5,
+    title: 'Hindia: The Tour 2026',
+    artist: 'Hindia',
+    date: '28 Agustus 2026',
+    time: '19:30 - 22:30 WIB',
+    venue: 'Balai Sarbini, Jakarta',
+    priceStart: 400000,
+    image: 'https://hindia.id/archive/hd2.jpg',
+    status: 'Available',
+    featured: false,
+    description: 'Hindia membawa tur tunggalnya The Tour 2026! Malam penuh musik, lirik mendalam, dan energi khas Hindia yang menghipnotis penonton di Balai Sarbini.',
+    lineup: ['Hindia', 'Special Guest'],
+    ticketClasses: [
+      { name: 'VIP', price: 750000, quota: 300, sold: 200 },
+      { name: 'Festival', price: 400000, quota: 800, sold: 500 },
+    ],
+    faq: [
+      { q: 'Apakah konser menggunkaan kursi?', a: 'Area VIP bersebelahan dengan panggung, area festival standing.' },
+      { q: 'Apakah boleh membawa kamera?', a: 'Kamera saku diperbolehkan, kamera profesional tidak diizinkan.' },
+    ],
+  },
+  6: {
+    id: 6,
+    title: 'God Bless: Rockin\' the Nation',
+    artist: 'God Bless',
+    date: '5 September 2026',
+    time: '19:00 - 23:00 WIB',
+    venue: 'Lapangan Gasibu, Bandung',
+    priceStart: 150000,
+    image: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/God_Bless_2020_stamp_of_Indonesia.jpg',
+    status: 'Available',
+    featured: false,
+    description: 'God Bless, legenda rock Indonesia, kembali menggelegar lewat konser Rockin\' the Nation! Persembahan spesial untuk para penggemar setia rock n roll Tanah Air.',
+    lineup: ['God Bless', 'Ahmad Albar', 'Eross Candra', 'Special Guest'],
+    ticketClasses: [
+      { name: 'VIP', price: 350000, quota: 500, sold: 320 },
+      { name: 'Festival', price: 150000, quota: 2000, sold: 1200 },
+    ],
+    faq: [
+      { q: 'Apakah anak-anak diperbolehkan?', a: 'Boleh, namun wajib didampingi orang tua.' },
+      { q: 'Apakah tersedia area VIP dekat panggung?', a: 'Ya, area VIP paling dekat dengan panggung utama.' },
+    ],
+  },
+  7: {
+    id: 7,
+    title: 'Ifan Seventeen: The Last Chapter',
+    artist: 'Ifan Seventeen',
+    date: '18 September 2026',
+    time: '19:30 - 22:00 WIB',
+    venue: 'Ciputra Artpreneur, Jakarta',
+    priceStart: 550000,
+    image: 'https://rricoid-assets.obs.ap-southeast-4.myhuaweicloud.com/berita/Jakarta/o/1740326465552-FOTO_IFAN_NEW_2/oxyn9qzdmij8656.jpeg',
+    status: 'Sold Out',
+    featured: false,
+    description: 'Ifan Seventeen menutup babak terakhir perjalanan musiknya lewat The Last Chapter. Malam penuh haru dengan lagu-lagu ikonik yang menemani perjalanan banyak orang.',
+    lineup: ['Ifan Seventeen', 'Orchestra Live'],
+    ticketClasses: [
+      { name: 'VIP', price: 1200000, quota: 400, sold: 400 },
+      { name: 'CAT 1', price: 850000, quota: 700, sold: 700 },
+      { name: 'CAT 2', price: 550000, quota: 1200, sold: 1200 },
+    ],
+    faq: [
+      { q: 'Apakah tiket masih tersedia?', a: 'Maaf, seluruh tiket untuk konser ini sudah habis terjual.' },
+      { q: 'Apakah ada orkestra live?', a: 'Ya, konser ini diiringi orkestra live yang menambah kesan dramatis.' },
+    ],
+  },
+  8: {
+    id: 8,
+    title: 'Enau Festival 2026',
+    artist: 'Enau',
+    date: '2 Oktober 2026',
+    time: '15:00 - 23:00 WIB',
+    venue: 'Stadion Batakan, Balikpapan',
+    priceStart: 250000,
+    image: 'https://cdn.medcom.id/dynamic/content/2024/11/22/1730140/7qrnEDxdyu.jpg?w=1024',
+    status: 'Available',
+    featured: false,
+    description: 'Enau Festival 2026 kembali hadir di Kalimantan! Festival musik tahunan dengan lineup terbaik, panggung megah, dan suasana konser yang meriah di Stadion Batakan.',
+    lineup: ['Enau', 'Penampil Lokal', 'DJ Performance'],
+    ticketClasses: [
+      { name: 'VIP', price: 600000, quota: 800, sold: 400 },
+      { name: 'Reguler', price: 350000, quota: 2500, sold: 1500 },
+      { name: 'Early Bird', price: 250000, quota: 1500, sold: 1500 },
+    ],
+    faq: [
+      { q: 'Berapa lama festival berlangsung?', a: 'Festival dimulai siang hari dan berakhir menjelang tengah malam.' },
+      { q: 'Apakah tersedia penginapan?', a: 'Area sekitar Stadion Batakan memiliki banyak pilihan penginapan.' },
     ],
   },
 };
@@ -42,7 +201,8 @@ const benefits = [
 
 export default function ConcertDetail({ params }) {
   const [activeTab, setActiveTab] = useState('tickets');
-  const concert = concertData[params.id] || concertData[1];
+  const { id } = use(params);
+  const concert = concertData[id] || concertData[1];
 
   return (
     <div className="min-h-screen">
