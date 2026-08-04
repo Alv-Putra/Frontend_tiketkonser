@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion';
 
 const artists = [
-  { name: 'Tulus', image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&q=80', genre: 'Pop' },
-  { name: 'Raisa', image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80', genre: 'Pop' },
-  { name: 'Rich Brian', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80', genre: 'Hip Hop' },
-  { name: 'Isyana', image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80', genre: 'Classical Pop' },
-  { name: 'Dewa 19', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80', genre: 'Rock' },
-  { name: 'Pamungkas', image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80', genre: 'Indie' },
+  { name: 'Tulus', image: 'https://akcdn.detik.net.id/community/media/visual/2023/03/01/lagu-tulus-paling-favorit-di-spotify.jpeg?w=700&q=90', genre: 'Pop' },
+  { name: 'Raisa', image: 'https://assets.telkomsel.com/public/2024-02/27%20%281%29_0.png', genre: 'Pop' },
+  { name: 'Rich Brian', image: 'https://assets.telkomsel.com/public/2025-07/mengenal-rich-brian.png?VersionId=YbuLijBp8IszLoGsmBown8RMc.o91XVq', genre: 'Hip Hop' },
+  { name: 'For Revenge', image: 'https://awsimages.detik.net.id/community/media/visual/2025/03/19/for-revenge-1742372092396.jpeg?w=1200', genre: 'Classical Pop' },
+  { name: 'Dia', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUG5XMdWEzQ3lOpbTlPte1t78px-n0M_m17o7uKhMlSWEumi06kD6fbB0&s=10', genre: 'Hipdut' },
+  { name: 'Perunggu', image: 'https://awsimages.detik.net.id/community/media/visual/2024/04/06/perunggu.png?w=700&q=90', genre: 'Indie' },
 ];
 
 export default function PopularArtists() {
