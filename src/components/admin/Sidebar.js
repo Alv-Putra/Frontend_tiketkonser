@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Music, Mic2, Tag, ShoppingCart, CreditCard,
-  Settings, LogOut, ChevronLeft, Menu
+  Settings, LogOut, ChevronLeft, Menu, ShieldCheck, Users as UsersIcon
 } from 'lucide-react';
 
 const menuItems = [
@@ -14,6 +14,8 @@ const menuItems = [
   { label: 'Konser', icon: Music, href: '/admin/concerts' },
   { label: 'Artis', icon: Mic2, href: '/admin/artists' },
   { label: 'Kategori', icon: Tag, href: '/admin/categories' },
+  { label: 'Persetujuan', icon: ShieldCheck, href: '/admin/approvals' },
+  { label: 'Pengguna', icon: UsersIcon, href: '/admin/users' },
   { label: 'Pesanan', icon: ShoppingCart, href: '/admin/orders' },
   { label: 'Pembayaran', icon: CreditCard, href: '/admin/payments' },
   { label: 'Pengaturan', icon: Settings, href: '/admin/settings' },
@@ -41,8 +43,8 @@ export default function Sidebar() {
         >
           <div className="flex items-center justify-between p-5 border-b border-border">
             {!collapsed && (
-              <Link href="/admin" className="text-xl font-bold">
-                <span className="text-gradient">Concert</span>Hub
+              <Link href="/admin" className="text-xl font-black tracking-tight text-text-primary">
+                Conser<span className="text-primary-accent">Id</span>
               </Link>
             )}
             <button
@@ -61,7 +63,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm transition-all duration-200 ${
+                  className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-accent/10 text-primary-accent'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface'
@@ -77,7 +79,7 @@ export default function Sidebar() {
           <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border">
             <Link
               href="/"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm text-text-secondary hover:text-text-primary hover:bg-surface transition-all duration-200`}
+              className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface transition-all duration-200`}
             >
               <LogOut size={18} />
               {!collapsed && <span>Kembali ke Website</span>}
@@ -97,8 +99,8 @@ export default function Sidebar() {
             <div className="absolute inset-0 bg-black/50" onClick={() => setCollapsed(false)} />
             <div className="relative w-64 h-full bg-secondary-bg border-r border-border p-5">
               <div className="flex items-center justify-between mb-8">
-                <Link href="/admin" className="text-xl font-bold">
-                  <span className="text-gradient">Concert</span>Hub
+                <Link href="/admin" className="text-xl font-black tracking-tight text-text-primary">
+                  Conser<span className="text-primary-accent">Id</span>
                 </Link>
               </div>
               <nav className="space-y-1">
@@ -110,7 +112,7 @@ export default function Sidebar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setCollapsed(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm transition-all duration-200 ${
+                      className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] transition-all duration-200 ${
                         isActive
                           ? 'bg-primary-accent/10 text-primary-accent'
                           : 'text-text-secondary hover:text-text-primary hover:bg-surface'

@@ -1,3 +1,41 @@
+# ConserId Frontend
+
+Frontend Next.js untuk platform tiket festival, terhubung ke backend Express + Prisma
+(`Konser-Be/Backend_UKK`).
+
+## Menjalankan
+
+Backend berjalan di `http://localhost:3000` (port default). Frontend berjalan di port **3001**
+untuk menghindari konflik:
+
+```bash
+npm run dev
+```
+
+Buka [http://localhost:3001](http://localhost:3001).
+
+Setiap request ke `/api/*` di-proxy oleh `next.config.mjs` ke backend melalui environment:
+
+```bash
+# .env.local
+BACKEND_API_URL=http://localhost:3000
+```
+
+Server backend mengirim email verifikasi/reset dengan `CLIENT_URL` (mis.
+`http://localhost:3001`) sebagai link yang diarahkan ke halaman FE:
+- `/verify-email?token=...` — konfirmasi verifikasi email
+- `/reset-password?token=...` — reset kata sandi
+
+## Catatan Integrasi
+
+- Register hanya mengirim `fullName`, `email`, dan `password`; role `buyer` dari backend
+  dipetakan menjadi `customer`.
+- Setelah register, user wajib verifikasi email sebelum bisa login (tidak auto-login).
+- Refresh token berada di httpOnly cookie backend namun endpoint refresh membutuhkan
+  `refreshToken` pada body sehingga tidak bisa dipakai dari browser; sesi dibersihkan saat 401.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
@@ -6,15 +44,9 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 

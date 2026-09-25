@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Download } from 'lucide-react';
-import Button from '@/components/ui/Button';
 
 const navLinks = [
   { label: 'Home', href: '#home' },
@@ -26,14 +25,14 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
         scrolled
-          ? 'bg-primary-bg/80 backdrop-blur-xl border-b border-border'
+          ? 'bg-ln-surface/90 backdrop-blur-xl border-b border-ln-line shadow-sm'
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-5 md:px-10 xl:px-20">
+      <div className="max-w-[1256px] mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-20">
-          <a href="#" className="text-2xl font-bold">
-            <span className="text-gradient">Concert</span>Hub
+          <a href="#" className="text-2xl font-black tracking-tight text-ln-dark">
+            Conser<span className="text-ln-primary">Id</span>
           </a>
 
           <div className="hidden md:flex items-center gap-8">
@@ -41,7 +40,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                className="text-sm font-semibold text-ln-muted hover:text-ln-dark transition-colors"
               >
                 {link.label}
               </a>
@@ -49,14 +48,17 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:block">
-            <Button size="sm" onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}>
+            <button
+              onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}
+              className="font-ln inline-flex items-center gap-2 rounded-full bg-ln-primary px-4 py-2 text-sm font-bold text-white hover:bg-ln-primary-dark transition-colors cursor-pointer"
+            >
               <Download size={16} />
               Download App
-            </Button>
+            </button>
           </div>
 
           <button
-            className="md:hidden p-2 text-text-primary cursor-pointer"
+            className="md:hidden p-2 text-ln-dark cursor-pointer"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -70,7 +72,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-secondary-bg border-b border-border"
+            className="md:hidden bg-ln-surface border-b border-ln-line"
           >
             <div className="px-5 py-6 space-y-4">
               {navLinks.map((link) => (
@@ -78,15 +80,18 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block text-text-secondary hover:text-text-primary transition-colors"
+                  className="block text-sm font-semibold text-ln-text hover:text-ln-primary transition-colors"
                 >
                   {link.label}
                 </a>
               ))}
-              <Button className="w-full" size="sm" onClick={() => { setMobileOpen(false); document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              <button
+                onClick={() => { setMobileOpen(false); document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' }); }}
+                className="font-ln inline-flex items-center justify-center gap-2 rounded-full bg-ln-primary px-4 py-2 text-sm font-bold text-white hover:bg-ln-primary-dark transition-colors cursor-pointer w-full"
+              >
                 <Download size={16} />
                 Download App
-              </Button>
+              </button>
             </div>
           </motion.div>
         )}

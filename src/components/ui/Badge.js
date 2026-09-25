@@ -13,7 +13,7 @@ const colors = {
 export default function Badge({ children, variant = 'default', className = '' }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${colors[variant] || colors.default} ${className}`}
+      className={`font-heading inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${colors[variant] || colors.default} ${className}`}
     >
       {children}
     </span>

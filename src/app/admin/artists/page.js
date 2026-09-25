@@ -94,7 +94,7 @@ export default function ArtistManagement() {
                 <thead>
                   <tr className="border-b border-border">
                     {['Nama', 'Genre', 'Negara', 'Event', 'Aksi'].map((h) => (
-                      <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
+                      <th key={h} className="font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>

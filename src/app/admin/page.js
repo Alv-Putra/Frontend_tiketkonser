@@ -71,7 +71,7 @@ export default function AdminDashboard() {
               <thead>
                 <tr className="border-b border-border">
                   {['ID Pesanan', 'Pelanggan', 'Event', 'Jumlah', 'Status'].map((h) => (
-                    <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-3 py-3">{h}</th>
+                    <th key={h} className="font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-3 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
               <div key={event.name} className="pb-4 border-b border-border/50 last:border-0 last:pb-0">
                 <h3 className="text-sm font-medium text-text-primary mb-2">{event.name}</h3>
                 <div className="flex items-center justify-between text-xs text-text-muted mb-2">
-                  <span>{event.sold.toLocaleString()} / {event.quota.toLocaleString()} sold</span>
+                  <span>{event.sold.toLocaleString('id-ID')} / {event.quota.toLocaleString('id-ID')} sold</span>
                   <span>{event.revenue}</span>
                 </div>
                 <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">

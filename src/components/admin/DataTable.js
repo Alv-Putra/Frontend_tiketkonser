@@ -65,7 +65,7 @@ export default function DataTable({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3 ${
+                  className={`font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3 ${
                     col.sortable ? 'cursor-pointer hover:text-text-primary select-none' : ''
                   }`}
                   onClick={() => col.sortable && handleSort(col.key)}

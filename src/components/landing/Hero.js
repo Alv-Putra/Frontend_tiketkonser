@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Button from '@/components/ui/Button';
 
 const slides = [
   {
@@ -69,22 +68,22 @@ export default function Hero() {
         />
       </AnimatePresence>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ln-bg via-ln-bg/35 to-transparent z-10" />
 
       <button
         onClick={prev}
-        className="absolute left-5 top-1/2 z-30 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
+        className="absolute left-5 top-1/2 z-30 p-2 rounded-full bg-white border border-ln-line text-ln-dark shadow-sm hover:bg-ln-bg transition-all duration-300 hidden md:block cursor-pointer"
       >
         <ChevronLeft size={24} />
       </button>
       <button
         onClick={next}
-        className="absolute right-5 top-1/2 z-30 p-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 hidden md:block"
+        className="absolute right-5 top-1/2 z-30 p-2 rounded-full bg-white border border-ln-line text-ln-dark shadow-sm hover:bg-ln-bg transition-all duration-300 hidden md:block cursor-pointer"
       >
         <ChevronRight size={24} />
       </button>
 
-      <div className="relative z-25 max-w-8xl mx-auto px-5 md:px-10 xl:px-20 w-full pb-8   md:pb-50">
+      <div className="relative z-25 max-w-[1256px] mx-auto px-4 md:px-6 w-full pb-8 md:pb-14">
         <AnimatePresence mode="wait">
           <motion.div
             key={`content-${current}`}
@@ -97,7 +96,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-sm md:text-base text-primary-accent font-semibold tracking-widest uppercase mb-2"
+              className="font-ln text-sm md:text-base text-ln-primary font-bold tracking-widest uppercase mb-2"
             >
               {slides[current].date}
             </motion.p>
@@ -106,7 +105,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-2"
+              className="ln-display text-ln-dark leading-tight mb-2"
             >
               {slides[current].name}
             </motion.h2>
@@ -115,7 +114,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className="text-lg md:text-xl text-white/70 mb-6"
+              className="text-lg md:text-xl text-ln-muted mb-6"
             >
               {slides[current].venue}
             </motion.p>
@@ -125,12 +124,12 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.4 }}
             >
-              <Button
-                size="lg"
+              <button
                 onClick={() => document.getElementById('concerts')?.scrollIntoView({ behavior: 'smooth' })}
+                className="font-ln inline-flex items-center justify-center rounded-full bg-ln-primary px-8 py-3 text-base font-bold text-white hover:bg-ln-primary-dark transition-colors cursor-pointer"
               >
                 Beli Tiket
-              </Button>
+              </button>
             </motion.div>
           </motion.div>
         </AnimatePresence>
@@ -141,10 +140,10 @@ export default function Hero() {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`transition-all duration-300 rounded-full ${
+            className={`transition-all duration-300 rounded-full cursor-pointer ${
               i === current
-                ? 'w-10 h-2.5 bg-primary-accent'
-                : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'
+                ? 'w-10 h-2.5 bg-ln-primary'
+                : 'w-2.5 h-2.5 bg-ln-line hover:bg-ln-muted'
             }`}
           />
         ))}

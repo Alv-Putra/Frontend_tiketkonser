@@ -5,23 +5,35 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Toast from '@/components/ui/Toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '@/stores/authStore';
 
 export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [toast, setToast] = useState({ isOpen: false, type: 'error', message: '' });
+  const login = useAuthStore((state) => state.login);
+  const isLoading = useAuthStore((state) => state.isLoading);
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('Mohon isi semua kolom');
       return;
     }
-    router.push('/admin');
+    const result = await login(email, password);
+    if (result.success && result.user.role === 'admin') {
+      router.push('/admin');
+    } else if (result.success) {
+      setToast({ isOpen: true, type: 'error', message: 'Email ini bukan akun admin.' });
+    } else {
+      setError(result.error);
+    }
   };
 
   return (
@@ -35,7 +47,7 @@ export default function AdminLogin() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold">
-            <span className="text-gradient">Concert</span>Hub
+             <span className="text-gradient">Conser</span>Id
           </Link>
           <p className="text-text-muted mt-2">Admin Dashboard</p>
         </div>
@@ -53,10 +65,10 @@ export default function AdminLogin() {
             </div>
           )}
 
-            <Input
+          <Input
             label="Email"
             type="email"
-            placeholder="admin@concerthub.com"
+            placeholder="admin@conserid.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -81,10 +93,14 @@ export default function AdminLogin() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg">
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             <LogIn size={18} />
-            Masuk
+            {isLoading ? 'Memproses...' : 'Masuk'}
           </Button>
+
+          <div className="rounded-xl bg-surface border border-border p-3 text-xs text-text-muted leading-relaxed">
+            Demo: admin@conserid.com / Admin123
+          </div>
 
           <div className="text-center">
             <Link href="/" className="text-sm text-text-muted hover:text-secondary-accent transition-colors">
@@ -93,6 +109,13 @@ export default function AdminLogin() {
           </div>
         </form>
       </motion.div>
+
+      <Toast
+        isOpen={toast.isOpen}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

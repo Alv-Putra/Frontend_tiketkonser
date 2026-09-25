@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 
 const variants = {
-  primary: 'bg-gradient-primary text-white hover:opacity-90 glow-gold',
+  primary: 'bg-primary-accent text-white hover:opacity-90',
   secondary: 'bg-secondary-accent text-primary-bg hover:opacity-90',
   outline: 'border border-border text-text-primary hover:bg-surface',
   ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface',
@@ -35,7 +35,7 @@ export default function Button({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
+      className={`font-heading inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
       {...props}
     >
       {children}

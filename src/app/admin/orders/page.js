@@ -62,7 +62,7 @@ export default function OrderManagement() {
               <thead>
                 <tr className="border-b border-border">
                   {['ID Pesanan', 'Pelanggan', 'Event', 'Jumlah', 'Status', 'Tanggal', 'Aksi'].map((h) => (
-                    <th key={h} className="text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
+                    <th key={h} className="font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>

@@ -1,24 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-bg: #0f0c06;
-  --color-secondary-bg: #111111;
-  --color-surface: #1A1A1A;
-  --color-primary-accent: #D6AF78;
-  --color-secondary-accent: #F5EEE4;
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #D4D4D8;
-  --color-text-muted: #A1A1AA;
-  --color-border: rgba(214, 175, 120, 0.15);
+  --color-primary-bg: #F3F3F3;
+  --color-secondary-bg: #FFFFFF;
+  --color-surface: #ECECEC;
+  --color-primary-accent: #0C0435;
+  --color-secondary-accent: #0C0435;
+  --color-text-primary: #222222;
+  --color-text-secondary: #555555;
+  --color-text-muted: #6E6E6E;
+  --color-border: #E2E2E2;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'Inter', monospace;
+  --font-sans: 'Myriad Pro', var(--font-inter, 'Inter'), system-ui, sans-serif;
+  --font-heading: var(--font-montserrat, 'Montserrat'), 'Montserrat', system-ui, sans-serif;
+  --font-mono: var(--font-inter, 'Inter'), monospace;
   --radius-small: 12px;
   --radius-medium: 18px;
   --radius-large: 24px;
   --radius-full: 999px;
+
+  --font-ln: var(--font-noto, 'Noto Sans'), 'Noto Sans', 'Segoe UI', sans-serif;
+
+  --color-ln-bg: #F3F3F3;
+  --color-ln-surface: #ffffff;
+  --color-ln-primary: #0C0435;
+  --color-ln-primary-dark: #06021C;
+  --color-ln-dark: #000000;
+  --color-ln-text: #222222;
+  --color-ln-muted: #6e6e6e;
+  --color-ln-line: #d3d5da;
+  --color-ln-accent: #FFF599;
+  --color-ln-sky: #d6e7f9;
+  --color-ln-info: #2077d5;
+  --color-ln-error: #0C0435;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  label {
+    font-family: var(--font-heading);
+  }
 }
 
 html {
@@ -27,34 +58,125 @@ html {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1A1A1A transparent;
+  scrollbar-color: #E2E2E2 transparent;
 }
 
 body {
-  background-color: #0f0c06;
-  color: #FFFFFF;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #F3F3F3;
+  color: #222222;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(135deg, #D6AF78, #F5EEE4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #0C0435;
+    -webkit-text-fill-color: #0C0435;
   }
 
   .glow-gold {
-    box-shadow: 0 0 20px rgba(214, 175, 120, 0.15), 0 0 40px rgba(214, 175, 120, 0.05);
+    box-shadow: 0 2px 12px rgba(12, 4, 53, 0.08);
   }
 
   .bg-gradient-primary {
-    background: linear-gradient(135deg, #D6AF78, #F5EEE4);
+    background-color: #0C0435;
   }
 
   .bg-gradient-hero {
     background: linear-gradient(180deg, rgba(15, 12, 6, 0) 0%, rgba(15, 12, 6, 0.8) 50%, #0f0c06 100%);
   }
+}
+
+@layer components {
+  .ln-display {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 40px;
+  }
+  .ln-h1 {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .ln-h2 {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 28px;
+  }
+  .ln-h3 {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 26px;
+  }
+  .ln-h4 {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .ln-h5 {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .ln-body {
+    font-family: var(--font-ln);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 25px;
+  }
+  .ln-body-small {
+    font-family: var(--font-ln);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ln-display {
+    font-size: 50px;
+    line-height: 56px;
+  }
+  .ln-h1 {
+    font-size: 38px;
+    line-height: 44px;
+  }
+  .ln-h2 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .ln-h3 {
+    font-size: 21px;
+    line-height: 28px;
+  }
+}
+
+@keyframes ln-marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.ln-marquee-track {
+  animation: ln-marquee 30s linear infinite;
+}
+
+.ln-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

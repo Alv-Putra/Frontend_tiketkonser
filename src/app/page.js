@@ -1,28 +1,22 @@
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
-import SearchFilter from '@/components/landing/SearchFilter';
-import FeaturedConcerts from '@/components/landing/FeaturedConcerts';
-import UpcomingConcerts from '@/components/landing/UpcomingConcerts';
-import PopularArtists from '@/components/landing/PopularArtists';
-import CategoriesSection from '@/components/landing/CategoriesSection';
-import MobileAppPreview from '@/components/landing/MobileAppPreview';
-import FAQ from '@/components/landing/FAQ';
-import Sponsor from '@/components/landing/Sponsor';
-import Footer from '@/components/landing/Footer';
+import Marquee from '@/components/livenation/Marquee';
+import FindEventsSection from '@/components/livenation/FindEventsSection';
+import Watching from '@/components/livenation/Watching';
+import LastCall from '@/components/livenation/LastCall';
+import FirstToKnow from '@/components/livenation/FirstToKnow';
+import Footer from '@/components/livenation/Footer';
 
 export default function Home() {
   return (
-    <main>
+    <main className="bg-ln-bg text-ln-text min-h-screen">
       <Navbar />
       <Hero />
-      <SearchFilter />
-      <FeaturedConcerts />
-      <UpcomingConcerts />
-      <PopularArtists />
-      <CategoriesSection />
-      <MobileAppPreview />
-      <FAQ />
-      <Sponsor />
+      <Marquee />
+      <FindEventsSection />
+      <Watching />
+      <LastCall />
+      <FirstToKnow />
       <Footer />
     </main>
   );
