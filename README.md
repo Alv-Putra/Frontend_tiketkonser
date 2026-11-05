@@ -19,14 +19,15 @@ Guest membuka Homepage → melihat festival → detail festival → Beli Tiket �
 | Area | Teknologi |
 |---|---|
 | Framework | Next.js 16, React 19, react-dom |
-| Bahasa | TypeScript |
-| Styling | Tailwind CSS 4 |
+| Bahasa | TypeScript (migrasi dari JavaScript sedang berjalan, lihat `PRD.md` 7.3) |
+| Styling | Tailwind CSS 4 (token lewat `@theme` di `src/app/globals.css`) |
 | State | Zustand |
-| Animasi | Framer Motion |
+| Animasi | Framer Motion + CSS |
 | Ikon | Lucide React |
 | QR Code | qrcode.react |
 | Tanggal | date-fns |
-| Lint | ESLint |
+| ID unik | uuid |
+| Lint | ESLint 9 + eslint-config-next |
 
 ## Prasyarat
 
@@ -76,6 +77,26 @@ Buka [http://localhost:3001](http://localhost:3001).
 | `npm run start` | Menjalankan hasil build (port 3001) |
 | `npm run lint` | Menjalankan ESLint |
 
+Script `test` belum ada: framework pengujian belum dipilih (`PRD.md` bagian 9). Jest tidak dipakai.
+
+## Struktur Folder
+
+Dikelompokkan per fitur, mengikuti section alur sistem. Aturan lengkap ada di `AGENTS.md` bagian 8.
+
+```
+src/
+├── app/          # Routing saja (impor dari features/)
+├── features/     # Satu folder per section: home, festivals, auth, checkout,
+│                 # payment, tickets, checkin, organizer, admin
+├── components/   # Lintas fitur: layout/, ui/, motion/
+├── lib/          # API client, variants animasi, format
+├── store/        # Zustand lintas fitur
+├── types/        # Tipe bersama
+└── tests/        # Setup dan helper test
+```
+
+Untuk membuat kerangka folder: `bash scaffold.sh`.
+
 ## Catatan Integrasi
 
 - Register hanya mengirim `fullName`, `email`, dan `password`. Role `buyer` dari backend dipetakan menjadi `customer`.
@@ -85,4 +106,9 @@ Buka [http://localhost:3001](http://localhost:3001).
 
 ## Dokumentasi
 
-- PRD: `PRD.md`
+| File | Isi |
+|---|---|
+| `PRD.md` | Kebutuhan produk: peran, alur, FR-1 sampai FR-13, status, rute, stack, pertanyaan terbuka |
+| `design.md` | Panduan desain: warna putih-hitam-merah, tipografi, komponen, animasi per section |
+| `AGENTS.md` | Aturan untuk agent AI (opencode): dokumen wajib dibaca, TDD, standar kode, struktur folder |
+| `opencode.json` | Memuat PRD, design, dan README otomatis ke konteks semua agent |
