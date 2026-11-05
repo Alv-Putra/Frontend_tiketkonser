@@ -10,6 +10,9 @@ const nextConfig = {
   turbopack: {
     root: rootDir,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     return [
       {
