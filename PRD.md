@@ -3,7 +3,7 @@
 **Produk:** Website penjualan tiket festival
 **Repo:** Alv-Putra/Frontend_tiketkonser (`frontend_konser` v0.1.0)
 **Backend:** Express + Prisma (`Konser-Be/Backend_UKK`)
-**Versi:** 1.2
+**Versi:** 1.3
 **Sumber:** `package.json`, `README.md`, `design.md`, dokumen alur sistem (`alur_tiket_konser.docx`)
 
 ## 1. Ringkasan
@@ -146,7 +146,7 @@ Daftar rute yang disetujui. Agent tidak boleh menambah rute di luar tabel ini ta
 | Bahasa | TypeScript (`.ts`/`.tsx`) |
 | Styling | Tailwind CSS 4 (konfigurasi token lewat `@theme` di CSS) |
 | State | Zustand 5 |
-| Animasi | Framer Motion + CSS. Tidak ada library animasi lain (GSAP, Lenis, Lottie, react-countup tidak dipakai). |
+| Animasi | Framer Motion + CSS sebagai default. Library animasi lain (GSAP, Lenis, Lottie, Three.js, react-countup, dll.) diizinkan. |
 | Ikon | Lucide React |
 | QR Code | qrcode.react |
 | Tanggal | date-fns |

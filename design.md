@@ -6,8 +6,9 @@ Aturan pemakaian dokumen:
 
 - Perilaku dan aturan bisnis mengikuti `PRD.md`. Dokumen ini hanya mengatur tampilan.
 - Bagian bertanda **`[TBD-PRD]`** menyangkut hal yang belum diputuskan di PRD (bagian 9). **Jangan diimplementasikan** sebelum PRD diperbarui.
-- Animasi memakai **Framer Motion dan CSS saja** (sesuai PRD 7.1). Jangan menambah library animasi lain.
+- Animasi memakai **Framer Motion dan CSS sebagai default** (sesuai PRD 7.1). Library animasi lain (GSAP, Lenis, Lottie, Three.js, react-countup, dll.) **boleh dipakai** tanpa persetujuan terpisah.
 - Nomor "Section" di bagian 6.3 sama dengan nomor langkah alur sistem dan FR di PRD.
+- Referensi dari galeri desain eksternal (recent.design dan sejenisnya) boleh dipakai sebagai **inspirasi pola**, dengan aturan di bagian 10. Hasil adaptasi tetap mengikuti palet, font, dan batasan di dokumen ini.
 
 ---
 
@@ -192,7 +193,7 @@ Tombol **Beli Tiket** selalu Primary dan memiliki efek *magnetic* (mengikuti kur
 | Smooth scroll | CSS `scroll-behavior: smooth` |
 | Confetti, centang | Framer Motion + SVG |
 
-Tidak dipakai: GSAP, Lenis, Lottie, react-countup.
+Library animasi lain (GSAP, Lenis, Lottie, Three.js, react-countup, dll.) boleh dipakai bila Framer Motion/CSS tidak praktis untuk kebutuhannya. Syarat: patuhi bagian 8 (reduced motion, performa, aksesibilitas) dan palet bagian 2. Bila Lenis dipakai, ia menggantikan CSS `scroll-behavior: smooth`.
 
 ### 6.2 Motion Tokens
 
@@ -660,6 +661,8 @@ Framer Motion: bungkus aplikasi dengan `<MotionConfig reducedMotion="user">` (7.
 
 Saat reduced motion aktif: matikan parallax, marquee, confetti, custom cursor, dan tilt 3D.
 
+Animasi dari library non-Framer Motion wajib dimatikan sendiri saat `prefers-reduced-motion: reduce` (mis. `gsap.matchMedia()`, Lenis tidak diinisialisasi).
+
 ### 8.2 Aksesibilitas
 
 - Rasio kontras mengikuti tabel 2.4.
@@ -691,12 +694,65 @@ Mobile: matikan tilt 3D dan custom cursor, kurangi jarak reveal menjadi 24px, gu
 
 ---
 
-## 10. Checklist Implementasi
+## 10. Referensi Eksternal (recent.design dan galeri sejenis)
+
+Tujuan: mengambil **pola desain** (layout, ritme section, tipografi, gaya gerak) dari situs contoh, lalu mengadaptasikannya ke tema ConserId. Referensi tidak mengubah PRD, palet, atau batasan teknis.
+
+### 10.1 Sumber yang boleh dipakai
+
+| Sumber | Dipakai untuk |
+|---|---|
+| [recent.design](https://recent.design) (dulu Godly) | Galeri harian situs web, UI, dan motion; bisa disimpan ke koleksi |
+| [Awwwards](https://www.awwwards.com) | Situs berprestasi; pola interaksi dan animasi |
+| [One Page Love](https://onepagelove.com) | Landing page satu halaman (Homepage/hero) |
+| [Land-book](https://land-book.com) | Landing page dan section |
+| [Lookup.design](https://www.lookup.design) | Contoh UI per komponen |
+| [Footer.design](https://footer.design) | Contoh footer |
+| [SEESAW](https://seesaw.design) | Inspirasi umum |
+| [Codrops roundups](https://tympanus.net/codrops/category/articles/websites-roundups) | Kumpulan situs kreatif dan teknik animasinya |
+| Galeri lain (Dribbble, Behance, Mobbin, Siteinspire, Lapa Ninja, dsb.) | Boleh, dengan aturan yang sama |
+
+Daftar ini bukan batas keras: situs galeri lain yang menyediakan contoh website boleh dipakai selama mengikuti 10.2 sampai 10.4.
+
+Kata kunci pencarian yang relevan untuk ConserId: `music festival`, `event ticketing`, `concert`, `ticket checkout`, `QR ticket`, `festival landing page`, `brutalist`, `black and red`, `editorial typography`.
+
+### 10.2 Yang boleh dan tidak boleh diambil
+
+| Boleh diambil (pola) | Tidak boleh diambil |
+|---|---|
+| Susunan layout dan hierarki section | Kode, CSS, atau aset (gambar, ikon, video, font berlisensi) milik situs lain |
+| Skala tipografi dan ritme spasi | Teks/copy, nama brand, logo, dan ilustrasi |
+| Jenis animasi (mis. text mask reveal, marquee, tilt) | Palet warna asli situs referensi |
+| Struktur komponen (mis. kartu tiket, tab sticky) | Fitur yang tidak ada di PRD (mis. peta tempat duduk, chat, marketplace) |
+
+Situs di galeri adalah karya berhak cipta pihak lain, bukan template bebas pakai. Menyalin tampilan persis sama atau kode/aset-nya tidak diperbolehkan.
+
+### 10.3 Aturan adaptasi (wajib)
+
+1. **Palet:** selalu putih, hitam, merah sesuai bagian 2, dengan batas kontras di 2.4. Warna situs referensi tidak dipakai.
+2. **Font:** hanya Anton dan Inter (bagian 3), kecuali user menyetujui font lain.
+3. **PRD menang:** jika referensi memuat fungsi di luar PRD atau menyentuh `[TBD-PRD]`, bagian itu dilewati.
+4. **Aksesibilitas dan performa** (bagian 8) tetap berlaku, termasuk `prefers-reduced-motion`.
+5. **Template berkode** (mis. dari marketplace) hanya boleh dipakai jika lisensinya jelas mengizinkan dan user menyetujui. Dependency non-animasi tetap memerlukan persetujuan user (`AGENTS.md` bagian 3); library animasi dikecualikan.
+
+### 10.4 Alur kerja agent
+
+1. **Pemicu:** user menyebut URL/nama galeri, atau meminta referensi untuk Section tertentu (bagian 6.3). Agent tidak mencari referensi atas inisiatif sendiri.
+2. **Cari:** buka halaman galeri atau situs yang disebut user (tool `webfetch` atau pencarian). Ambil maksimal **3 sampai 5** kandidat per section.
+3. **Tampilkan ke user:** tabel ringkas (nama, URL, apa yang menarik, cocok untuk Section berapa). Tunggu user memilih.
+4. **Catat:** tambahkan yang dipilih ke `docs/design/references.md` memakai format di file itu.
+5. **Adaptasi:** terjemahkan pola ke komponen ConserId sesuai 10.3, lalu kerjakan dengan TDD dan struktur folder di `AGENTS.md`.
+6. **Perubahan `design.md`:** bila pola menjadi standar permanen, usulkan perubahan ke user; jangan mengubah `design.md` diam-diam.
+
+Jika halaman tidak bisa dibuka (butuh login, memblokir akses otomatis, atau konten dimuat lewat JavaScript), **jangan menebak**: minta user menempelkan URL lain, tangkapan layar, atau deskripsi pola yang diinginkan.
+
+## 11. Checklist Implementasi
 
 - [ ] Pasang font Anton + Inter (`next/font`), definisikan token `@theme` (2.5).
 - [ ] Komponen dasar di `components/ui/`: Button, Input, Modal, Toast, Badge, Skeleton.
 - [ ] Komponen lintas fitur: `components/layout/` (Navbar, Footer, ScrollProgress) dan `components/motion/` (Reveal, CountUp, Marquee).
 - [ ] `lib/motion.ts`, `MotionConfig reducedMotion="user"`, dan `app/template.tsx`.
 - [ ] Animasi per section sesuai 6.3, **kecuali** yang bertanda `[TBD-PRD]`.
+- [ ] Setiap pola yang berasal dari referensi eksternal tercatat di `docs/design/references.md`.
 - [ ] Uji `prefers-reduced-motion`, keyboard, dan screen reader.
 - [ ] Audit Lighthouse (Performance dan Accessibility ≥ 90).

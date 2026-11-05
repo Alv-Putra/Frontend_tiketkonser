@@ -22,7 +22,7 @@ Guest membuka Homepage → melihat festival → detail festival → Beli Tiket �
 | Bahasa | TypeScript (migrasi dari JavaScript sedang berjalan, lihat `PRD.md` 7.3) |
 | Styling | Tailwind CSS 4 (token lewat `@theme` di `src/app/globals.css`) |
 | State | Zustand |
-| Animasi | Framer Motion + CSS |
+| Animasi | Framer Motion + CSS (library animasi lain diizinkan) |
 | Ikon | Lucide React |
 | QR Code | qrcode.react |
 | Tanggal | date-fns |
@@ -81,7 +81,7 @@ Script `test` belum ada: framework pengujian belum dipilih (`PRD.md` bagian 9). 
 
 ## Struktur Folder
 
-Dikelompokkan per fitur, mengikuti section alur sistem. Aturan lengkap ada di `AGENTS.md` bagian 8.
+Struktur target dikelompokkan per fitur, mengikuti section alur sistem. Aturan lengkap ada di `AGENTS.md` bagian 8. Pemindahan file lama ke struktur ini dikerjakan bertahap (`PRD.md` 7.3).
 
 ```
 src/
@@ -95,8 +95,6 @@ src/
 └── tests/        # Setup dan helper test
 ```
 
-Untuk membuat kerangka folder: `bash scaffold.sh`.
-
 ## Catatan Integrasi
 
 - Register hanya mengirim `fullName`, `email`, dan `password`. Role `buyer` dari backend dipetakan menjadi `customer`.
@@ -109,6 +107,7 @@ Untuk membuat kerangka folder: `bash scaffold.sh`.
 | File | Isi |
 |---|---|
 | `PRD.md` | Kebutuhan produk: peran, alur, FR-1 sampai FR-13, status, rute, stack, pertanyaan terbuka |
-| `design.md` | Panduan desain: warna putih-hitam-merah, tipografi, komponen, animasi per section |
+| `design.md` | Panduan desain: warna putih-hitam-merah, tipografi, komponen, animasi per section, aturan referensi eksternal |
+| `docs/design/references.md` | Log referensi desain dari recent.design dan galeri sejenis |
 | `AGENTS.md` | Aturan untuk agent AI (opencode): dokumen wajib dibaca, TDD, standar kode, struktur folder |
 | `opencode.json` | Memuat PRD, design, dan README otomatis ke konteks semua agent |

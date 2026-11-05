@@ -20,6 +20,7 @@ Tiga dokumen ini adalah konteks wajib untuk setiap tugas:
   - Jika belum ada, terpotong, atau Anda tidak yakin: baca penuh dengan tool Read sebelum melakukan hal lain.
 - Jika salah satu file tidak ada atau tidak terbaca, **berhenti dan tanya user**. Jangan menebak isinya.
 - Nama file bersifat case-sensitive di Linux dan macOS: gunakan persis `PRD.md`, `design.md`, `README.md`.
+- `docs/design/references.md` (log referensi desain eksternal) ikut dimuat otomatis oleh pola `docs/design/**/*.md` di `opencode.json`.
 - Jangan mengandalkan ingatan sesi lama atau asumsi. Jika tugas baru dimulai di tengah sesi dan dokumen mungkin berubah, baca ulang bagian yang relevan.
 
 ### 1.2 Aturan untuk subagent dan delegasi
@@ -48,11 +49,12 @@ Jika ada pertentangan antar dokumen, laporkan ke user; jangan memilih sendiri se
 
 ## 3. Cakupan kerja
 
-- Kerjakan hanya yang diminta dan yang tercantum di PRD. Jangan menambah fitur, halaman, atau dependency di luar itu.
+- Kerjakan hanya yang diminta dan yang tercantum di PRD. Jangan menambah fitur, halaman, atau dependency di luar itu (library animasi dikecualikan).
 - Perubahan seminimal mungkin. Jangan mengubah layout atau gaya yang sudah ada tanpa diminta.
 - Jangan menciptakan route, endpoint, field, atau status yang tidak ada di PRD (rute: PRD 5.1) atau backend. Jika belum jelas, tanya.
 - Bagian `design.md` bertanda **`[TBD-PRD]`** dan hal di PRD bagian 9 (pertanyaan terbuka) **tidak boleh diimplementasikan**. Tanyakan ke user atau minta PRD diperbarui lebih dulu.
-- Animasi hanya memakai Framer Motion dan CSS. Jangan memasang GSAP, Lenis, Lottie, react-countup, atau library animasi lain.
+- Referensi desain dari situs luar (recent.design dan galeri sejenis) hanya dicari jika user memintanya, dan mengikuti Bagian 9.
+- Animasi memakai Framer Motion dan CSS sebagai default. Library animasi lain (GSAP, Lenis, Lottie, Three.js, react-countup, dll.) boleh dipasang dan dipakai, selama patuh `design.md` bagian 8 (reduced motion, performa).
 - Output kode: berikan **file lengkap** yang siap dipakai, bukan potongan.
 
 ## 4. TDD (wajib)
@@ -90,7 +92,7 @@ Area yang harus punya test (rujuk PRD):
 ## 5. Standar kode
 
 - TypeScript wajib: halaman/komponen `.tsx`, logika/store/util `.ts`. Jangan membuat file `.js` baru. File `.js` yang sudah ada diubah lewat tugas migrasi terpisah (PRD 7.3).
-- Stack: Next.js 16 (App Router), React 19 + react-dom, Tailwind CSS 4, Zustand, Framer Motion, Lucide React, qrcode.react, date-fns, uuid.
+- Stack: Next.js 16 (App Router), React 19 + react-dom, Tailwind CSS 4, Zustand, Framer Motion (+ library animasi lain bila perlu), Lucide React, qrcode.react, date-fns, uuid.
 - Token warna, font, dan easing didefinisikan lewat `@theme` di `src/app/globals.css` (Tailwind 4), bukan `tailwind.config.js` (lihat `design.md` 2.5).
 - Request API lewat `/api/*` (proxy ke `BACKEND_API_URL` di `next.config.mjs`). Jangan hardcode URL backend.
 - Role backend `buyer` dipetakan menjadi `customer` di FE.
@@ -199,3 +201,15 @@ Aturan penempatan:
 - Jangan membuat folder tingkat atas baru di `src/` tanpa persetujuan user.
 - Jangan membuat folder `app/api/`; proxy ke backend diatur di `next.config.mjs`.
 - Jika sebuah file harus dipindah ke struktur ini, lakukan sebagai tugas terpisah dengan test tetap hijau (Red → Green → Refactor), tidak digabung dengan perubahan perilaku.
+
+## 9. Referensi desain eksternal
+
+Aturan lengkap ada di `design.md` bagian 10. Ringkasnya:
+
+- **Pemicu:** hanya jika user menyebut URL atau galeri (recent.design, Awwwards, One Page Love, Land-book, Lookup.design, Footer.design, Codrops, dan sejenisnya) atau meminta referensi untuk sebuah Section. Jangan mencari referensi atas inisiatif sendiri.
+- **Yang diambil hanya pola** (layout, ritme, tipografi, gaya gerak). Jangan menyalin kode, aset, teks, logo, atau palet dari situs lain.
+- **Hasil adaptasi tetap** putih-hitam-merah, font Anton dan Inter, Framer Motion dan CSS sebagai default (library animasi lain boleh), serta tunduk pada PRD (bagian `[TBD-PRD]` dan fitur di luar PRD dilewati).
+- **Alur:** kumpulkan 3 sampai 5 kandidat, tampilkan ke user, tunggu pilihan, catat di `docs/design/references.md`, baru implementasi dengan TDD.
+- **Tidak bisa membuka halaman** (login, diblokir, konten JavaScript): jangan menebak; minta user menempelkan URL lain, tangkapan layar, atau deskripsi.
+- **Template berkode** dari marketplace hanya dengan lisensi yang jelas dan persetujuan user; dependency non-animasi tetap perlu persetujuan.
+- Perubahan pada `design.md` akibat referensi harus diusulkan ke user terlebih dulu.
