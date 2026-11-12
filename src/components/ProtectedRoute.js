@@ -13,7 +13,10 @@ export default function ProtectedRoute({ children, roles = [ROLES.CUSTOMER] }) {
   useEffect(() => {
     if (!isHydrated) return;
     if (!user) {
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const currentPath =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : '/';
       router.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
       return;
     }

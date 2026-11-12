@@ -11,6 +11,8 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
+  modulePathIgnorePatterns: ['<rootDir>/frontend_konser/'],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/frontend_konser/'],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['@swc/jest', {
       jsc: {

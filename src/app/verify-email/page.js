@@ -1,167 +1,210 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, CheckCircle2, XCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { Mail, CheckCircle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Toast from '@/components/ui/Toast';
+import BackButton from '@/components/ui/BackButton';
 import authService from '@/services/authService';
 
+const primaryButton =
+  'inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white font-semibold px-5 py-2.5 min-h-[44px] rounded-xl shadow-sm transition-colors cursor-pointer';
+const secondaryButton =
+  'inline-flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 font-medium px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer';
+const disabledButton =
+  'inline-flex items-center justify-center gap-2 bg-slate-800/60 text-slate-500 border border-slate-800 font-medium px-5 py-2.5 rounded-xl cursor-not-allowed opacity-60';
+
 function VerifyEmailContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token') || '';
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState(token ? 'loading' : 'form');
+  const token = searchParams.get('token');
+  const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error' | 'resend'
   const [message, setMessage] = useState('');
-  const [toast, setToast] = useState({ isOpen: false, type: 'error', message: '' });
-  const ran = useRef(false);
+  const [email, setEmail] = useState('');
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    if (!token || ran.current) return;
-    ran.current = true;
-    let active = true;
-    authService
-      .confirmEmailVerification(token)
-      .then(() => {
-        if (active) {
-          setStatus('success');
-          setMessage('Email Anda berhasil diverifikasi. Silakan masuk untuk melanjutkan.');
-        }
-      })
-      .catch((error) => {
-        if (active) {
-          setStatus('error');
-          setMessage(error.message || 'Token verifikasi tidak valid atau sudah kadaluarsa.');
-        }
-      });
-    return () => {
-      active = false;
+    const verify = async () => {
+      if (!token) {
+        setStatus('resend');
+        setMessage('Token verifikasi tidak ditemukan. Masukkan email Anda untuk mengirim ulang link verifikasi.');
+        return;
+      }
+
+      try {
+        const result = await authService.confirmEmailVerification(token);
+        setStatus('success');
+        setMessage('Email Anda berhasil diverifikasi! Anda sekarang dapat masuk ke akun ConserId.');
+      } catch (error) {
+        setStatus('error');
+        setMessage(error.message || 'Terjadi kesalahan saat memverifikasi email. Silakan coba lagi atau minta link verifikasi baru.');
+      }
     };
+
+    verify();
   }, [token]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('submitting');
+  const handleResend = async () => {
+    if (!email) return;
+
+    setResending(true);
     try {
-      const resMessage = await authService.requestEmailVerification(email);
-      setStatus('sent');
-      setMessage(resMessage || 'Link verifikasi telah dikirim. Silakan periksa kotak masuk Anda.');
+      await authService.requestEmailVerification(email);
+      setStatus('success');
+      setMessage(`Link verifikasi telah dikirim ke ${email}. Periksa inbox atau folder spam Anda.`);
     } catch (error) {
-      setStatus('form');
-      setToast({ isOpen: true, type: 'error', message: error.message || 'Gagal mengirim link verifikasi.' });
+      setMessage('Gagal mengirim link verifikasi. Silakan coba lagi.');
+    } finally {
+      setResending(false);
     }
   };
 
+  const iconTile =
+    'w-16 h-16 mx-auto rounded-2xl flex items-center justify-center';
+
   return (
-    <div className="min-h-screen flex flex-col bg-primary-bg">
-      <div className="max-w-7xl mx-auto w-full px-5 md:px-10 xl:px-20 pt-8">
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
-        >
-          <ArrowLeft size={18} />
-          Kembali ke Masuk
-        </Link>
+    <div className="min-h-screen flex flex-col bg-[#0B0F19]">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+        <BackButton href="/" label="Kembali ke Beranda" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-5 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="w-full max-w-md"
         >
-          <div className="bg-secondary-bg border border-border rounded-[24px] p-8 md:p-10 shadow-xl">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-black mb-2">
-                <span className="text-gradient">Verifikasi Email</span>
+          <div className="w-full max-w-md bg-[#111827] border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6 text-center">
+            {/* Status Icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              className={`${iconTile} ${
+                status === 'success'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30'
+                  : status === 'error'
+                    ? 'bg-rose-500/10 border border-rose-500/30'
+                    : 'bg-violet-600/20 border border-violet-500/30 text-violet-400'
+              }`}
+            >
+              {status === 'loading' ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                >
+                  <RefreshCw size={30} className="text-white" />
+                </motion.div>
+              ) : status === 'success' ? (
+                <CheckCircle size={30} className="text-emerald-400" />
+              ) : status === 'error' ? (
+                <AlertCircle size={30} className="text-rose-400" />
+              ) : (
+                <Mail size={30} className="text-white" />
+              )}
+            </motion.div>
+
+            {/* Title */}
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-slate-50">
+                {status === 'loading' && 'Memverifikasi...'}
+                {status === 'success' && 'Berhasil!'}
+                {status === 'error' && 'Gagal'}
+                {status === 'resend' && 'Verifikasi Email'}
               </h1>
-              <p className="text-text-muted text-sm">
-                Aktifkan akun Anda untuk mulai membeli tiket
+
+              {/* Message */}
+              <p className="text-sm text-slate-400 leading-relaxed">
+                {status === 'loading' && 'Sedang memverifikasi email Anda...'}
+                {status === 'success' && message}
+                {status === 'error' && message}
+                {status === 'resend' && message}
               </p>
             </div>
 
-            {status === 'loading' && (
-              <div className="flex flex-col items-center gap-4 py-8 text-text-muted">
-                <Loader2 className="animate-spin" size={32} />
-                <p className="text-sm">Memverifikasi akun Anda...</p>
-              </div>
-            )}
-
-            {status === 'success' && (
-              <div className="flex flex-col items-center gap-4 py-8 text-center">
-                <CheckCircle2 size={48} className="text-success" />
-                <p className="text-text-secondary font-medium">{message}</p>
-                <Link href="/auth/login">
-                  <Button size="lg" className="mt-2">
-                    Masuk Sekarang
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {status === 'error' && (
-              <div className="flex flex-col items-center gap-4 py-8 text-center">
-                <XCircle size={48} className="text-error" />
-                <p className="text-text-secondary font-medium">{message}</p>
+            {/* Resend Form */}
+            {status === 'resend' && (
+              <div className="space-y-4 text-left">
+                <Input
+                  label="Alamat Email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nama@email.com"
+                  icon={Mail}
+                  autoComplete="email"
+                />
                 <button
                   type="button"
-                  onClick={() => setStatus('form')}
-                  className="mt-2 text-sm text-primary-accent hover:underline cursor-pointer"
+                  onClick={handleResend}
+                  disabled={resending || !email}
+                  className={`w-full ${resending || !email ? disabledButton : primaryButton}`}
                 >
-                  Kirim ulang link verifikasi
+                  {resending ? 'Mengirim...' : 'Kirim Ulang Link Verifikasi'}
                 </button>
               </div>
             )}
 
-            {status === 'form' && (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  placeholder="nama@email.com"
-                  icon={Mail}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                />
-                <Button type="submit" className="w-full" size="lg" disabled={status === 'submitting'}>
-                  {status === 'submitting' ? 'Mengirim...' : 'Kirim Link Verifikasi'}
-                </Button>
-              </form>
-            )}
-
-            {status === 'sent' && (
-              <div className="flex flex-col items-center gap-4 py-8 text-center">
-                <CheckCircle2 size={48} className="text-success" />
-                <p className="text-text-secondary font-medium">{message}</p>
-                <Link href="/auth/login">
-                  <Button variant="outline" className="mt-2">
-                    Kembali ke Masuk
-                  </Button>
+            {/* Success Actions */}
+            {status === 'success' && (
+              <div className="space-y-3">
+                <Link href="/auth/login" className={`w-full ${primaryButton}`}>
+                  Masuk ke ConserId
                 </Link>
               </div>
             )}
+
+            {/* Error Actions */}
+            {status === 'error' && (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setStatus('resend')}
+                  className={`w-full ${primaryButton}`}
+                >
+                  Kirim Ulang Link Verifikasi
+                </button>
+                <Link href="/auth/login" className={`w-full ${secondaryButton}`}>
+                  Masuk
+                </Link>
+              </div>
+            )}
+
+            {/* Help Link */}
+            <div className="pt-6 border-t border-slate-800">
+              <p className="text-sm text-slate-400">
+                Butuh bantuan?{' '}
+                <Link
+                  href="/help"
+                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                >
+                  Hubungi Kami
+                </Link>
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>
-
-      <Toast
-        isOpen={toast.isOpen}
-        type={toast.type}
-        message={toast.message}
-        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
-      />
     </div>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        >
+          <RefreshCw size={32} className="text-violet-400" />
+        </motion.div>
+      </div>
+    }>
       <VerifyEmailContent />
     </Suspense>
   );

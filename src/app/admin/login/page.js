@@ -37,8 +37,8 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-5">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-accent/5 via-transparent to-secondary-accent/5" />
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0B0F19] relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(124,58,237,0.12),rgba(255,255,255,0))] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -46,21 +46,23 @@ export default function AdminLogin() {
         className="relative w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold">
-             <span className="text-gradient">Conser</span>Id
+          <Link href="/" className="text-3xl font-black text-slate-50">
+            Conser<span className="text-violet-400">Id</span>
           </Link>
-          <p className="text-text-muted mt-2">Admin Dashboard</p>
+          <p className="text-slate-400 mt-2">Admin Dashboard</p>
         </div>
 
         <form
           onSubmit={handleLogin}
-          className="bg-secondary-bg border border-border rounded-3xl p-8 space-y-6"
+          className="bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6"
         >
-          <h1 className="text-2xl font-bold text-center mb-2">Selamat Datang</h1>
-          <p className="text-text-muted text-sm text-center mb-6">Masuk ke akun admin Anda</p>
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-slate-50 mb-2">Selamat Datang</h1>
+            <p className="text-slate-400 text-sm">Masuk ke akun admin Anda</p>
+          </div>
 
           {error && (
-            <div className="bg-error/10 border border-error/20 rounded-xl px-4 py-3 text-sm text-error">
+            <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3 text-sm text-rose-400">
               {error}
             </div>
           )}
@@ -74,19 +76,20 @@ export default function AdminLogin() {
           />
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">Kata Sandi</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Kata Sandi</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Masukkan kata sandi"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-primary-bg border border-border rounded-xl px-4 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors pr-12"
+                className="w-full bg-[#0F172A] border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all pr-12"
               />
               <button
                 type="button"
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -98,12 +101,12 @@ export default function AdminLogin() {
             {isLoading ? 'Memproses...' : 'Masuk'}
           </Button>
 
-          <div className="rounded-xl bg-surface border border-border p-3 text-xs text-text-muted leading-relaxed">
+          <div className="rounded-xl bg-[#0F172A] border border-slate-800 p-3 text-xs text-slate-500 leading-relaxed">
             Demo: admin@conserid.com / Admin123
           </div>
 
           <div className="text-center">
-            <Link href="/" className="text-sm text-text-muted hover:text-secondary-accent transition-colors">
+            <Link href="/" className="text-sm text-slate-400 hover:text-violet-400 transition-colors">
               Kembali ke Website
             </Link>
           </div>

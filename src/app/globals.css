@@ -1,40 +1,65 @@
 @import "tailwindcss";
 
+/* ============================================================
+   ConserId: "Midnight Stage" Design System
+   Dark concert-focused theme. Every semantic token below is the
+   single source of truth for colour across src/.
+   ============================================================ */
 @theme {
-  --color-primary-bg: #F3F3F3;
-  --color-secondary-bg: #FFFFFF;
-  --color-surface: #ECECEC;
-  --color-primary-accent: #0C0435;
-  --color-secondary-accent: #0C0435;
-  --color-text-primary: #222222;
-  --color-text-secondary: #555555;
-  --color-text-muted: #6E6E6E;
-  --color-border: #E2E2E2;
-  --color-success: #22C55E;
+  /* Surfaces */
+  --color-primary-bg: #0B0F19;      /* app background */
+  --color-secondary-bg: #111827;    /* card / modal / table surface */
+  --color-surface: #0F172A;         /* nested surface, input fill */
+
+  /* Brand */
+  --color-primary-accent: #7C3AED;    /* violet: primary brand */
+  --color-primary-accent-hover: #6D28D9;
+  --color-secondary-accent: #EC4899;  /* pink / magenta */
+  --color-accent-cyan: #06B6D4;       /* cyan highlight */
+
+  /* Text */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Lines */
+  --color-border: #1E293B;
+
+  /* Status */
+  --color-success: #10B981;
+  --color-success-bright: #34D399;
   --color-warning: #F59E0B;
+  --color-warning-bright: #FBBF24;
   --color-error: #EF4444;
+  --color-error-bright: #F87171;
+  --color-info: #06B6D4;
+
+  /* Typography */
   --font-sans: 'Myriad Pro', var(--font-inter, 'Inter'), system-ui, sans-serif;
   --font-heading: var(--font-montserrat, 'Montserrat'), 'Montserrat', system-ui, sans-serif;
   --font-mono: var(--font-inter, 'Inter'), monospace;
-  --radius-small: 12px;
-  --radius-medium: 18px;
-  --radius-large: 24px;
-  --radius-full: 999px;
-
   --font-ln: var(--font-noto, 'Noto Sans'), 'Noto Sans', 'Segoe UI', sans-serif;
 
-  --color-ln-bg: #F3F3F3;
-  --color-ln-surface: #ffffff;
-  --color-ln-primary: #0C0435;
-  --color-ln-primary-dark: #06021C;
-  --color-ln-dark: #000000;
-  --color-ln-text: #222222;
-  --color-ln-muted: #6e6e6e;
-  --color-ln-line: #d3d5da;
-  --color-ln-accent: #FFF599;
-  --color-ln-sky: #d6e7f9;
-  --color-ln-info: #2077d5;
-  --color-ln-error: #0C0435;
+  /* Radii */
+  --radius-small: 12px;
+  --radius-medium: 16px;
+  --radius-large: 18px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* Legacy Live Nation palette, remapped onto Midnight Stage */
+  --color-ln-bg: #0B0F19;
+  --color-ln-surface: #111827;
+  --color-ln-primary: #7C3AED;
+  --color-ln-primary-dark: #6D28D9;
+  --color-ln-dark: #F8FAFC;
+  --color-ln-text: #F8FAFC;
+  --color-ln-muted: #94A3B8;
+  --color-ln-line: #1E293B;
+  --color-ln-accent: #EC4899;
+  --color-ln-sky: #06B6D4;
+  --color-ln-info: #06B6D4;
+  --color-ln-error: #F87171;
 }
 
 @layer base {
@@ -50,41 +75,141 @@
   label {
     font-family: var(--font-heading);
   }
-}
 
-html {
-  scroll-behavior: smooth;
-}
+  html {
+    scroll-behavior: smooth;
+    background-color: #0B0F19;
+    color-scheme: dark;
+  }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #E2E2E2 transparent;
-}
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1E293B transparent;
+  }
 
-body {
-  background-color: #F3F3F3;
-  color: #222222;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  body {
+    background-color: #0B0F19;
+    color: #F8FAFC;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Keep native controls legible on the dark canvas */
+  input,
+  textarea,
+  select {
+    color-scheme: dark;
+  }
+
+  select option {
+    background-color: #111827;
+    color: #F8FAFC;
+  }
+
+  ::placeholder {
+    color: #64748B;
+  }
 }
 
 @layer utilities {
   .text-gradient {
-    color: #0C0435;
-    -webkit-text-fill-color: #0C0435;
+    background: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(135deg, #C4B5FD 0%, #EC4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .glow-gold {
-    box-shadow: 0 2px 12px rgba(12, 4, 53, 0.08);
+    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.25);
   }
 
   .bg-gradient-primary {
-    background-color: #0C0435;
+    background-color: #7C3AED;
+  }
+
+  .bg-gradient-primary-modern {
+    background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);
   }
 
   .bg-gradient-hero {
-    background: linear-gradient(180deg, rgba(15, 12, 6, 0) 0%, rgba(15, 12, 6, 0.8) 50%, #0f0c06 100%);
+    background: linear-gradient(180deg, rgba(11, 15, 25, 0) 0%, rgba(11, 15, 25, 0.75) 55%, #0B0F19 100%);
+  }
+
+  .border-gradient-primary {
+    border: 2px solid transparent;
+    background: linear-gradient(#111827, #111827) padding-box,
+                linear-gradient(135deg, #7C3AED, #EC4899) border-box;
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
+  }
+
+  .shadow-glow-sm {
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+}
+
+@layer components {
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.15);
+  }
+
+  .btn-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .btn-shimmer:hover::before {
+    left: 100%;
   }
 }
 

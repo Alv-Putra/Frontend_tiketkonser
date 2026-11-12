@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Plus, X, Trash2 } from 'lucide-react';
+import { Plus, X, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import BackButton from '@/components/ui/BackButton';
 import Input from '@/components/ui/Input';
 import Toast from '@/components/ui/Toast';
 import festivalService from '@/services/festivalService';
@@ -111,13 +112,11 @@ function CreateFestivalContent() {
 
   return (
     <div className="pb-16">
-      <button
-        onClick={() => router.push('/organizer/festivals')}
-        className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors mb-8 cursor-pointer"
-      >
-        <ChevronLeft size={18} />
-        Kembali
-      </button>
+      <BackButton
+        href="/organizer/festivals"
+        label="Kembali ke Daftar Festival"
+        className="mb-8"
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

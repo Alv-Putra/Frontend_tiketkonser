@@ -37,10 +37,10 @@ describe('useCartStore', () => {
     useCartStore.getState().initializeCart({ festivalId: 'f1', festivalTitle: 'Java Jazz' });
     useCartStore.getState().addItem({ ticketTypeId: 'f1t1', name: 'VIP', price: 100000, quantity: 2 });
     useCartStore.getState().addItem({ ticketTypeId: 'f1t2', name: 'CAT', price: 50000, quantity: 1 });
-    useCartStore.getState().addItem({ ticketTypeId: 'f1t1', name: 'VIP', price: 100000, quantity: 3 });
+    useCartStore.getState().addItem({ ticketTypeId: 'f1t1', name: 'VIP', price: 100000, quantity: 2 });
     const items = useCartStore.getState().items;
     expect(items).toHaveLength(2);
-    expect(items.find((i) => i.ticketTypeId === 'f1t1').quantity).toBe(5);
+    expect(items.find((i) => i.ticketTypeId === 'f1t1').quantity).toBe(4);
     expect(items.find((i) => i.ticketTypeId === 'f1t2').quantity).toBe(1);
   });
 

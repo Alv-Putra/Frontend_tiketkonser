@@ -23,12 +23,10 @@ export default function OrganizerLayout({ children }) {
   if (user.role !== 'organizer' && user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-primary-bg">
+    <div className="flex min-h-screen bg-[#0B0F19]">
       <OrganizerSidebar />
-      <div className="lg:pl-64 transition-all duration-300">
-        <main className="p-5 md:p-8 max-w-7xl">
-          {children}
-        </main>
+      <div className="flex-1 min-w-0 p-6 pt-16 lg:p-8 lg:pt-8 bg-[#0B0F19]">
+        {children}
       </div>
     </div>
   );

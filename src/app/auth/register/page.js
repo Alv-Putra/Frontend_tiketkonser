@@ -4,14 +4,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User as UserIcon, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User as UserIcon, Ticket } from 'lucide-react';
 import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
 import Toast from '@/components/ui/Toast';
+import { PasswordStrengthIndicator, BackButton } from '@/components/ui';
 import useAuthStore from '@/stores/authStore';
 import { validateName, validateEmail, validatePassword, validateConfirmPassword } from '@/lib/validators';
 import { RATE_LIMIT } from '@/lib/constants';
 import useRateLimit from '@/hooks/useRateLimit';
+
+const primaryButton =
+  'inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 cursor-pointer';
+const disabledButton =
+  'inline-flex items-center justify-center gap-2 bg-slate-800/60 text-slate-500 border border-slate-800 font-medium px-5 py-2.5 rounded-xl cursor-not-allowed opacity-60';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -74,34 +79,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-primary-bg">
-      <div className="max-w-7xl mx-auto w-full px-5 md:px-10 xl:px-20 pt-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
-        >
-          <ArrowLeft size={18} />
-          Kembali ke Beranda
-        </Link>
+    <div className="min-h-screen flex flex-col bg-[#0B0F19]">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+        <BackButton href="/" label="Kembali ke Beranda" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-5 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="w-full max-w-md"
         >
-          <div className="bg-secondary-bg border border-border rounded-[24px] p-8 md:p-10 shadow-xl">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-black mb-2">
-                <span className="text-gradient">Daftar</span>
-              </h1>
-              <p className="text-text-muted text-sm">
-                Buat akun untuk membeli tiket festival
-              </p>
+          <div className="w-full max-w-md bg-[#111827] border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
+            {/* Brand */}
+            <div className="text-center space-y-3">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-violet-600 flex items-center justify-center shadow-md shadow-violet-600/20">
+                <Ticket size={26} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-50">Daftar</h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Buat akun untuk membeli tiket festival
+                </p>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Nama Lengkap"
                 name="fullName"
@@ -113,6 +117,7 @@ export default function RegisterPage() {
                 error={errors.fullName}
                 autoComplete="name"
               />
+
               <Input
                 label="Email"
                 name="email"
@@ -124,7 +129,8 @@ export default function RegisterPage() {
                 error={errors.email}
                 autoComplete="email"
               />
-              <div className="relative">
+
+              <div className="space-y-3">
                 <Input
                   label="Password"
                   name="password"
@@ -135,52 +141,67 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   error={errors.password}
                   autoComplete="new-password"
+                  suffix={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                      className="cursor-pointer hover:text-slate-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  }
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-[38px] text-text-muted hover:text-text-primary transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <div className="relative">
-                <Input
-                  label="Konfirmasi Password"
-                  name="confirmPassword"
-                  type={showConfirm ? 'text' : 'password'}
-                  placeholder="Ulangi password"
-                  icon={Lock}
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  error={errors.confirmPassword}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-4 top-[38px] text-text-muted hover:text-text-primary transition-colors cursor-pointer"
-                >
-                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                {form.password && (
+                  <PasswordStrengthIndicator password={form.password} />
+                )}
               </div>
 
-              <div className="rounded-[18px] bg-surface border border-border p-4 text-xs text-text-muted leading-relaxed">
+              <Input
+                label="Konfirmasi Password"
+                name="confirmPassword"
+                type={showConfirm ? 'text' : 'password'}
+                placeholder="Ulangi password"
+                icon={Lock}
+                value={form.confirmPassword}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                autoComplete="new-password"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    aria-label={showConfirm ? 'Sembunyikan password' : 'Tampilkan password'}
+                    className="cursor-pointer hover:text-slate-300 transition-colors"
+                  >
+                    {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                }
+              />
+
+              <div className="rounded-2xl bg-[#0F172A] border border-slate-800 p-4 text-xs text-slate-400 leading-relaxed">
                 <p>
                   Setelah mendaftar, Anda perlu memverifikasi email melalui link yang dikirim ke
                   inbox Anda sebelum bisa masuk.
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full ${isLoading ? disabledButton : primaryButton}`}
+              >
                 {isLoading ? 'Memproses...' : 'Daftar'}
-              </Button>
+              </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-border text-center">
-              <p className="text-sm text-text-muted">
+            <div className="pt-6 border-t border-slate-800 text-center">
+              <p className="text-sm text-slate-400">
                 Sudah punya akun?{' '}
-                <Link href="/auth/login" className="text-primary-accent hover:underline">
+                <Link
+                  href="/auth/login"
+                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                >
                   Masuk
                 </Link>
               </p>

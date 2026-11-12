@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter, Montserrat, Noto_Sans } from "next/font/google";
 import AuthProvider from "@/context/AuthProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,11 +28,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className="h-full">
+    <html lang="id" className="h-full" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${montserrat.variable} ${notoSans.variable} ${inter.className} min-h-full bg-primary-bg text-text-primary antialiased`}
+        suppressHydrationWarning
+        className={`${inter.variable} ${montserrat.variable} ${notoSans.variable} ${inter.className} min-h-screen flex flex-col bg-primary-bg text-text-primary antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <div className="flex-1 flex flex-col min-h-0">{children}</div>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

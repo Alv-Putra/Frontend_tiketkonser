@@ -4,7 +4,6 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  ChevronLeft,
   Clock,
   Landmark,
   Wallet,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import CustomerLayout from '@/components/customer/CustomerLayout';
 import Button from '@/components/ui/Button';
+import BackButton from '@/components/ui/BackButton';
 import Toast from '@/components/ui/Toast';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Skeleton from '@/components/ui/Skeleton';
@@ -89,13 +89,7 @@ function PaymentContent({ params }) {
   return (
     <CustomerLayout>
       <div className="max-w-7xl mx-auto px-5 md:px-10 xl:px-20 py-10">
-        <button
-          onClick={() => router.push('/checkout')}
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors mb-8 cursor-pointer"
-        >
-          <ChevronLeft size={18} />
-          Kembali
-        </button>
+        <BackButton href="/checkout" label="Kembali ke Checkout" className="mb-8" />
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}

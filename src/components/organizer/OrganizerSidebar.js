@@ -16,9 +16,17 @@ const menuItems = [
   { label: 'Penjualan', icon: ListChecks, href: '/organizer/sales' },
 ];
 
+const navItemClass = (isActive) =>
+  `font-heading flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 border ${
+    isActive
+      ? 'bg-violet-600/15 text-violet-400 border-violet-500/30'
+      : 'text-slate-400 hover:text-slate-50 hover:bg-slate-800/80 border-transparent'
+  }`;
+
 export default function OrganizerSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = async () => {
@@ -26,111 +34,158 @@ export default function OrganizerSidebar() {
     window.location.href = '/';
   };
 
+  const isActiveItem = (href) =>
+    pathname === href || (href !== '/organizer' && pathname.startsWith(href));
+
   return (
     <>
+      {/* Mobile trigger */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 w-10 h-10 rounded-[12px] bg-secondary-bg border border-border flex items-center justify-center text-text-primary cursor-pointer"
-        onClick={() => setCollapsed(!collapsed)}
+        type="button"
+        aria-label="Buka menu navigasi"
+        className="lg:hidden fixed top-4 left-4 z-50 w-10 h-10 rounded-xl bg-[#111827] border border-slate-800 flex items-center justify-center text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+        onClick={() => setMobileOpen(true)}
       >
         <Menu size={18} />
       </button>
 
+      {/* Desktop sidebar */}
       <motion.aside
-        initial={{ width: collapsed ? 72 : 260 }}
-        animate={{ width: collapsed ? 72 : 260 }}
-        transition={{ duration: 0.3 }}
-        className="fixed left-0 top-0 h-full bg-secondary-bg border-r border-border z-40 hidden lg:block"
+        initial={false}
+        animate={{ width: collapsed ? 72 : 256 }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        className="hidden lg:flex lg:sticky lg:top-0 lg:h-screen shrink-0 flex-col bg-[#111827] border-r border-slate-800 overflow-hidden"
       >
-        <div className="flex items-center justify-between p-5 border-b border-border">
+        <div className="flex items-center justify-between p-5 border-b border-slate-800">
           {!collapsed && (
-            <Link href="/organizer" className="text-xl font-black tracking-tight text-text-primary">
-              Conser<span className="text-primary-accent">Id</span>
+            <Link href="/organizer" className="text-xl font-black tracking-tight text-slate-50">
+              Conser<span className="text-violet-400">Id</span>
             </Link>
           )}
           <button
+            type="button"
+            aria-label="Ciutkan sidebar"
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-[12px] hover:bg-surface text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-50 transition-colors cursor-pointer"
           >
             <ChevronLeft size={16} className={`transition-transform ${collapsed ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== '/organizer' && pathname.startsWith(item.href));
+            const isActive = isActiveItem(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] transition-all duration-200 ${
-                  isActive
-                    ? 'bg-primary-accent/10 text-primary-accent'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
-                }`}
+                title={collapsed ? item.label : undefined}
+                className={navItemClass(isActive)}
               >
-                <Icon size={18} />
-                {!collapsed && <span>{item.label}</span>}
+                <Icon size={18} className="shrink-0" />
+                {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border space-y-1">
+        <div className="p-3 border-t border-slate-800 space-y-1">
           <Link
             href="/"
-            className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface transition-all duration-200`}
+            title={collapsed ? 'Kembali ke Website' : undefined}
+            className="font-heading flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-slate-400 hover:text-slate-50 hover:bg-slate-800/80 border border-transparent transition-all duration-200"
           >
-            <LogOut size={18} />
-            {!collapsed && <span>Kembali ke Website</span>}
+            <LogOut size={18} className="shrink-0" />
+            {!collapsed && <span className="truncate">Kembali ke Website</span>}
           </Link>
           <button
+            type="button"
             onClick={handleLogout}
-            className="font-heading w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] text-error hover:bg-error/10 transition-all duration-200 cursor-pointer"
+            title={collapsed ? 'Keluar' : undefined}
+            className="font-heading w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-rose-400 hover:bg-rose-500/10 border border-transparent transition-all duration-200 cursor-pointer"
           >
-            <LogOut size={18} />
-            {!collapsed && <span>Keluar</span>}
+            <LogOut size={18} className="shrink-0" />
+            {!collapsed && <span className="truncate">Keluar</span>}
           </button>
         </div>
       </motion.aside>
 
+      {/* Mobile drawer */}
       <AnimatePresence>
-        {collapsed && (
+        {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -300 }}
-            className="fixed inset-0 z-30 lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 lg:hidden"
           >
-            <div className="absolute inset-0 bg-black/50" onClick={() => setCollapsed(false)} />
-            <div className="relative w-64 h-full bg-secondary-bg border-r border-border p-5">
-              <div className="flex items-center justify-between mb-8">
-                <Link href="/organizer" className="text-xl font-black tracking-tight text-text-primary">
-                  Conser<span className="text-primary-accent">Id</span>
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="relative w-64 h-full bg-[#111827] border-r border-slate-800 flex flex-col overflow-y-auto"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-slate-800">
+                <Link
+                  href="/organizer"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-xl font-black tracking-tight text-slate-50"
+                >
+                  Conser<span className="text-violet-400">Id</span>
                 </Link>
+                <button
+                  type="button"
+                  aria-label="Tutup menu"
+                  onClick={() => setMobileOpen(false)}
+                  className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-50 transition-colors cursor-pointer"
+                >
+                  <ChevronLeft size={16} />
+                </button>
               </div>
-              <nav className="space-y-1">
+
+              <nav className="p-3 space-y-1 flex-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href || (item.href !== '/organizer' && pathname.startsWith(item.href));
+                  const isActive = isActiveItem(item.href);
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      onClick={() => setCollapsed(false)}
-                      className={`font-heading flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[13px] transition-all duration-200 ${
-                        isActive
-                          ? 'bg-primary-accent/10 text-primary-accent'
-                          : 'text-text-secondary hover:text-text-primary hover:bg-surface'
-                      }`}
+                      onClick={() => setMobileOpen(false)}
+                      className={navItemClass(isActive)}
                     >
-                      <Icon size={18} />
-                      <span>{item.label}</span>
+                      <Icon size={18} className="shrink-0" />
+                      <span className="truncate">{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
-            </div>
+
+              <div className="p-3 border-t border-slate-800 space-y-1">
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-heading flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-slate-400 hover:text-slate-50 hover:bg-slate-800/80 border border-transparent transition-all duration-200"
+                >
+                  <LogOut size={18} className="shrink-0" />
+                  <span className="truncate">Kembali ke Website</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="font-heading w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-rose-400 hover:bg-rose-500/10 border border-transparent transition-all duration-200 cursor-pointer"
+                >
+                  <LogOut size={18} className="shrink-0" />
+                  <span className="truncate">Keluar</span>
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

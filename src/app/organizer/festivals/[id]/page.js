@@ -3,8 +3,9 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Save, Trash2, Ticket, Calendar, MapPin, Plus, X } from 'lucide-react';
+import { Save, Trash2, Ticket, Calendar, MapPin, Plus, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import BackButton from '@/components/ui/BackButton';
 import Input from '@/components/ui/Input';
 import Toast from '@/components/ui/Toast';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -97,13 +98,7 @@ function FestivalDetailContent({ params }) {
   return (
     <div className="pb-16">
       <div className="flex items-center justify-between mb-8">
-        <button
-          onClick={() => router.push('/organizer/festivals')}
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-        >
-          <ChevronLeft size={18} />
-          Kembali
-        </button>
+        <BackButton href="/organizer/festivals" label="Kembali ke Daftar Festival" />
         <Badge variant={config.variant}>{config.label}</Badge>
       </div>
 

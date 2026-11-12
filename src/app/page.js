@@ -9,7 +9,7 @@ import Footer from '@/components/livenation/Footer';
 
 export default function Home() {
   return (
-    <main className="bg-ln-bg text-ln-text min-h-screen">
+    <main className="flex-1 bg-[#0B0F19] text-slate-50 min-h-screen">
       <Navbar />
       <Hero />
       <Marquee />
