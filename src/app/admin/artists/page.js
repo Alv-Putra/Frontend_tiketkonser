@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Search, Mic, Music, Edit2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Mic, Music, Edit2, RotateCw } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
 import useMonitoringStore from '@/stores/monitoringStore';
@@ -9,6 +9,7 @@ import useMonitoringStore from '@/stores/monitoringStore';
 export default function AdminArtistsPage() {
   const artists = useMonitoringStore((state) => state.artists);
   const addArtist = useMonitoringStore((state) => state.addArtist);
+  const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
   const [genreFilter, setGenreFilter] = useState('Semua');
@@ -17,6 +18,22 @@ export default function AdminArtistsPage() {
   const [artistName, setArtistName] = useState('');
   const [artistGenre, setArtistGenre] = useState('Pop');
   const [artistCountry, setArtistCountry] = useState('Indonesia');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchAdminData().catch(() => {});
+  }, [fetchAdminData]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchAdminData();
+    } catch {
+      // Offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredArtists = artists.filter((a) => {
     const matchSearch =

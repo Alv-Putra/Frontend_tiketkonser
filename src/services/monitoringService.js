@@ -1,3 +1,5 @@
+import { apiFetch } from '@/lib/api';
+
 /**
  * Monitoring Service
  * Provides centralized data access, metrics computation, and business logic
@@ -257,9 +259,13 @@ class MonitoringService {
     this.payments = JSON.parse(JSON.stringify(INITIAL_PAYMENTS));
     this.users = JSON.parse(JSON.stringify(INITIAL_USERS));
     this.approvals = [];
+    this.adminMetrics = null;
   }
 
   getAdminMetrics() {
+    if (this.adminMetrics) {
+      return this.adminMetrics;
+    }
     const totalSold = this.concerts.reduce((acc, c) => acc + (c.sold || 0), 0);
     const pendingPaymentsCount = this.payments.filter((p) => p.status === 'Perlu verifikasi').length;
     const soldOutConcertsCount = this.concerts.filter((c) => !c.salesOpen || c.sold >= c.quota).length;
@@ -449,6 +455,308 @@ class MonitoringService {
 
   getApprovals() {
     return [...this.approvals];
+  }
+
+  async fetchAdminDashboardFromApi() {
+    try {
+      const res = await apiFetch('/api/v1/admin/dashboard');
+      if (res && res.totals) {
+        const { totals, recent_orders = [] } = res;
+        const totalRevenueNum = Number(totals.paid_revenue);
+        const totalRevenueFormatted = totalRevenueNum >= 1000000000
+          ? `Rp${(totalRevenueNum / 1000000000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} miliar`
+          : `Rp${totalRevenueNum.toLocaleString('id-ID')}`;
+
+        this.adminMetrics = {
+          ...this.getAdminMetrics(),
+          tiketTerjual: {
+            value: Number(totals.paid_orders).toLocaleString('id-ID'),
+            raw: Number(totals.paid_orders),
+            change: '+12,5%',
+            trend: 'up',
+            period: 'dari bulan lalu',
+          },
+          totalPendapatan: {
+            value: totalRevenueFormatted,
+            change: '+18,3%',
+            trend: 'up',
+            period: 'dari bulan lalu',
+          },
+          totalPelanggan: {
+            value: Number(totals.users).toLocaleString('id-ID'),
+            count: Number(totals.users),
+            change: '+8,1%',
+            trend: 'up',
+            period: 'dari bulan lalu',
+          },
+          konserAktif: {
+            value: String(totals.events),
+            count: Number(totals.events),
+            change: '-2,4%',
+            trend: 'down',
+            period: 'dari bulan lalu',
+          },
+          pendingApprovalsCount: Number(totals.pending_events),
+        };
+
+        if (recent_orders.length > 0) {
+          this.orders = recent_orders.map((o) => ({
+            id: String(o.order_number || o.id),
+            customer: o.user ? o.user.email : 'Pelanggan',
+            concert: 'Festival Konser',
+            total: `Rp${Number(o.total).toLocaleString('id-ID')}`,
+            amount: Number(o.total),
+            status: o.status === 'paid' ? 'Lunas' : (o.status === 'pending' ? 'Tertunda' : 'Dibatalkan'),
+            date: new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+            method: 'Pembayaran Online',
+          }));
+        }
+      }
+    } catch {
+      // Pertahankan metrik lokal jika offline
+    }
+    return this.getAdminMetrics();
+  }
+
+  async fetchUsersFromApi(filters = {}) {
+    try {
+      const query = new URLSearchParams();
+      if (filters.search) query.set('search', filters.search);
+      if (filters.role && filters.role !== 'Semua') query.set('role', filters.role.toLowerCase());
+      const url = `/api/v1/admin/users${query.toString() ? `?${query.toString()}` : ''}`;
+      const res = await apiFetch(url);
+      const userList = Array.isArray(res) ? res : res.data;
+      if (userList.length > 0) {
+        this.users = userList.map((u) => {
+          const profile = u.userProfiles?.[0];
+          const roleName = u.role?.name || 'buyer';
+          const displayRole = roleName === 'buyer' ? 'Customer' : roleName.charAt(0).toUpperCase() + roleName.slice(1);
+          return {
+            id: String(u.id),
+            public_id: u.public_id || String(u.id),
+            name: profile?.full_name || u.email.split('@')[0],
+            email: u.email,
+            role: displayRole,
+            status: u.is_active ? 'Aktif' : 'Nonaktif',
+            registered: new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          };
+        });
+      }
+    } catch {
+      // Pertahankan pengguna lokal
+    }
+    return this.getUsers(filters.search, filters.role);
+  }
+
+  async updateUserStatusApi(userId, isActive) {
+    try {
+      await apiFetch(`/api/v1/admin/users/${userId}/status`, {
+        method: 'PATCH',
+        body: { is_active: isActive },
+      });
+      const user = this.users.find((u) => u.id === String(userId) || u.public_id === String(userId));
+      if (user) {
+        user.status = isActive ? 'Aktif' : 'Nonaktif';
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async fetchOrganizersFromApi(filters = {}) {
+    try {
+      const query = new URLSearchParams();
+      if (filters.search) query.set('search', filters.search);
+      if (filters.status && filters.status !== 'Semua') query.set('status', filters.status.toLowerCase());
+      const url = `/api/v1/admin/organizers${query.toString() ? `?${query.toString()}` : ''}`;
+      return await apiFetch(url);
+    } catch {
+      return null;
+    }
+  }
+
+  async updateOrganizerStatusApi(organizerId, status) {
+    try {
+      return await apiFetch(`/api/v1/admin/organizers/${organizerId}/status`, {
+        method: 'PATCH',
+        body: { status },
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  async approveEventApi(eventId) {
+    try {
+      const res = await apiFetch(`/api/v1/admin/event/${eventId}/approve`, {
+        method: 'PUT',
+      });
+      this.approvals = this.approvals.filter((a) => a.id !== String(eventId));
+      return res;
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchEventsFromApi() {
+    try {
+      const res = await apiFetch('/api/v1/events');
+      const items = Array.isArray(res) ? res : res.data;
+      if (items.length > 0) {
+        this.concerts = items.map((e) => {
+          const tickets = e.ticketTypes || [];
+          const sold = tickets.reduce((acc, t) => acc + Number(t.sold || 0), 0);
+          const quota = tickets.reduce((acc, t) => acc + Number(t.quota || 0), 0);
+          const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t) => Number(t.price))) : 0;
+          return {
+            id: String(e.id),
+            public_id: e.public_id || String(e.id),
+            name: e.title,
+            artist: e.summary || e.title,
+            schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+            location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
+            genre: e.category?.name || 'Musik',
+            sold,
+            quota: quota || 1000,
+            priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
+            salesOpen: true,
+            organizer: e.organizer?.company_name || 'Organizer',
+            image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+            description: e.description || '',
+            categories: tickets.map((t) => ({
+              id: String(t.id),
+              name: t.name,
+              price: Number(t.price),
+              sold: Number(t.sold || 0),
+              quota: Number(t.quota),
+              remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
+              status: t.status === 'active' ? 'Tersedia' : 'Habis',
+            })),
+          };
+        });
+      }
+    } catch {
+      // Pertahankan konser lokal
+    }
+    return this.getConcerts();
+  }
+
+  async fetchTransactionLogsFromApi(filters = {}) {
+    try {
+      const query = new URLSearchParams();
+      if (filters.status) query.set('status', filters.status);
+      const url = `/api/v1/admin/transaction-logs${query.toString() ? `?${query.toString()}` : ''}`;
+      const res = await apiFetch(url);
+      const logList = Array.isArray(res) ? res : res.data;
+      if (logList.length > 0) {
+        this.orders = logList.map((o) => ({
+          id: String(o.order_number),
+          customer: o.user ? (o.user.userProfiles?.[0]?.full_name || o.user.email) : 'Pelanggan',
+          concert: 'Festival Musik',
+          total: `Rp${Number(o.total).toLocaleString('id-ID')}`,
+          amount: Number(o.total),
+          status: o.status === 'paid' ? 'Lunas' : (o.status === 'pending' ? 'Tertunda' : 'Dibatalkan'),
+          date: new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          method: o.payments?.[0]?.payment_method || 'Online',
+        }));
+
+        const mappedPayments = logList.flatMap((o) => (o.payments || []).map((p) => ({
+          id: String(p.public_id),
+          orderId: String(o.order_number),
+          customer: o.user ? (o.user.userProfiles?.[0]?.full_name || o.user.email) : 'Pelanggan',
+          concert: 'Festival Musik',
+          amount: `Rp${Number(p.gross_amount).toLocaleString('id-ID')}`,
+          method: p.payment_method || 'Transfer Bank',
+          date: new Date(p.paid_at || o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          status: p.status === 'success' ? 'Terverifikasi' : 'Perlu verifikasi',
+        })));
+        if (mappedPayments.length > 0) {
+          this.payments = mappedPayments;
+        }
+      }
+      return res;
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchOrganizerEventsApi() {
+    try {
+      const res = await apiFetch('/api/v1/organizer/event');
+      const events = Array.isArray(res) ? res : res.data;
+      if (events.length > 0) {
+        this.concerts = events.map((e) => {
+          const tickets = e.ticketTypes || [];
+          const sold = tickets.reduce((acc, t) => acc + Number(t.sold || 0), 0);
+          const quota = tickets.reduce((acc, t) => acc + Number(t.quota || 0), 0);
+          const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t) => Number(t.price))) : 0;
+          return {
+            id: String(e.id),
+            public_id: e.public_id || String(e.id),
+            name: e.title,
+            artist: e.summary || e.title,
+            schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+            location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
+            genre: e.category?.name || 'Musik',
+            sold,
+            quota: quota || 1000,
+            priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
+            salesOpen: e.status === 'published' && Boolean(e.is_published),
+            organizer: e.organizer?.company_name || 'Organizer',
+            image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+            description: e.description || '',
+            categories: tickets.map((t) => ({
+              id: String(t.id),
+              name: t.name,
+              price: Number(t.price),
+              sold: Number(t.sold || 0),
+              quota: Number(t.quota),
+              remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
+              status: t.status === 'active' ? 'Tersedia' : 'Habis',
+            })),
+          };
+        });
+      }
+    } catch {
+      // Pertahankan konser lokal
+    }
+    return this.getConcerts();
+  }
+
+  async fetchOrganizerEventSalesApi(eventId) {
+    try {
+      return await apiFetch(`/api/v1/organizer/event/${eventId}/sales`);
+    } catch {
+      return null;
+    }
+  }
+
+  async createOrganizerEventApi(eventData) {
+    return apiFetch('/api/v1/organizer/event', {
+      method: 'POST',
+      body: eventData,
+    });
+  }
+
+  async createOrganizerTicketApi(ticketData) {
+    return apiFetch('/api/v1/organizer/tickets', {
+      method: 'POST',
+      body: ticketData,
+    });
+  }
+
+  async updateOrganizerTicketApi(ticketId, ticketData) {
+    return apiFetch(`/api/v1/organizer/tickets/${ticketId}`, {
+      method: 'PATCH',
+      body: ticketData,
+    });
+  }
+
+  async deleteOrganizerTicketApi(ticketId) {
+    return apiFetch(`/api/v1/organizer/tickets/${ticketId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

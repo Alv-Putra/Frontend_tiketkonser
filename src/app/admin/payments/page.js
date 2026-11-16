@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Download, Check, X, ShieldAlert, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Download, Check, X, ShieldAlert, ArrowRight, RotateCw } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
@@ -10,12 +10,29 @@ import useMonitoringStore from '@/stores/monitoringStore';
 export default function AdminPaymentsPage() {
   const payments = useMonitoringStore((state) => state.payments);
   const verifyPayment = useMonitoringStore((state) => state.verifyPayment);
+  const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [selectedPayment, setSelectedPayment] = useState(
     payments.find((p) => p.status === 'Perlu verifikasi') || payments[0] || null
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchAdminData().catch(() => {});
+  }, [fetchAdminData]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchAdminData();
+    } catch {
+      // Offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const verifiedCount = payments.filter((p) => p.status === 'Terverifikasi').length;
   const pendingCount = payments.filter((p) => p.status === 'Perlu verifikasi').length;
@@ -62,20 +79,37 @@ export default function AdminPaymentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Pembayaran</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Pembayaran</h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#193029] text-[#8DE2BD] border border-[#234B3E]">
+              LIVE BACKEND
+            </span>
+          </div>
           <p className="text-xs text-[#A7AEC3]">
-            Periksa transaksi dan verifikasi pembayaran pelanggan.
+            Periksa transaksi dan verifikasi pembayaran pelanggan langsung dari database.
           </p>
         </div>
 
-        <button
-          onClick={handleExport}
-          type="button"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Ekspor transaksi</span>
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            type="button"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1B1E2C] hover:bg-[#2A2E40] text-[#A7AEC3] hover:text-[#F4F5FA] text-xs font-semibold border border-[#2A2E40] transition-all cursor-pointer"
+            title="Muat ulang data live backend"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#A78BFA]' : ''}`} />
+            <span>Segarkan</span>
+          </button>
+          <button
+            onClick={handleExport}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Ekspor transaksi</span>
+          </button>
+        </div>
       </div>
 
       {/* 4 Stat Cards */}

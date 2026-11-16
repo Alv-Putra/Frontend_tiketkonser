@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Plus,
@@ -10,17 +10,20 @@ import {
   Music,
   Check,
   Calendar,
-  MapPin
+  MapPin,
+  RotateCw
 } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import useMonitoringStore from '@/stores/monitoringStore';
+import monitoringService from '@/services/monitoringService';
 
 export default function OrganizerConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
   const addConcert = useMonitoringStore((state) => state.addConcert);
+  const fetchOrganizerData = useMonitoringStore((state) => state.fetchOrganizerData);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
@@ -30,8 +33,26 @@ export default function OrganizerConcertsPage() {
   const [newLocation, setNewLocation] = useState('');
   const [newSchedule, setNewSchedule] = useState('');
   const [newQuota, setNewQuota] = useState('2000');
+  const [isLive, setIsLive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Filter concerts belonging to Java Festival Production or search
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+    fetchOrganizerData()
+      .then(() => {
+        if (mounted) setIsLive(true);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [fetchOrganizerData]);
+
+  // Filter concerts
   const filteredConcerts = concerts.filter((c) => {
     const matchSearch =
       !search ||
@@ -44,21 +65,48 @@ export default function OrganizerConcertsPage() {
     return matchSearch && matchStatus;
   });
 
-  const totalSold = concerts.reduce((acc, c) => acc + c.sold, 0);
-  const totalQuota = concerts.reduce((acc, c) => acc + c.quota, 0);
+  const totalSold = concerts.reduce((acc, c) => acc + (c.sold || 0), 0);
+  const totalQuota = concerts.reduce((acc, c) => acc + (c.quota || 0), 0);
 
-  const handleCreate = (e) => {
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchOrganizerData();
+      setIsLive(true);
+    } catch {
+      // offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!newConcertName.trim()) return;
     addConcert({
       name: newConcertName,
-      artist: newArtist || 'Java Festival Artists',
+      artist: newArtist || 'Festival Artists',
       location: newLocation || 'JIExpo Kemayoran, Jakarta',
       schedule: newSchedule || '15–17 Mei 2026',
       quota: parseInt(newQuota, 10) || 2000,
       priceFrom: 'Rp350.000',
-      organizer: 'Java Festival Production'
+      organizer: 'Organizer',
+      salesOpen: false
     });
+
+    try {
+      await monitoringService.createOrganizerEventApi({
+        title: newConcertName,
+        summary: newArtist || newConcertName,
+        description: `Festival musik spektakuler ${newConcertName}`,
+        start_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end_at: new Date(Date.now() + 32 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      await fetchOrganizerData();
+    } catch {
+      // Local addition remains intact
+    }
+
     setNewConcertName('');
     setNewArtist('');
     setNewLocation('');
@@ -71,20 +119,42 @@ export default function OrganizerConcertsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Konser Saya</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Konser Saya</h1>
+            {isLive ? (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#193029] text-[#8DE2BD] border border-[#234B3E]">
+                LIVE BACKEND
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2A2240] text-[#A78BFA] border border-[#362A54]">
+                {isLoading ? 'MEMUAT...' : 'DATABASE KONSER'}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[#A7AEC3]">
-            Kelola konser yang diselenggarakan oleh Java Festival Production.
+            Kelola konser yang diselenggarakan beserta tiket dan penjualannya.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          type="button"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Buat Konser Baru</span>
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={handleRefresh}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#151824] hover:bg-[#1B1E2C] border border-[#1B1E2C] text-[#F4F5FA] text-xs font-semibold transition-all cursor-pointer"
+          >
+            <RotateCw className={`w-3.5 h-3.5 text-[#A78BFA] ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Segarkan</span>
+          </button>
+
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Buat Konser Baru</span>
+          </button>
+        </div>
       </div>
 
       {/* 3 Stat Cards */}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Search, Tag } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Tag, RotateCw } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
@@ -10,6 +10,7 @@ import useMonitoringStore from '@/stores/monitoringStore';
 export default function AdminCategoriesPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const addCategory = useMonitoringStore((state) => state.addCategory);
+  const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
   const [concertFilter, setConcertFilter] = useState('Semua');
@@ -19,6 +20,22 @@ export default function AdminCategoriesPage() {
   const [categoryName, setCategoryName] = useState('');
   const [categoryPrice, setCategoryPrice] = useState('500000');
   const [categoryQuota, setCategoryQuota] = useState('500');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchAdminData().catch(() => {});
+  }, [fetchAdminData]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchAdminData();
+    } catch {
+      // Offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const allCategories = [];
   concerts.forEach((c) => {

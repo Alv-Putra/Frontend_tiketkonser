@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,10 +19,15 @@ import {
   Share2,
   Users,
   Music,
-  CreditCard
+  CreditCard,
+  Smartphone,
+  QrCode,
+  Lock,
+  Download
 } from 'lucide-react';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import { mockFestivals } from '@/services/mockData';
+import festivalService from '@/services/festivalService';
 
 const ALL_CONCERTS = [
   {
@@ -305,9 +310,28 @@ const ALL_CONCERTS = [
 export default function ConcertDetailPage({ params }) {
   const router = useRouter();
   const { id } = use(params);
+  const [liveConcert, setLiveConcert] = useState(null);
+
+  // Fetch real festival/concert from backend if available
+  useEffect(() => {
+    let mounted = true;
+    if (id) {
+      festivalService
+        .getFestivalById(id, { useApi: true })
+        .then((data) => {
+          if (mounted && data) {
+            setLiveConcert(data);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   // Match by id or slug
-  const concert =
+  const matchedConcert =
     ALL_CONCERTS.find(
       (c) => c.id === id || c.slug === id || c.id.toLowerCase() === id.toLowerCase()
     ) ||
@@ -316,36 +340,64 @@ export default function ConcertDetailPage({ params }) {
     // Default fallback to first concert
     ALL_CONCERTS[0];
 
+  // Normalized concert data with safe fallbacks for benefits, lineup, schedule, and ticketTypes
+  const concert = {
+    ...matchedConcert,
+    ...(liveConcert || {}),
+    title: liveConcert?.title || matchedConcert?.title || 'Festival Konser',
+    artist: liveConcert?.artist || matchedConcert?.artist || 'Various Artists',
+    genre: liveConcert?.genre || matchedConcert?.genre || 'Musik',
+    date: liveConcert?.date
+      ? (typeof liveConcert.date === 'string' && liveConcert.date.includes('T')
+          ? new Date(liveConcert.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+          : liveConcert.date)
+      : (matchedConcert?.date || 'Segera Diumumkan'),
+    venue: liveConcert?.venue || matchedConcert?.venue || 'Venue',
+    city: liveConcert?.city || matchedConcert?.city || 'Indonesia',
+    image: liveConcert?.image || matchedConcert?.image || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+    description: liveConcert?.description || matchedConcert?.description || '',
+    status: liveConcert?.status || matchedConcert?.status || 'TERSEDIA',
+    available: liveConcert?.ticketStatus !== 'sold_out' && (matchedConcert?.available !== false),
+    lineup: Array.isArray(liveConcert?.lineup)
+      ? liveConcert.lineup
+      : Array.isArray(matchedConcert?.lineup)
+      ? matchedConcert.lineup
+      : [liveConcert?.artist || matchedConcert?.artist || matchedConcert?.title || 'Bintang Tamu Spesial'],
+    schedule: Array.isArray(matchedConcert?.schedule) && matchedConcert.schedule.length > 0
+      ? matchedConcert.schedule.map((s) => ({
+          time: typeof s.time === 'string' && s.time.includes('T')
+            ? new Date(s.time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+            : (s.time || '18.00 WIB'),
+          title: s.title || 'Live Performance',
+        }))
+      : [
+          { time: '14.00 WIB', title: 'Open Gate & Pintu Masuk' },
+          { time: '18.00 WIB', title: 'Pertunjukan Pembuka' },
+          { time: '20.00 WIB', title: 'Panggung Utama' },
+        ],
+    ticketTypes: ((liveConcert?.ticketTypes || matchedConcert?.ticketTypes) || []).map((t, idx) => {
+      const sold = Number(t.sold || 0);
+      const quota = Number(t.quota || 0);
+      const isSoldOut = t.quota === 'Habis' || t.status === 'sold_out' || (quota > 0 && sold >= quota);
+      const remaining = quota > 0 ? Math.max(0, quota - sold) : null;
+      return {
+        ...t,
+        id: String(t.id || `ticket-${idx}`),
+        name: t.name || 'General Admission',
+        price: Number(t.price || 0),
+        formattedPrice: t.formattedPrice || `Rp${Number(t.price || 0).toLocaleString('id-ID')}`,
+        quota: isSoldOut
+          ? 'Habis'
+          : (typeof t.quota === 'string' ? t.quota : (remaining !== null ? `Tersisa ${remaining} tiket` : 'Tersedia')),
+        benefits: Array.isArray(t.benefits) && t.benefits.length > 0
+          ? t.benefits
+          : ['Akses area festival resmi', 'Konfirmasi instan & e-ticket QR Code', 'Pajak dan biaya masuk termasuk'],
+      };
+    }),
+  };
+
   const [activeTab, setActiveTab] = useState('tickets');
-  const [quantities, setQuantities] = useState({});
-  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [orderId, setOrderId] = useState('ORD-8821');
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-
-  const updateQuantity = (typeId, delta) => {
-    const current = quantities[typeId] || 0;
-    const next = Math.max(0, Math.min(5, current + delta));
-    setQuantities((prev) => ({ ...prev, [typeId]: next }));
-  };
-
-  const totalTickets = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
-
-  const subtotal = concert.ticketTypes.reduce((acc, t) => {
-    const qty = quantities[t.id] || 0;
-    return acc + t.price * qty;
-  }, 0);
-
-  const handleProceedCheckout = (e) => {
-    e.preventDefault();
-    if (!customerName.trim() || !customerEmail.trim()) {
-      alert('Silakan isi nama dan alamat email pemesan.');
-      return;
-    }
-    setOrderId('ORD-' + String(Date.now()).slice(-4));
-    setOrderSuccess(true);
-  };
+  const [mobileModalOpen, setMobileModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0B0D14] text-[#F4F5FA] font-sans selection:bg-[#7953E8] selection:text-white pb-24">
@@ -466,7 +518,35 @@ export default function ConcertDetailPage({ params }) {
       </section>
 
       {/* Main Content & Order Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Mobile-Only Booking Notice Banner */}
+        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#1E1933] via-[#151824] to-[#10121C] border border-[#7953E8]/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#7953E8]/20 border border-[#7953E8]/40 text-[#A78BFA] flex items-center justify-center shrink-0">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-[#F4F5FA] flex items-center gap-2">
+                <span>Pemesanan Tiket Tersedia di Aplikasi Mobile</span>
+                <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-[#7953E8] text-white">
+                  Mobile App
+                </span>
+              </div>
+              <p className="text-xs text-[#A7AEC3] mt-0.5 leading-relaxed">
+                Halaman web ConserId khusus untuk eksplorasi katalog konser dan informasi ketersediaan tiket. Pemesanan dan verifikasi tiket dilakukan melalui aplikasi mobile ConserId demi keamanan Dynamic QR Code.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileModalOpen(true)}
+            type="button"
+            className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white flex items-center gap-2 shrink-0 transition-colors shadow-lg shadow-[#7953E8]/20 cursor-pointer"
+          >
+            <QrCode className="w-4 h-4" />
+            <span>Cara Pesan di Mobile</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Tab Content */}
           <div className="lg:col-span-8 space-y-6">
@@ -513,7 +593,9 @@ export default function ConcertDetailPage({ params }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-bold text-[#F4F5FA]">Daftar Kategori Tiket</h2>
-                    <p className="text-xs text-[#7F89A0]">Pilih jumlah tiket yang ingin Anda pesan (Maksimal 5 tiket)</p>
+                    <p className="text-xs text-[#7F89A0]">
+                      Status ketersediaan tiket resmi konser ini (Pemesanan dilakukan via aplikasi mobile)
+                    </p>
                   </div>
                   <span className="text-xs font-semibold text-[#8DE2BD] bg-[#193029] px-2.5 py-1 rounded-full border border-[#8DE2BD]/30">
                     Garansi Harga Resmi
@@ -521,18 +603,13 @@ export default function ConcertDetailPage({ params }) {
                 </div>
 
                 <div className="space-y-3">
-                  {concert.ticketTypes.map((ticket) => {
-                    const qty = quantities[ticket.id] || 0;
+                  {(concert.ticketTypes || []).map((ticket) => {
                     const isTicketSoldOut = ticket.quota === 'Habis' || !concert.available;
 
                     return (
                       <div
                         key={ticket.id}
-                        className={`p-5 rounded-2xl border transition-all ${
-                          qty > 0
-                            ? 'bg-[#1E1933] border-[#7953E8]'
-                            : 'bg-[#151824] border-[#1B1E2C] hover:border-[#2A2E40]'
-                        }`}
+                        className="p-5 rounded-2xl border transition-all bg-[#151824] border-[#1B1E2C] hover:border-[#2A2E40]"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="space-y-1.5">
@@ -552,7 +629,7 @@ export default function ConcertDetailPage({ params }) {
                               {ticket.formattedPrice}
                             </div>
                             <div className="space-y-1 pt-1">
-                              {ticket.benefits.map((b, i) => (
+                              {(ticket.benefits || []).map((b, i) => (
                                 <div key={i} className="flex items-center gap-2 text-xs text-[#A7AEC3]">
                                   <Check className="w-3.5 h-3.5 text-[#8DE2BD] shrink-0" />
                                   <span>{b}</span>
@@ -561,34 +638,21 @@ export default function ConcertDetailPage({ params }) {
                             </div>
                           </div>
 
-                          {/* Stepper Quantity */}
+                          {/* Action Button */}
                           <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
                             {isTicketSoldOut ? (
-                              <span className="text-xs font-bold text-[#FFA4B8] px-3 py-2 rounded-lg bg-[#36202C]">
+                              <span className="text-xs font-bold text-[#FFA4B8] px-3.5 py-2 rounded-xl bg-[#36202C]">
                                 Habis Terjual
                               </span>
                             ) : (
-                              <div className="flex items-center gap-2 bg-[#10121C] border border-[#1B1E2C] p-1 rounded-xl">
-                                <button
-                                  onClick={() => updateQuantity(ticket.id, -1)}
-                                  disabled={qty === 0}
-                                  type="button"
-                                  className="w-8 h-8 rounded-lg bg-[#151824] text-[#F4F5FA] hover:bg-[#2A2240] hover:text-[#A78BFA] flex items-center justify-center font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="w-8 text-center font-bold text-sm text-[#F4F5FA]">
-                                  {qty}
-                                </span>
-                                <button
-                                  onClick={() => updateQuantity(ticket.id, 1)}
-                                  disabled={totalTickets >= 5}
-                                  type="button"
-                                  className="w-8 h-8 rounded-lg bg-[#151824] text-[#F4F5FA] hover:bg-[#7953E8] hover:text-white flex items-center justify-center font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => setMobileModalOpen(true)}
+                                type="button"
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A2240] hover:bg-[#362A54] border border-[#362A54] text-xs font-semibold text-[#A78BFA] hover:text-white transition-all cursor-pointer"
+                              >
+                                <Smartphone className="w-4 h-4" />
+                                <span>Pesan di Mobile</span>
+                              </button>
                             )}
                           </div>
                         </div>
@@ -608,7 +672,7 @@ export default function ConcertDetailPage({ params }) {
                     <span>Daftar Bintang Tamu & Lineup</span>
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {concert.lineup.map((art, idx) => (
+                    {(concert.lineup || []).map((art, idx) => (
                       <span
                         key={idx}
                         className="px-3 py-1.5 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-xs font-semibold text-[#F4F5FA]"
@@ -625,7 +689,7 @@ export default function ConcertDetailPage({ params }) {
                     <span>Rundown Jadwal Acara</span>
                   </h3>
                   <div className="space-y-3">
-                    {concert.schedule.map((item, idx) => (
+                    {(concert.schedule || []).map((item, idx) => (
                       <div
                         key={idx}
                         className="p-3.5 rounded-xl bg-[#10121C] border border-[#1B1E2C] flex items-center justify-between"
@@ -677,173 +741,152 @@ export default function ConcertDetailPage({ params }) {
             )}
           </div>
 
-          {/* Right Column: Sticky Order Summary Card */}
+          {/* Right Column: Sticky Mobile Booking Card */}
           <div className="lg:col-span-4 sticky top-24">
-            <div className="p-6 rounded-3xl bg-[#151824] border border-[#1B1E2C] shadow-2xl space-y-4">
+            <div className="p-6 rounded-3xl bg-[#151824] border border-[#1B1E2C] shadow-2xl space-y-5">
               <div className="flex items-center justify-between pb-3 border-b border-[#1B1E2C]">
-                <h3 className="text-base font-bold text-[#F4F5FA]">Ringkasan Pesanan</h3>
-                <span className="text-xs text-[#A78BFA] font-medium">{totalTickets} Tiket Dipilih</span>
-              </div>
-
-              {/* Selected List */}
-              <div className="space-y-2.5">
-                {concert.ticketTypes.map((t) => {
-                  const qty = quantities[t.id] || 0;
-                  if (qty === 0) return null;
-                  return (
-                    <div key={t.id} className="flex items-center justify-between text-xs">
-                      <span className="text-[#A7AEC3] truncate max-w-[170px]">{t.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[#F4F5FA]">x{qty}</span>
-                        <span className="font-bold text-[#A78BFA]">
-                          Rp{(t.price * qty).toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {totalTickets === 0 && (
-                  <div className="text-center py-6 text-xs text-[#7F89A0]">
-                    Pilih kategori tiket di atas untuk memulai pemesanan.
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#2A2240] text-[#A78BFA] flex items-center justify-center">
+                    <Smartphone className="w-4 h-4" />
                   </div>
-                )}
+                  <h3 className="text-base font-bold text-[#F4F5FA]">Pemesanan Tiket</h3>
+                </div>
+                <span className="text-[11px] text-[#A78BFA] bg-[#2A2240] px-2.5 py-0.5 rounded-full font-semibold border border-[#362A54]">
+                  Mobile Only
+                </span>
               </div>
 
-              <div className="pt-3 border-t border-[#1B1E2C] space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-[#7F89A0]">
-                  <span>Biaya Layanan</span>
-                  <span className="text-[#8DE2BD]">Gratis</span>
+              {/* Price Preview */}
+              <div className="p-4 rounded-2xl bg-[#10121C] border border-[#1B1E2C] space-y-1.5">
+                <div className="text-[11px] text-[#7F89A0]">Harga Tiket Resmi</div>
+                <div className="text-xl font-black text-[#F4F5FA]">
+                  {concert.priceStart || (concert.ticketTypes && concert.ticketTypes[0]?.formattedPrice) || 'Tersedia'}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-[#F4F5FA]">Total Pembayaran</span>
-                  <span className="text-lg font-black text-[#F4F5FA]">
-                    Rp{subtotal.toLocaleString('id-ID')}
-                  </span>
+                <div className="text-[11px] text-[#8DE2BD] flex items-center gap-1 pt-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Garansi tiket resmi terverifikasi</span>
                 </div>
               </div>
 
+              {/* Ticket Categories List */}
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-[#A7AEC3]">Kategori Tiket:</div>
+                <div className="space-y-1.5">
+                  {(concert.ticketTypes || []).map((t) => (
+                    <div
+                      key={t.id}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-xs"
+                    >
+                      <span className="text-[#F4F5FA] font-medium truncate max-w-[170px]">{t.name}</span>
+                      <span className="font-bold text-[#A78BFA] shrink-0">{t.formattedPrice}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* How to Order Steps */}
+              <div className="pt-3 border-t border-[#1B1E2C] space-y-2.5">
+                <div className="text-xs font-bold text-[#F4F5FA]">Cara Memesan di Mobile:</div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2A2240] text-[#A78BFA] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                      1
+                    </div>
+                    <div className="text-[#A7AEC3]">
+                      Buka aplikasi <strong className="text-[#F4F5FA]">ConserId</strong> di smartphone Anda.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2A2240] text-[#A78BFA] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                      2
+                    </div>
+                    <div className="text-[#A7AEC3]">
+                      Cari festival <strong className="text-[#F4F5FA]">{concert.title}</strong> dan pilih kategori tiket.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#2A2240] text-[#A78BFA] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                      3
+                    </div>
+                    <div className="text-[#A7AEC3]">
+                      Selesaikan pembayaran, e-ticket dengan QR Code instan langsung aktif di aplikasi.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Button */}
               <button
-                onClick={() => setCheckoutModalOpen(true)}
-                disabled={totalTickets === 0 || !concert.available}
+                onClick={() => setMobileModalOpen(true)}
                 type="button"
-                className="w-full py-3.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white shadow-xl shadow-[#7953E8]/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white shadow-xl shadow-[#7953E8]/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                {concert.available ? 'Lanjutkan Pemesanan' : 'Tiket Telah Habis'}
+                <Smartphone className="w-4 h-4" />
+                <span>Pesan Melalui Aplikasi Mobile</span>
               </button>
 
-              <div className="text-center text-[11px] text-[#7F89A0]">
-                Transaksi dilindungi enkripsi 256-bit aman
+              <div className="text-center text-[11px] text-[#7F89A0] flex items-center justify-center gap-1.5 pt-1">
+                <Lock className="w-3.5 h-3.5 text-[#8DE2BD]" />
+                <span>Dynamic QR Code resmi anti-calo & pemalsuan</span>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Checkout Simulator Modal */}
-      {checkoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-[#151824] border border-[#1B1E2C] p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-[#F4F5FA]">Konfirmasi Pemesanan Tiket</h3>
+      {/* Mobile App Download & Booking Modal */}
+      {mobileModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-[#151824] border border-[#1B1E2C] p-6 space-y-5 text-center">
+            <div className="flex items-center justify-between pb-2 border-b border-[#1B1E2C]">
+              <div className="flex items-center gap-2 text-left">
+                <div className="w-8 h-8 rounded-lg bg-[#2A2240] text-[#A78BFA] flex items-center justify-center">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#F4F5FA]">Pemesanan Tiket di Mobile</h3>
+                  <p className="text-[11px] text-[#7F89A0]">Aplikasi resmi ConserId</p>
+                </div>
+              </div>
               <button
-                onClick={() => { setCheckoutModalOpen(false); setOrderSuccess(false); }}
-                className="text-[#7F89A0] hover:text-[#F4F5FA] cursor-pointer"
+                onClick={() => setMobileModalOpen(false)}
+                className="text-[#7F89A0] hover:text-[#F4F5FA] p-1 rounded-lg hover:bg-[#10121C] transition-colors cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            {orderSuccess ? (
-              <div className="space-y-4 text-center py-4">
-                <div className="w-14 h-14 rounded-full bg-[#193029] border border-[#8DE2BD]/30 text-[#8DE2BD] flex items-center justify-center mx-auto text-2xl">
-                  ✓
+            {/* QR Code Frame */}
+            <div className="p-6 rounded-2xl bg-[#10121C] border border-[#1B1E2C] flex flex-col items-center justify-center space-y-3">
+              <div className="w-40 h-40 rounded-xl bg-white p-3 flex flex-col items-center justify-center shadow-inner relative">
+                <div className="w-full h-full border-4 border-dashed border-[#0B0D14] rounded-lg flex flex-col items-center justify-center p-2 text-center">
+                  <QrCode className="w-20 h-20 text-[#0B0D14]" />
+                  <span className="text-[9px] font-bold text-[#0B0D14] mt-1 tracking-tight">SCAN VIA SMARTPHONE</span>
                 </div>
-                <div>
-                  <h4 className="text-base font-bold text-[#F4F5FA]">Pemesanan Berhasil!</h4>
-                  <p className="text-xs text-[#A7AEC3] mt-1">
-                    Instruksi pembayaran dan rincian e-ticket telah dikirim ke <span className="text-[#8DE2BD]">{customerEmail}</span>.
-                  </p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-xs space-y-1.5 text-left">
-                  <div className="flex justify-between">
-                    <span className="text-[#7F89A0]">ID Pesanan:</span>
-                    <span className="font-bold text-[#A78BFA]">{orderId}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#7F89A0]">Konser:</span>
-                    <span className="font-bold text-[#F4F5FA]">{concert.title}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#7F89A0]">Total Tagihan:</span>
-                    <span className="font-bold text-[#F4F5FA]">Rp{subtotal.toLocaleString('id-ID')}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { setCheckoutModalOpen(false); setOrderSuccess(false); setQuantities({}); }}
-                  className="w-full py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white cursor-pointer"
-                >
-                  Selesai
-                </button>
               </div>
-            ) : (
-              <form onSubmit={handleProceedCheckout} className="space-y-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#A7AEC3] mb-1">
-                    Nama Pemesan Sesuai Identitas
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Contoh: Budi Santoso"
-                    className="w-full bg-[#10121C] border border-[#1B1E2C] rounded-xl px-3 py-2 text-xs text-[#F4F5FA] placeholder-[#7F89A0] focus:outline-none focus:border-[#7953E8]"
-                  />
-                </div>
+              <div className="text-xs text-[#A7AEC3] max-w-xs leading-relaxed">
+                Arahkan kamera smartphone Anda ke QR code di atas untuk membuka pemesanan tiket <strong>{concert.title}</strong> di aplikasi mobile ConserId.
+              </div>
+            </div>
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#A7AEC3] mb-1">
-                    Alamat Email (untuk pengiriman e-ticket)
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="Contoh: budi@gmail.com"
-                    className="w-full bg-[#10121C] border border-[#1B1E2C] rounded-xl px-3 py-2 text-xs text-[#F4F5FA] placeholder-[#7F89A0] focus:outline-none focus:border-[#7953E8]"
-                  />
-                </div>
+            {/* Platform Badges */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-left">
+                <div className="text-[10px] text-[#7F89A0]">Tersedia di</div>
+                <div className="text-xs font-bold text-[#F4F5FA] mt-0.5">Google Play Store</div>
+              </div>
+              <div className="p-3 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-left">
+                <div className="text-[10px] text-[#7F89A0]">Tersedia di</div>
+                <div className="text-xs font-bold text-[#F4F5FA] mt-0.5">Apple App Store</div>
+              </div>
+            </div>
 
-                <div className="p-3 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-xs space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-[#7F89A0]">Jumlah Tiket:</span>
-                    <span className="font-bold text-[#F4F5FA]">{totalTickets} tiket</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#7F89A0]">Total Bayar:</span>
-                    <span className="font-bold text-[#A78BFA]">Rp{subtotal.toLocaleString('id-ID')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white cursor-pointer"
-                  >
-                    Konfirmasi & Bayar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCheckoutModalOpen(false)}
-                    className="px-4 py-2.5 rounded-xl bg-[#10121C] text-xs font-medium text-[#A7AEC3] hover:text-[#F4F5FA] cursor-pointer"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </form>
-            )}
+            <button
+              onClick={() => setMobileModalOpen(false)}
+              className="w-full py-2.5 rounded-xl bg-[#1B1E2C] hover:bg-[#2A2E40] text-xs font-medium text-[#A7AEC3] hover:text-[#F4F5FA] transition-colors cursor-pointer"
+            >
+              Tutup
+            </button>
           </div>
         </div>
       )}

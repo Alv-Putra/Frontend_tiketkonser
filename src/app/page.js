@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Ticket,
   ShieldCheck,
@@ -21,9 +22,12 @@ import {
   Headphones,
   Flame,
   Sparkles,
-  Clock
+  Clock,
+  Smartphone,
+  QrCode
 } from 'lucide-react';
 import StatusBadge from '@/components/workspace/StatusBadge';
+import festivalService from '@/services/festivalService';
 
 const HERO_SLIDES = [
   {
@@ -275,6 +279,7 @@ const CURATOR_VIDEOS = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -282,6 +287,49 @@ export default function HomePage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [selectedConcertDetail, setSelectedConcertDetail] = useState(null);
   const [activeCuratorIndex, setActiveCuratorIndex] = useState(0);
+  const [liveConcerts, setLiveConcerts] = useState(CONCERTS_DATA);
+
+  // Fetch published events from database backend
+  useEffect(() => {
+    let mounted = true;
+    festivalService.getPublishedFestivals({ useApi: true })
+      .then((items) => {
+        if (!mounted || !items || items.length === 0) return;
+        const mapped = items.map((f) => ({
+          id: String(f.id),
+          status: f.ticketStatus === 'sold_out' ? 'HABIS TERJUAL' : 'TERSEDIA',
+          date: f.date
+            ? new Date(f.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()
+            : 'SEGERA',
+          title: f.title,
+          artist: f.artist || f.title,
+          lineup: Array.isArray(f.lineup) ? f.lineup.join(' · ') : (f.lineup || f.title),
+          location: f.venue ? `${f.venue}, ${f.city || ''}` : (f.city || 'Indonesia'),
+          city: f.city || 'Jakarta',
+          genre: f.genre || 'Musik',
+          price: `Rp${Number(f.priceStart || 0).toLocaleString('id-ID')}`,
+          available: f.ticketStatus !== 'sold_out',
+          description: f.description || '',
+          image: f.image || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+          ticketTypes: (f.ticketTypes || []).map((t) => ({
+            id: t.id,
+            name: t.name,
+            price: `Rp${Number(t.price || 0).toLocaleString('id-ID')}`,
+            quota: t.sold >= t.quota ? 'Habis' : 'Tersedia',
+          })),
+        }));
+
+        setLiveConcerts((prev) => {
+          const ids = new Set(mapped.map((m) => m.id));
+          const rest = prev.filter((p) => !ids.has(p.id));
+          return [...mapped, ...rest];
+        });
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Hero carousel state with gestures & infinite smooth slide
   const [activeSlideIndex, setActiveSlideIndex] = useState(HERO_SLIDES.length); // Start at middle set (index 5)
@@ -434,7 +482,7 @@ export default function HomePage() {
     setIsHeroPaused(false);
   };
 
-  const filteredConcerts = CONCERTS_DATA.filter((c) => {
+  const filteredConcerts = liveConcerts.filter((c) => {
     const matchQuery =
       !searchQuery ||
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -698,9 +746,7 @@ export default function HomePage() {
                         setActiveSlideIndex((prev) => prev + delta);
                         setIsTransitioning(true);
                       } else {
-                        setSelectedConcertDetail(
-                          CONCERTS_DATA.find((c) => c.id === slide.id) || CONCERTS_DATA[0]
-                        );
+                        router.push(`/concerts/${slide.id}`);
                       }
                     }
                   }}
@@ -768,20 +814,14 @@ export default function HomePage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedConcertDetail(
-                              CONCERTS_DATA.find((c) => c.id === slide.id) || CONCERTS_DATA[0]
-                            );
-                          }}
-                          type="button"
-                          suppressHydrationWarning
+                        <Link
+                          href={`/concerts/${slide.id}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#7953E8]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer pt-sans-bold"
                         >
                           <span>Lihat Detail</span>
                           <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -1013,7 +1053,7 @@ export default function HomePage() {
                           : 'bg-[#1B1E2C] text-[#7F89A0] cursor-not-allowed'
                       }`}
                     >
-                      {concert.available ? 'Lihat Detail & Pesan' : 'Habis'}
+                      {concert.available ? 'Lihat Detail' : 'Habis'}
                     </Link>
                   </div>
                 </div>
@@ -1514,7 +1554,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-[#F4F5FA]">Pilih Kategori Tiket:</div>
                 <div className="grid grid-cols-1 gap-2">
-                  {selectedConcertDetail.ticketTypes.map((cat, idx) => (
+                  {(selectedConcertDetail.ticketTypes || []).map((cat, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedCategoryIndex(idx)}
@@ -1537,48 +1577,22 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Order Quantity & Total */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#10121C] border border-[#1B1E2C] text-xs">
-              <span className="text-[#A7AEC3]">Jumlah Tiket:</span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setOrderQuantity(Math.max(1, orderQuantity - 1))}
-                  suppressHydrationWarning
-                  className="w-7 h-7 rounded-lg bg-[#151824] border border-[#2A2E40] text-[#F4F5FA] flex items-center justify-center font-bold"
-                >
-                  -
-                </button>
-                <span className="font-bold text-sm text-[#F4F5FA]">{orderQuantity}</span>
-                <button
-                  onClick={() => setOrderQuantity(Math.min(5, orderQuantity + 1))}
-                  suppressHydrationWarning
-                  className="w-7 h-7 rounded-lg bg-[#151824] border border-[#2A2E40] text-[#F4F5FA] flex items-center justify-center font-bold"
-                >
-                  +
-                </button>
-              </div>
+            {/* Mobile Booking Notice */}
+            <div className="p-3.5 rounded-xl bg-[#1E1933] border border-[#7953E8]/30 flex items-center gap-3 text-xs">
+              <Smartphone className="w-5 h-5 text-[#A78BFA] shrink-0" />
+              <span className="text-[#C4B5FD] leading-relaxed">
+                Pemesanan dan pembelian tiket konser ini dilakukan melalui <strong>Aplikasi Mobile ConserId</strong> demi keamanan Dynamic QR Code.
+              </span>
             </div>
 
-            {orderPlacedMessage ? (
-              <div className="p-3.5 rounded-xl bg-[#193029] border border-[#8DE2BD]/30 text-xs text-[#8DE2BD] font-semibold text-center">
-                {orderPlacedMessage}
-              </div>
-            ) : null}
-
             <div className="flex items-center gap-2 pt-2">
-              <button
-                type="button"
-                suppressHydrationWarning
-                onClick={() => {
-                  const catName = selectedConcertDetail.ticketTypes
-                    ? selectedConcertDetail.ticketTypes[selectedCategoryIndex]?.name
-                    : 'Reguler';
-                  setOrderPlacedMessage(`Pesanan ${orderQuantity}x tiket (${catName}) berhasil dibuat! Menunggu instruksi pembayaran.`);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white text-center cursor-pointer shadow-lg shadow-[#7953E8]/20 transition-all"
+              <Link
+                href={`/concerts/${selectedConcertDetail.id}`}
+                className="flex-1 py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white text-center cursor-pointer shadow-lg shadow-[#7953E8]/20 transition-all flex items-center justify-center gap-1.5"
               >
-                Pesan Sekarang ({orderQuantity} Tiket)
-              </button>
+                <span>Lihat Detail Konser Lengkap</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
               <button
                 type="button"
                 suppressHydrationWarning

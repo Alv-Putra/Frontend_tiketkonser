@@ -92,4 +92,27 @@ describe('useMonitoringStore', () => {
     expect(state.adminMetrics).toBeDefined();
     expect(state.organizerMetrics).toBeDefined();
   });
+
+  it('calls fetchAdminData, fetchUserData, fetchOrganizerData, approveEvent, and updateUserStatus', async () => {
+    jest.spyOn(monitoringService, 'fetchAdminDashboardFromApi').mockResolvedValue(monitoringService.getAdminMetrics());
+    jest.spyOn(monitoringService, 'fetchUsersFromApi').mockResolvedValue(monitoringService.getUsers());
+    jest.spyOn(monitoringService, 'fetchEventsFromApi').mockResolvedValue(monitoringService.getConcerts());
+    jest.spyOn(monitoringService, 'fetchTransactionLogsFromApi').mockResolvedValue({ total: 1, data: [] });
+    jest.spyOn(monitoringService, 'fetchOrganizerEventsApi').mockResolvedValue(monitoringService.getConcerts());
+    jest.spyOn(monitoringService, 'approveEventApi').mockResolvedValue({ success: true });
+    jest.spyOn(monitoringService, 'updateUserStatusApi').mockResolvedValue(true);
+
+    await act(async () => {
+      await useMonitoringStore.getState().fetchAdminData();
+      await useMonitoringStore.getState().fetchUserData({ search: 'admin' });
+      await useMonitoringStore.getState().fetchOrganizerData();
+      await useMonitoringStore.getState().approveEvent('1');
+      await useMonitoringStore.getState().updateUserStatus('usr1', false);
+    });
+
+    const state = useMonitoringStore.getState();
+    expect(state.adminMetrics).toBeDefined();
+    expect(state.users).toBeDefined();
+    expect(state.concerts).toBeDefined();
+  });
 });

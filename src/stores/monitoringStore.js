@@ -81,6 +81,54 @@ export const useMonitoringStore = create((set, get) => ({
       adminMetrics: monitoringService.getAdminMetrics(),
       organizerMetrics: monitoringService.getOrganizerMetrics(get().activeConcertId)
     });
+  },
+
+  fetchAdminData: async () => {
+    await Promise.all([
+      monitoringService.fetchAdminDashboardFromApi(),
+      monitoringService.fetchUsersFromApi(),
+      monitoringService.fetchEventsFromApi(),
+      monitoringService.fetchTransactionLogsFromApi(),
+    ]);
+    set({
+      adminMetrics: monitoringService.getAdminMetrics(),
+      users: monitoringService.getUsers(),
+      orders: monitoringService.getOrders(),
+      payments: monitoringService.getPayments(),
+      concerts: monitoringService.getConcerts(),
+      approvals: monitoringService.getApprovals(),
+    });
+  },
+
+  fetchUserData: async (filters) => {
+    await monitoringService.fetchUsersFromApi(filters);
+    set({
+      users: monitoringService.getUsers(),
+    });
+  },
+
+  fetchOrganizerData: async () => {
+    await monitoringService.fetchOrganizerEventsApi();
+    const activeId = get().activeConcertId;
+    set({
+      concerts: monitoringService.getConcerts(),
+      organizerMetrics: monitoringService.getOrganizerMetrics(activeId),
+    });
+  },
+
+  approveEvent: async (eventId) => {
+    await monitoringService.approveEventApi(eventId);
+    set({
+      approvals: monitoringService.getApprovals(),
+      adminMetrics: monitoringService.getAdminMetrics(),
+    });
+  },
+
+  updateUserStatus: async (userId, isActive) => {
+    await monitoringService.updateUserStatusApi(userId, isActive);
+    set({
+      users: monitoringService.getUsers(),
+    });
   }
 }));
 

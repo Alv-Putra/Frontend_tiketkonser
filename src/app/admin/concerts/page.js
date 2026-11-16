@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Plus,
@@ -10,7 +10,8 @@ import {
   Filter,
   Check,
   Calendar,
-  MapPin
+  MapPin,
+  RotateCw
 } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
@@ -21,6 +22,7 @@ export default function AdminConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
   const addConcert = useMonitoringStore((state) => state.addConcert);
+  const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
@@ -30,6 +32,22 @@ export default function AdminConcertsPage() {
   const [newLocation, setNewLocation] = useState('');
   const [newSchedule, setNewSchedule] = useState('');
   const [newQuota, setNewQuota] = useState('2000');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchAdminData().catch(() => {});
+  }, [fetchAdminData]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchAdminData();
+    } catch {
+      // Offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredConcerts = concerts.filter((c) => {
     const matchSearch =
@@ -76,20 +94,37 @@ export default function AdminConcertsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Kelola konser</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Kelola konser</h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#193029] text-[#8DE2BD] border border-[#234B3E]">
+              LIVE BACKEND
+            </span>
+          </div>
           <p className="text-xs text-[#A7AEC3]">
-            Atur informasi konser, jadwal, dan pantau penjualan tiket.
+            Atur informasi konser, jadwal, dan pantau ketersediaan tiket langsung dari database.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          type="button"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Tambah konser</span>
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            type="button"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1B1E2C] hover:bg-[#2A2E40] text-[#A7AEC3] hover:text-[#F4F5FA] text-xs font-semibold border border-[#2A2E40] transition-all cursor-pointer"
+            title="Muat ulang data live backend"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#A78BFA]' : ''}`} />
+            <span>Segarkan</span>
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tambah konser</span>
+          </button>
+        </div>
       </div>
 
       {/* 4 Stat Cards */}

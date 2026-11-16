@@ -1,6 +1,7 @@
 import festivalService, {
   FestivalService,
   festivalService as namedFestivalService,
+  transformBackendEventToFestival,
 } from '@/services/festivalService';
 import { storageDB } from '@/services/storageService';
 import { mockFestivals } from '@/services/mockData';
@@ -249,5 +250,212 @@ describe('festivalService', () => {
     jest.runAllTimers();
     const result = await promise;
     expect(result.length).toBe(mockFestivals.length);
+  });
+
+  describe('transformBackendEventToFestival and backend API integration', () => {
+    it('handles null or undefined input', () => {
+      expect(transformBackendEventToFestival(null)).toBeNull();
+      expect(transformBackendEventToFestival(undefined)).toBeNull();
+    });
+
+    it('transforms full backend event with tickets', () => {
+      const beEvent = {
+        id: 101,
+        public_id: 'pub-101',
+        title: 'Konser Hebat',
+        slug: 'konser-hebat',
+        summary: 'Ringkasan konser',
+        description: 'Deskripsi lengkap',
+        banner: 'https://example.com/banner.jpg',
+        thumbnail: 'https://example.com/thumb.jpg',
+        poster: 'https://example.com/poster.jpg',
+        start_at: '2026-06-01T10:00:00Z',
+        end_at: '2026-06-01T23:00:00Z',
+        is_featured: true,
+        status: 'published',
+        organizer_id: 12,
+        category: { name: 'Rock' },
+        venue: {
+          name: 'Stadion Utama',
+          city: { name: 'Bandung', province: { name: 'Jawa Barat' } },
+        },
+        ticketTypes: [
+          { id: 1, name: 'VIP', price: 500000, quota: 100, sold: 20, status: 'active' },
+          { id: 2, name: 'Regular', price: 250000, quota: 200, sold: 50, status: 'active' },
+        ],
+      };
+      const result = transformBackendEventToFestival(beEvent);
+      expect(result.id).toBe('101');
+      expect(result.title).toBe('Konser Hebat');
+      expect(result.priceStart).toBe(250000);
+      expect(result.ticketStatus).toBe('available');
+      expect(result.genre).toBe('Rock');
+      expect(result.venue).toBe('Stadion Utama');
+      expect(result.city).toBe('Bandung');
+      expect(result.province).toBe('Jawa Barat');
+    });
+
+    it('transforms event with sold out tickets and fallback venue', () => {
+      const beEvent = {
+        id: 102,
+        title: 'Konser Habis',
+        start_at: '2026-06-01T10:00:00Z',
+        end_at: '2026-06-01T23:00:00Z',
+        status: 'draft',
+        ticketTypes: [
+          { id: 1, name: 'VIP', price: 500000, quota: 10, sold: 10, status: 'sold_out' },
+        ],
+      };
+      const result = transformBackendEventToFestival(beEvent);
+      expect(result.ticketStatus).toBe('sold_out');
+      expect(result.priceStart).toBe(500000);
+      expect(result.venue).toBe('Venue');
+      expect(result.city).toBe('Jakarta');
+      expect(result.province).toBe('');
+    });
+
+    it('transforms event without tickets', () => {
+      const beEvent = {
+        id: 103,
+        title: 'Tanpa Tiket',
+        start_at: '2026-06-01T10:00:00Z',
+        end_at: '2026-06-01T23:00:00Z',
+        ticketTypes: [],
+      };
+      const result = transformBackendEventToFestival(beEvent);
+      expect(result.priceStart).toBe(0);
+      expect(result.ticketStatus).toBe('sold_out');
+    });
+
+    it('transforms event with public_id and tickets without explicit price or quota', () => {
+      const beEvent = {
+        public_id: 'pub-only-1',
+        title: 'Pub Only Event',
+        start_at: '2026-06-01T10:00:00Z',
+        end_at: '2026-06-01T23:00:00Z',
+        ticketTypes: [{ public_id: 't-pub' }],
+      };
+      const result = transformBackendEventToFestival(beEvent);
+      expect(result.id).toBe('pub-only-1');
+      expect(result.ticketTypes[0].id).toBe('t-pub');
+      expect(result.ticketTypes[0].price).toBe(0);
+      expect(result.ticketTypes[0].quota).toBe(0);
+    });
+
+    it('fetches published festivals from API when useApi is true', async () => {
+      jest.useRealTimers();
+      const mockEvent = {
+        id: 1,
+        title: 'Api Fest',
+        start_at: '2026-07-01T00:00:00Z',
+        end_at: '2026-07-02T00:00:00Z',
+        status: 'published',
+        ticketTypes: [{ id: 1, price: 100000, quota: 10, sold: 0 }],
+      };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: [mockEvent] }),
+      });
+
+      const res = await festivalService.getPublishedFestivals({ useApi: true });
+      expect(res.length).toBe(1);
+      expect(res[0].title).toBe('Api Fest');
+
+      // Direct array response
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => [mockEvent],
+      });
+      const directArrayRes = await festivalService.getPublishedFestivals({ useApi: true });
+      expect(directArrayRes.length).toBe(1);
+
+      // Empty API fallback
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: [] }),
+      });
+      const fallbackRes = await festivalService.getPublishedFestivals({ useApi: true });
+      expect(fallbackRes.length).toBeGreaterThan(0);
+
+      // Error API fallback
+      global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+      const errorFallbackRes = await festivalService.getPublishedFestivals({ useApi: true });
+      expect(errorFallbackRes.length).toBeGreaterThan(0);
+
+      // Null data response from API
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: null }),
+      });
+      await festivalService.getPublishedFestivals({ useApi: true });
+    });
+
+    it('fetches festival by id from API when numeric and useApi is true', async () => {
+      jest.useRealTimers();
+      const mockEvent = {
+        id: 99,
+        title: 'Single Api Fest',
+        start_at: '2026-07-01T00:00:00Z',
+        end_at: '2026-07-02T00:00:00Z',
+        status: 'published',
+      };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: mockEvent }),
+      });
+
+      const res = await festivalService.getFestivalById('99', { useApi: true });
+      expect(res.title).toBe('Single Api Fest');
+
+      // Non-numeric ID with useApi: true
+      const nonNumRes = await festivalService.getFestivalById('f1', { useApi: true });
+      expect(nonNumRes.id).toBe('f1');
+
+      // Null data response from API
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: null }),
+      });
+      await festivalService.getFestivalById('99', { useApi: true });
+
+      // API failure fallback
+      global.fetch = jest.fn().mockRejectedValue(new Error('Not found'));
+      const fallbackRes = await festivalService.getFestivalById('f1', { useApi: true });
+      expect(fallbackRes.title).toBe('Java Jazz Festival 2026');
+    });
+
+    it('calls fetchApiEvents, fetchApiEventById, createApiEvent, and approveApiEvent', async () => {
+      jest.useRealTimers();
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: true, data: { ok: true } }),
+      });
+
+      await festivalService.fetchApiEvents({ search: 'rock', category: 'music', location: 'Jakarta', page: 1, limit: 10 });
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('search=rock'),
+        expect.anything()
+      );
+
+      await festivalService.fetchApiEvents();
+      await festivalService.fetchApiEvents({});
+      await festivalService.fetchApiEventById(123);
+      await festivalService.createApiEvent({ title: 'New Event' });
+      await festivalService.approveApiEvent(123);
+    });
   });
 });

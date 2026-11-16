@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Download,
@@ -8,7 +8,8 @@ import {
   ArrowRight,
   Check,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  RotateCw
 } from 'lucide-react';
 import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
@@ -21,11 +22,51 @@ export default function OrganizerDashboardPage() {
   const organizerMetrics = useMonitoringStore((state) => state.organizerMetrics);
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
+  const fetchOrganizerData = useMonitoringStore((state) => state.fetchOrganizerData);
 
   const [concertDropdownOpen, setConcertDropdownOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const activeConcert = organizerMetrics.concert || concerts[0];
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+    fetchOrganizerData()
+      .then(() => {
+        if (mounted) setIsLive(true);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [fetchOrganizerData]);
+
+  const activeConcert = organizerMetrics?.concert || concerts[0] || {
+    id: 'c1',
+    name: 'Belum ada konser',
+    schedule: '-',
+    location: '-',
+    sold: 0,
+    quota: 0,
+    salesOpen: false,
+    categories: []
+  };
   const isSalesOpen = activeConcert.salesOpen;
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchOrganizerData();
+      setIsLive(true);
+    } catch {
+      // offline fallback
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDownload = () => {
     alert('Laporan performa penjualan untuk "' + activeConcert.name + '" berhasil diunduh.');
@@ -40,20 +81,42 @@ export default function OrganizerDashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Panggungmu, dalam kendali.</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Panggungmu, dalam kendali.</h1>
+            {isLive ? (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#193029] text-[#8DE2BD] border border-[#234B3E]">
+                LIVE BACKEND
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2A2240] text-[#A78BFA] border border-[#362A54]">
+                {isLoading ? 'MEMUAT...' : 'ORGANIZER WORKSPACE'}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[#A7AEC3]">
-            Pantau performa dan operasional konsermu di satu tempat.
+            Pantau performa dan operasional konser buatanmu langsung dari database backend.
           </p>
         </div>
 
-        <button
-          onClick={handleDownload}
-          type="button"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Unduh laporan</span>
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={handleRefresh}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#151824] hover:bg-[#1B1E2C] border border-[#1B1E2C] text-[#F4F5FA] text-xs font-semibold transition-all cursor-pointer"
+          >
+            <RotateCw className={`w-3.5 h-3.5 text-[#A78BFA] ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Segarkan</span>
+          </button>
+
+          <button
+            onClick={handleDownload}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Unduh laporan</span>
+          </button>
+        </div>
       </div>
 
       {/* Monitored Concert Banner */}
