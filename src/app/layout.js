@@ -1,42 +1,29 @@
-import "./globals.css";
-import { Inter, Montserrat, Noto_Sans } from "next/font/google";
-import AuthProvider from "@/context/AuthProvider";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import './globals.css';
+import { PT_Sans } from 'next/font/google';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-inter",
-});
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-montserrat",
-});
-
-const notoSans = Noto_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-noto",
+const ptSans = PT_Sans({
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  variable: '--font-pt-sans',
+  display: 'swap',
 });
 
 export const metadata = {
-  title: "ConserId - Experience Live Music",
-  description: "Temukan dan dapatkan tiket konser terbaik. Download aplikasi ConserId untuk pembelian tiket.",
+  title: 'ConserId - Platform Tiket Konser & Festival Musik Resmi',
+  description: 'Satu tiket. Seribu cerita. Temukan konser favoritmu, beli tiket resmi dengan mudah dan aman.',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className="h-full" suppressHydrationWarning>
+    <html lang="id" className="h-full dark" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${montserrat.variable} ${notoSans.variable} ${inter.className} min-h-screen flex flex-col bg-primary-bg text-text-primary antialiased`}
+        className={`${ptSans.variable} min-h-screen flex flex-col bg-[#0B0D14] text-[#F4F5FA] font-sans antialiased`}
       >
         <ErrorBoundary>
-          <AuthProvider>
-            <div className="flex-1 flex flex-col min-h-0">{children}</div>
-          </AuthProvider>
+          <div className="flex-1 flex flex-col min-h-0">{children}</div>
         </ErrorBoundary>
       </body>
     </html>

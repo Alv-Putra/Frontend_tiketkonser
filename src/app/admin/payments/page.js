@@ -1,133 +1,270 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, CheckCircle, XCircle, Eye } from 'lucide-react';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import Modal from '@/components/ui/Modal';
-import Toast from '@/components/ui/Toast';
-import EmptyState from '@/components/ui/EmptyState';
+import { Search, Download, Check, X, ShieldAlert, ArrowRight } from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import StatCard from '@/components/workspace/StatCard';
+import StatusBadge from '@/components/workspace/StatusBadge';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-const initialPayments = [
-  { id: 'PAY-001', order: 'ORD-001', customer: 'Budi Santoso', method: 'GoPay', amount: 700000, status: 'Terverifikasi', date: '2026-04-10' },
-  { id: 'PAY-002', order: 'ORD-002', customer: 'Siti Rahma', method: 'Transfer Bank', amount: 1700000, status: 'Tertunda', date: '2026-04-11' },
-  { id: 'PAY-003', order: 'ORD-003', customer: 'Ahmad Fauzi', method: 'OVO', amount: 1500000, status: 'Terverifikasi', date: '2026-04-12' },
-  { id: 'PAY-004', order: 'ORD-004', customer: 'Dewi Lestari', method: 'DANA', amount: 500000, status: 'Gagal', date: '2026-04-13' },
-  { id: 'PAY-005', order: 'ORD-005', customer: 'Rudi Hartono', method: 'Transfer Bank', amount: 400000, status: 'Tertunda', date: '2026-04-14' },
-];
+export default function AdminPaymentsPage() {
+  const payments = useMonitoringStore((state) => state.payments);
+  const verifyPayment = useMonitoringStore((state) => state.verifyPayment);
 
-const statusVariant = {
-  'Terverifikasi': 'success',
-  'Tertunda': 'warning',
-  'Gagal': 'error',
-};
-
-export default function PaymentManagement() {
-  const [payments, setPayments] = useState(initialPayments);
   const [search, setSearch] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
-  const filtered = payments.filter((p) =>
-    p.id.toLowerCase().includes(search.toLowerCase()) ||
-    p.customer.toLowerCase().includes(search.toLowerCase()) ||
-    p.order.toLowerCase().includes(search.toLowerCase())
+  const [statusFilter, setStatusFilter] = useState('Semua');
+  const [selectedPayment, setSelectedPayment] = useState(
+    payments.find((p) => p.status === 'Perlu verifikasi') || payments[0] || null
   );
 
-  const verifyPayment = (id) => {
-    setPayments(payments.map((p) => p.id === id ? { ...p, status: 'Terverifikasi' } : p));
-    setToast({ show: true, message: 'Pembayaran berhasil diverifikasi', type: 'success' });
-    setSelectedPayment(null);
+  const verifiedCount = payments.filter((p) => p.status === 'Terverifikasi').length;
+  const pendingCount = payments.filter((p) => p.status === 'Perlu verifikasi').length;
+  const failedCount = payments.filter((p) => p.status === 'Gagal').length;
+
+  const filteredPayments = payments.filter((p) => {
+    const matchSearch =
+      !search ||
+      p.id.toLowerCase().includes(search.toLowerCase()) ||
+      p.orderId.toLowerCase().includes(search.toLowerCase()) ||
+      p.customer.toLowerCase().includes(search.toLowerCase());
+
+    const matchStatus =
+      statusFilter === 'Semua' ||
+      p.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchSearch && matchStatus;
+  });
+
+  const handleApprove = () => {
+    if (!selectedPayment) return;
+    verifyPayment(selectedPayment.id, true);
+    setSelectedPayment({
+      ...selectedPayment,
+      status: 'Terverifikasi'
+    });
   };
 
-  const rejectPayment = (id) => {
-    setPayments(payments.map((p) => p.id === id ? { ...p, status: 'Gagal' } : p));
-    setToast({ show: true, message: 'Pembayaran ditolak', type: 'error' });
-    setSelectedPayment(null);
+  const handleReject = () => {
+    if (!selectedPayment) return;
+    verifyPayment(selectedPayment.id, false);
+    setSelectedPayment({
+      ...selectedPayment,
+      status: 'Gagal'
+    });
+  };
+
+  const handleExport = () => {
+    alert('Daftar transaksi pembayaran berhasil diekspor.');
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold">Pembayaran</h1>
-        <p className="text-text-muted text-sm mt-1">Verifikasi dan kelola transaksi pembayaran</p>
-      </div>
-
-      <div className="bg-secondary-bg border border-border rounded-[18px] p-6">
-        <div className="relative mb-4">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" placeholder="Cari pembayaran..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full max-w-xs bg-surface border border-border rounded-[12px] pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors" />
+    <WorkspaceLayout title="Pembayaran">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Pembayaran</h1>
+          <p className="text-xs text-[#A7AEC3]">
+            Periksa transaksi dan verifikasi pembayaran pelanggan.
+          </p>
         </div>
 
-        {filtered.length === 0 ? (
-          <EmptyState title="Tidak ada pembayaran" description="Coba pencarian lain." />
-        ) : (
+        <button
+          onClick={handleExport}
+          type="button"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span>Ekspor transaksi</span>
+        </button>
+      </div>
+
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Total transaksi" value={payments.length.toString()} subtext="Rp4.800.000" />
+        <StatCard label="Terverifikasi" value={verifiedCount.toString()} subtext="Rp2.200.000" />
+        <StatCard label="Perlu verifikasi" value={pendingCount.toString()} subtext="Rp2.100.000" />
+        <StatCard label="Gagal" value={failedCount.toString()} subtext="Rp500.000" />
+      </div>
+
+      {/* Main Grid: Payments Table & Verification Action */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Table Column */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[#F4F5FA]">Daftar transaksi</h2>
+              {pendingCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#332B1B] text-[#F1C875]">
+                  {pendingCount} perlu verifikasi
+                </span>
+              )}
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-[#1B1E2C] border border-[#2A2E40] rounded-lg px-2.5 py-1.5 text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+            >
+              <option value="Semua">Semua status</option>
+              <option value="Terverifikasi">Terverifikasi</option>
+              <option value="Perlu verifikasi">Perlu verifikasi</option>
+              <option value="Gagal">Gagal</option>
+            </select>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-[#7F89A0] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari ID transaksi atau pelanggan..."
+              className="w-full bg-[#10121C] border border-[#1B1E2C] rounded-xl pl-9 pr-4 py-2 text-xs text-[#F4F5FA] placeholder-[#7F89A0] focus:outline-none focus:border-[#7953E8]"
+            />
+          </div>
+
+          {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-border">
-                  {['ID Pembayaran', 'Pesanan', 'Pelanggan', 'Metode', 'Jumlah', 'Status', 'Tanggal', 'Aksi'].map((h) => (
-                    <th key={h} className="font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
-                  ))}
+                <tr className="border-b border-[#1B1E2C] text-[#7F89A0] text-[10px] uppercase font-semibold">
+                  <th className="pb-2.5">Transaksi</th>
+                  <th className="pb-2.5">Pelanggan / Metode</th>
+                  <th className="pb-2.5">Jumlah</th>
+                  <th className="pb-2.5">Status</th>
+                  <th className="pb-2.5 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
-                {filtered.map((payment) => (
-                  <tr key={payment.id} className="border-b border-border/50 hover:bg-surface/30 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-text-primary">{payment.id}</td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{payment.order}</td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{payment.customer}</td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{payment.method}</td>
-                    <td className="px-4 py-3 text-sm text-text-primary">Rp{payment.amount.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={statusVariant[payment.status] || 'default'}>{payment.status}</Badge>
+              <tbody className="divide-y divide-[#1B1E2C]">
+                {filteredPayments.map((p) => (
+                  <tr
+                    key={p.id}
+                    onClick={() => setSelectedPayment(p)}
+                    className={`cursor-pointer transition-colors ${
+                      selectedPayment?.id === p.id ? 'bg-[#1B1E2C]' : 'hover:bg-[#1B1E2C]/50'
+                    }`}
+                  >
+                    <td className="py-3 font-semibold text-[#F4F5FA]">
+                      <div>{p.id}</div>
+                      <div className="text-[10px] text-[#7F89A0]">{p.orderId}</div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{payment.date}</td>
-                    <td className="px-4 py-3">
-                      <button onClick={() => setSelectedPayment(payment)} className="p-1.5 rounded-[12px] hover:bg-surface text-text-muted hover:text-secondary-accent transition-colors cursor-pointer"><Eye size={15} /></button>
+                    <td className="py-3 text-[#A7AEC3]">
+                      <div className="text-[#F4F5FA] font-medium">{p.customer}</div>
+                      <div className="text-[11px] text-[#7F89A0]">{p.method}</div>
+                    </td>
+                    <td className="py-3 font-bold text-[#F4F5FA]">{p.amount}</td>
+                    <td className="py-3">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="py-3 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPayment(p);
+                        }}
+                        type="button"
+                        className="px-2.5 py-1 rounded bg-[#1B1E2C] hover:bg-[#2A2E40] border border-[#2A2E40] text-[11px] text-[#A78BFA] font-medium transition-colors"
+                      >
+                        Periksa
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
 
-      <Modal isOpen={!!selectedPayment} onClose={() => setSelectedPayment(null)} title="Detail Pembayaran">
-        {selectedPayment && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              {[['ID Pembayaran', selectedPayment.id], ['ID Pesanan', selectedPayment.order], ['Pelanggan', selectedPayment.customer], ['Metode', selectedPayment.method], ['Jumlah', `Rp${selectedPayment.amount.toLocaleString('id-ID')}`], ['Status', selectedPayment.status], ['Tanggal', selectedPayment.date]].map(([label, value]) => (
-                <div key={label}>
-                  <p className="text-xs text-text-muted">{label}</p>
-                  <p className="text-sm text-text-primary font-medium">{value}</p>
+        {/* Verification Side Card */}
+        <div className="space-y-6">
+          {selectedPayment && (
+            <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C]">
+              <div className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider mb-2">
+                Verifikasi pembayaran
+              </div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-bold text-[#F4F5FA]">
+                  {selectedPayment.id} / {selectedPayment.orderId}
+                </span>
+                <StatusBadge status={selectedPayment.status} />
+              </div>
+
+              <div className="space-y-3 text-xs mb-4">
+                <div className="flex justify-between py-1.5 border-b border-[#1B1E2C]">
+                  <span className="text-[#7F89A0]">Total pembayaran</span>
+                  <span className="font-bold text-base text-[#F4F5FA]">{selectedPayment.amount}</span>
                 </div>
-              ))}
-            </div>
+                <div className="flex justify-between py-1.5 border-b border-[#1B1E2C]">
+                  <span className="text-[#7F89A0]">Pelanggan</span>
+                  <span className="font-medium text-[#F4F5FA]">{selectedPayment.customer}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#1B1E2C]">
+                  <span className="text-[#7F89A0]">Metode</span>
+                  <span className="font-medium text-[#F4F5FA]">{selectedPayment.method}</span>
+                </div>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-[#7F89A0]">Tanggal</span>
+                  <span className="text-[#A7AEC3]">{selectedPayment.date}</span>
+                </div>
+              </div>
 
-            <div className="bg-surface rounded-[12px] p-4 text-center">
-              <p className="text-sm text-text-muted mb-2">Bukti Pembayaran</p>
-              <div className="w-full h-40 bg-secondary-bg rounded-[12px] border border-border flex items-center justify-center text-text-muted text-sm">
-                [Tempat Screenshot Pembayaran]
+              {selectedPayment.status === 'Perlu verifikasi' ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={handleApprove}
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#193029] hover:bg-[#25463b] text-[#8DE2BD] border border-[#8DE2BD]/20 text-xs font-semibold transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Setujui</span>
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#36202C] hover:bg-[#4a2b3c] text-[#FFA4B8] border border-[#FFA4B8]/20 text-xs font-semibold transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Tolak</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-[#1B1E2C] text-center text-xs text-[#A7AEC3]">
+                  Status pembayaran telah ditetapkan ({selectedPayment.status})
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Verification Workflow Steps */}
+          <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C]">
+            <h2 className="text-xs font-semibold text-[#A7AEC3] uppercase tracking-wider mb-2">
+              Alur verifikasi
+            </h2>
+            <p className="text-xs text-[#F4F5FA] font-medium mb-3">
+              Verifikasi yang teliti, pengalaman yang aman.
+            </p>
+            <div className="space-y-2 text-xs">
+              <div className="p-2.5 rounded bg-[#1B1E2C] text-[#F4F5FA]">
+                <span className="font-bold text-[#A78BFA] mr-2">01</span> Periksa bukti transfer
+              </div>
+              <div className="p-2.5 rounded bg-[#1B1E2C] text-[#F4F5FA]">
+                <span className="font-bold text-[#A78BFA] mr-2">02</span> Cocokkan nominal
+              </div>
+              <div className="p-2.5 rounded bg-[#1B1E2C] text-[#F4F5FA]">
+                <span className="font-bold text-[#A78BFA] mr-2">03</span> Setujui atau tolak
               </div>
             </div>
-
-            {selectedPayment.status === 'Tertunda' && (
-              <div className="flex gap-3">
-                <Button variant="success" className="flex-1" onClick={() => verifyPayment(selectedPayment.id)}>
-                  <CheckCircle size={16} /> Verifikasi
-                </Button>
-                <Button variant="danger" className="flex-1" onClick={() => rejectPayment(selectedPayment.id)}>
-                  <XCircle size={16} /> Tolak
-                </Button>
-              </div>
-            )}
+            <p className="text-[11px] text-[#7F89A0] mt-3">
+              Status pembayaran dan pesanan harus selalu konsisten.
+            </p>
           </div>
-        )}
-      </Modal>
 
-      <Toast {...toast} isOpen={toast.show} onClose={() => setToast({ ...toast, show: false })} />
-    </div>
+          <div className="text-center text-[11px] text-[#7F89A0]">
+            Data dan lampiran contoh • Bukan transaksi nyata
+          </div>
+        </div>
+      </div>
+    </WorkspaceLayout>
   );
 }

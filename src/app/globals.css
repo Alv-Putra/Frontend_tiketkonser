@@ -1,102 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
-   ConserId: "Midnight Stage" Design System
-   Dark concert-focused theme. Every semantic token below is the
-   single source of truth for colour across src/.
+   ConserId Design System (Figma: Konser)
+   Dark theme, crafted for concert & live music platform.
    ============================================================ */
 @theme {
+  --font-sans: var(--font-pt-sans, 'PT Sans'), 'PT Sans', system-ui, -apple-system, sans-serif;
+
   /* Surfaces */
-  --color-primary-bg: #0B0F19;      /* app background */
-  --color-secondary-bg: #111827;    /* card / modal / table surface */
-  --color-surface: #0F172A;         /* nested surface, input fill */
+  --color-primary-bg: #0B0D14;
+  --color-secondary-bg: #10121C;
+  --color-card-bg: #151824;
+  --color-surface: #1B1E2C;
+  --color-surface-hover: #232638;
 
-  /* Brand */
-  --color-primary-accent: #7C3AED;    /* violet: primary brand */
-  --color-primary-accent-hover: #6D28D9;
-  --color-secondary-accent: #EC4899;  /* pink / magenta */
-  --color-accent-cyan: #06B6D4;       /* cyan highlight */
+  /* Brand Colors */
+  --color-brand-primary: #7953E8;
+  --color-brand-primary-hover: #673EE0;
+  --color-brand-violet: #A78BFA;
+  --color-brand-violet-light: #DCD1FF;
+  --color-brand-violet-bg: #2A2240;
 
-  /* Text */
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
+  /* Text Colors */
+  --color-text-primary: #F4F5FA;
+  --color-text-secondary: #A7AEC3;
+  --color-text-tertiary: #7F89A0;
 
-  /* Lines */
-  --color-border: #1E293B;
+  /* Borders & Dividers */
+  --color-border: #1B1E2C;
+  --color-border-hover: #2A2E40;
 
-  /* Status */
-  --color-success: #10B981;
-  --color-success-bright: #34D399;
-  --color-warning: #F59E0B;
-  --color-warning-bright: #FBBF24;
-  --color-error: #EF4444;
-  --color-error-bright: #F87171;
-  --color-info: #06B6D4;
-
-  /* Typography */
-  --font-sans: 'Myriad Pro', var(--font-inter, 'Inter'), system-ui, sans-serif;
-  --font-heading: var(--font-montserrat, 'Montserrat'), 'Montserrat', system-ui, sans-serif;
-  --font-mono: var(--font-inter, 'Inter'), monospace;
-  --font-ln: var(--font-noto, 'Noto Sans'), 'Noto Sans', 'Segoe UI', sans-serif;
+  /* Status Colors */
+  --color-status-success: #8DE2BD;
+  --color-status-success-bg: #193029;
+  --color-status-warning: #F1C875;
+  --color-status-warning-bg: #332B1B;
+  --color-status-danger: #FFA4B8;
+  --color-status-danger-bg: #36202C;
 
   /* Radii */
-  --radius-small: 12px;
-  --radius-medium: 16px;
-  --radius-large: 18px;
-  --radius-xl: 24px;
-  --radius-full: 999px;
-
-  /* Legacy Live Nation palette, remapped onto Midnight Stage */
-  --color-ln-bg: #0B0F19;
-  --color-ln-surface: #111827;
-  --color-ln-primary: #7C3AED;
-  --color-ln-primary-dark: #6D28D9;
-  --color-ln-dark: #F8FAFC;
-  --color-ln-text: #F8FAFC;
-  --color-ln-muted: #94A3B8;
-  --color-ln-line: #1E293B;
-  --color-ln-accent: #EC4899;
-  --color-ln-sky: #06B6D4;
-  --color-ln-info: #06B6D4;
-  --color-ln-error: #F87171;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 }
 
 @layer base {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-  }
-
-  label {
-    font-family: var(--font-heading);
-  }
-
   html {
     scroll-behavior: smooth;
-    background-color: #0B0F19;
+    background-color: #0B0D14;
     color-scheme: dark;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #1E293B transparent;
+    scrollbar-color: #1B1E2C transparent;
   }
 
   body {
-    background-color: #0B0F19;
-    color: #F8FAFC;
-    font-family: var(--font-sans);
+    background-color: #0B0D14;
+    color: #F4F5FA;
+    font-family: var(--font-pt-sans, 'PT Sans'), 'PT Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
-  /* Keep native controls legible on the dark canvas */
   input,
   textarea,
   select {
@@ -104,204 +76,50 @@
   }
 
   select option {
-    background-color: #111827;
-    color: #F8FAFC;
+    background-color: #151824;
+    color: #F4F5FA;
   }
 
   ::placeholder {
-    color: #64748B;
+    color: #7F89A0;
   }
 }
 
 @layer utilities {
-  .text-gradient {
-    background: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .text-gradient-hero {
-    background: linear-gradient(135deg, #C4B5FD 0%, #EC4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .glow-gold {
-    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.25);
-  }
-
-  .bg-gradient-primary {
-    background-color: #7C3AED;
-  }
-
-  .bg-gradient-primary-modern {
-    background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);
-  }
-
-  .bg-gradient-hero {
-    background: linear-gradient(180deg, rgba(11, 15, 25, 0) 0%, rgba(11, 15, 25, 0.75) 55%, #0B0F19 100%);
-  }
-
-  .border-gradient-primary {
-    border: 2px solid transparent;
-    background: linear-gradient(#111827, #111827) padding-box,
-                linear-gradient(135deg, #7C3AED, #EC4899) border-box;
-  }
-
-  .shadow-glow {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
-  }
-
-  .shadow-glow-sm {
-    box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-
-  .animate-pulse-soft {
-    animation: pulse-soft 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
-@layer components {
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.15);
-  }
-
-  .btn-shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-shimmer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    transition: left 0.5s ease;
-  }
-
-  .btn-shimmer:hover::before {
-    left: 100%;
-  }
+/* ============================================================
+   Typography: PT Sans (Harmonious & Unified)
+   ============================================================ */
+.pt-sans-regular {
+  font-family: "PT Sans", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
-@layer components {
-  .ln-display {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 38px;
-    line-height: 40px;
-  }
-  .ln-h1 {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 28px;
-    line-height: 36px;
-  }
-  .ln-h2 {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 21px;
-    line-height: 28px;
-  }
-  .ln-h3 {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 19px;
-    line-height: 26px;
-  }
-  .ln-h4 {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .ln-h5 {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 20px;
-  }
-  .ln-body {
-    font-family: var(--font-ln);
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 25px;
-  }
-  .ln-body-small {
-    font-family: var(--font-ln);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-  }
+.pt-sans-bold {
+  font-family: "PT Sans", sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }
 
-@media (min-width: 768px) {
-  .ln-display {
-    font-size: 50px;
-    line-height: 56px;
-  }
-  .ln-h1 {
-    font-size: 38px;
-    line-height: 44px;
-  }
-  .ln-h2 {
-    font-size: 28px;
-    line-height: 36px;
-  }
-  .ln-h3 {
-    font-size: 21px;
-    line-height: 28px;
-  }
+.pt-sans-regular-italic {
+  font-family: "PT Sans", sans-serif;
+  font-weight: 400;
+  font-style: italic;
 }
 
-@keyframes ln-marquee {
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
+.pt-sans-bold-italic {
+  font-family: "PT Sans", sans-serif;
+  font-weight: 700;
+  font-style: italic;
 }
 
-.ln-marquee-track {
-  animation: ln-marquee 30s linear infinite;
-}
-
-.ln-marquee-track:hover {
-  animation-play-state: paused;
-}
-
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}

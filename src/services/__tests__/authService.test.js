@@ -4,6 +4,7 @@ import authService, {
   normalizeUser,
   decodeJwtPayload,
   mapRole,
+  createMockToken,
 } from '@/services/authService';
 import { StorageKeys, getItem, setItem } from '@/lib/storage';
 
@@ -83,6 +84,25 @@ describe('authService', () => {
       );
       const result = await authService.login('x@y.z', 'Password123');
       expect(result.user.name).toBe('');
+    });
+
+    it('falls back to mock user when backend fails and credentials match', async () => {
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      const result = await authService.login('admin@conserid.com', 'Admin123');
+      expect(result.user.email).toBe('admin@conserid.com');
+      expect(result.user.role).toBe('admin');
+      expect(result.token).toContain('mock.');
+      expect(getItem(StorageKeys.AUTH_USER).role).toBe('admin');
+    });
+
+    it('re-throws error when backend fails and credentials do not match mock user', async () => {
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      await expect(authService.login('wrong@conserid.com', 'Admin123')).rejects.toThrow('Backend offline');
+    });
+
+    it('handles falsy email when backend fails', async () => {
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      await expect(authService.login(null, 'Admin123')).rejects.toThrow('Backend offline');
     });
   });
 
@@ -182,6 +202,18 @@ describe('authService', () => {
       expect(user.role).toBe('customer');
       expect(getItem(StorageKeys.AUTH_USER).name).toBe('M');
     });
+
+    it('returns stored user when backend fails and user exists', async () => {
+      setItem(StorageKeys.AUTH_USER, { id: 'u1', name: 'Admin', role: 'admin' });
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      const user = await authService.fetchProfile();
+      expect(user.role).toBe('admin');
+    });
+
+    it('throws when backend fails and no user exists in storage', async () => {
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      await expect(authService.fetchProfile()).rejects.toThrow('Backend offline');
+    });
   });
 
   describe('updateProfile', () => {
@@ -274,6 +306,13 @@ describe('authService', () => {
       await expect(authService.getAllUsers()).resolves.toEqual([{ id: '1', email: 'a@b.c' }]);
     });
 
+    it('falls back to mockUsers when getAllUsers fails', async () => {
+      fetchMock.mockRejectedValue(new Error('Backend offline'));
+      const users = await authService.getAllUsers();
+      expect(users.length).toBeGreaterThan(0);
+      expect(users[0].role).toBe('admin');
+    });
+
     it('getUserById targets the given id', async () => {
       fetchMock.mockResolvedValue(jsonResponse({ body: { success: true, data: { id: '3' } } }));
       await authService.getUserById(3);
@@ -340,6 +379,11 @@ describe('authService', () => {
     it('mapRole maps buyer and passes other roles through', () => {
       expect(mapRole('buyer')).toBe('customer');
       expect(mapRole('admin')).toBe('admin');
+    });
+
+    it('createMockToken returns a formatted token', () => {
+      const token = createMockToken({ email: 'a@b.c', role: 'admin' });
+      expect(token).toMatch(/^mock\..+\.signature$/);
     });
   });
 });

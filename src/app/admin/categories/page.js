@@ -1,148 +1,287 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Modal from '@/components/ui/Modal';
-import Input from '@/components/ui/Input';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import Toast from '@/components/ui/Toast';
-import EmptyState from '@/components/ui/EmptyState';
-import Pagination from '@/components/admin/Pagination';
+import { Plus, Search, Tag } from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import StatCard from '@/components/workspace/StatCard';
+import StatusBadge from '@/components/workspace/StatusBadge';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-const initialCategories = [
-  { id: 1, name: 'VIP', event: 'Java Jazz 2026', price: 1500000, quota: 200, sold: 150 },
-  { id: 2, name: 'Kategori 1', event: 'Java Jazz 2026', price: 850000, quota: 500, sold: 400 },
-  { id: 3, name: 'Kategori 2', event: 'Java Jazz 2026', price: 500000, quota: 1000, sold: 600 },
-  { id: 4, name: 'Festival', event: 'Java Jazz 2026', price: 350000, quota: 2000, sold: 1200 },
-  { id: 5, name: 'VIP', event: 'Coldplay Tour', price: 3500000, quota: 500, sold: 500 },
-  { id: 6, name: 'Reguler', event: 'Coldplay Tour', price: 850000, quota: 4500, sold: 4500 },
-];
+export default function AdminCategoriesPage() {
+  const concerts = useMonitoringStore((state) => state.concerts);
+  const addCategory = useMonitoringStore((state) => state.addCategory);
 
-export default function CategoryManagement() {
-  const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-  const [form, setForm] = useState({ name: '', event: '', price: '', quota: '', sold: '0' });
+  const [concertFilter, setConcertFilter] = useState('Semua');
+  const [availabilityFilter, setAvailabilityFilter] = useState('Semua');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedConcertId, setSelectedConcertId] = useState('c1');
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryPrice, setCategoryPrice] = useState('500000');
+  const [categoryQuota, setCategoryQuota] = useState('500');
 
-  const PAGE_SIZE = 10;
+  const allCategories = [];
+  concerts.forEach((c) => {
+    (c.categories || []).forEach((cat) => {
+      allCategories.push({
+        ...cat,
+        concertId: c.id,
+        concertName: c.name
+      });
+    });
+  });
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.event.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredCategories = allCategories.filter((cat) => {
+    const matchSearch =
+      !search ||
+      cat.name.toLowerCase().includes(search.toLowerCase()) ||
+      cat.concertName.toLowerCase().includes(search.toLowerCase());
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+    const matchConcert = concertFilter === 'Semua' || cat.concertName === concertFilter;
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm({ name: '', event: '', price: '', quota: '', sold: '0' });
-    setModalOpen(true);
-  };
+    const matchAvail =
+      availabilityFilter === 'Semua' ||
+      (availabilityFilter === 'Tersedia' && cat.remaining > 0) ||
+      (availabilityFilter === 'Habis' && cat.remaining <= 0);
 
-  const openEdit = (cat) => {
-    setEditing(cat);
-    setForm({ name: cat.name, event: cat.event, price: String(cat.price), quota: String(cat.quota), sold: String(cat.sold) });
-    setModalOpen(true);
-  };
+    return matchSearch && matchConcert && matchAvail;
+  });
 
-  const handleSave = () => {
-    if (editing) {
-      setCategories(categories.map((c) => c.id === editing.id ? { ...c, ...form, price: Number(form.price), quota: Number(form.quota), sold: Number(form.sold) } : c));
-      setToast({ show: true, message: 'Kategori berhasil diperbarui', type: 'success' });
-    } else {
-      setCategories([{ ...form, id: Date.now(), price: Number(form.price), quota: Number(form.quota), sold: Number(form.sold) }, ...categories]);
-      setToast({ show: true, message: 'Kategori berhasil ditambahkan', type: 'success' });
-    }
-    setModalOpen(false);
-  };
+  const totalQuota = allCategories.reduce((acc, cat) => acc + (cat.quota || 0), 0);
+  const totalSold = allCategories.reduce((acc, cat) => acc + (cat.sold || 0), 0);
+  const totalRemaining = Math.max(0, totalQuota - totalSold);
+  const soldPct = totalQuota > 0 ? ((totalSold / totalQuota) * 100).toFixed(1) : '0';
+  const availableCount = allCategories.filter((cat) => cat.remaining > 0).length;
 
-  const handleDelete = () => {
-    setCategories(categories.filter((c) => c.id !== editing.id));
-    setDeleteDialog(false);
-    setToast({ show: true, message: 'Kategori berhasil dihapus', type: 'error' });
+  const handleCreateCategory = (e) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return;
+    addCategory(selectedConcertId, {
+      name: categoryName,
+      price: parseInt(categoryPrice, 10) || 500000,
+      quota: parseInt(categoryQuota, 10) || 500,
+      remaining: parseInt(categoryQuota, 10) || 500,
+      sold: 0,
+      status: 'Tersedia'
+    });
+    setCategoryName('');
+    setIsModalOpen(false);
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <WorkspaceLayout title="Kategori Tiket">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Kategori Tiket</h1>
-          <p className="text-text-muted text-sm mt-1">Kelola kelas tiket untuk setiap event</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Kategori tiket</h1>
+          <p className="text-xs text-[#A7AEC3]">
+            Atur kelas, harga, dan alokasi tiket untuk setiap konser.
+          </p>
         </div>
-        <Button onClick={openCreate}><Plus size={16} /> Tambah Kategori</Button>
+
+        <button
+          onClick={() => setIsModalOpen(true)}
+          type="button"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Tambah kategori</span>
+        </button>
       </div>
 
-      <div className="bg-secondary-bg border border-border rounded-[18px] p-6">
-        <div className="relative mb-4">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" placeholder="Cari kategori..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full max-w-xs bg-surface border border-border rounded-[12px] pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary-accent/50 transition-colors" />
-        </div>
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Kategori tiket" value={allCategories.length.toString()} subtext="Dari seluruh konser aktif" />
+        <StatCard label="Total kuota" value={totalQuota.toLocaleString('id-ID')} subtext="Semua kelas tiket" />
+        <StatCard label="Tiket terjual" value={totalSold.toLocaleString('id-ID')} subtext={`${soldPct}% dari kuota`} />
+        <StatCard label="Tiket tersedia" value={totalRemaining.toLocaleString('id-ID')} subtext={`${availableCount} kategori tersedia`} />
+      </div>
 
-        {filtered.length === 0 ? (
-          <EmptyState title="Tidak ada kategori" description="Coba pencarian lain atau buat kategori baru." actionLabel="Tambah Kategori" onAction={openCreate} />
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    {['Kelas', 'Event', 'Harga', 'Kuota', 'Terjual', 'Tersedia', 'Aksi'].map((h) => (
-                      <th key={h} className="font-heading text-left text-xs text-text-muted uppercase tracking-wider font-medium px-4 py-3">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paged.map((cat) => (
-                  <tr key={cat.id} className="border-b border-border/50 hover:bg-surface/30 transition-colors">
-                    <td className="px-4 py-3 text-sm text-text-primary font-medium">{cat.name}</td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{cat.event}</td>
-                    <td className="px-4 py-3 text-sm text-text-primary">Rp{cat.price.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-3 text-sm text-text-primary">{cat.quota.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-3 text-sm text-text-primary">{cat.sold.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-sm font-medium ${cat.quota - cat.sold > 0 ? 'text-success' : 'text-error'}`}>
-                        {cat.quota - cat.sold > 0 ? (cat.quota - cat.sold).toLocaleString('id-ID') : 'Habis'}
-                      </span>
+      {/* Main Grid: Categories Table & Rangkuman Kelas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Table Column */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-[#F4F5FA]">Kelas dan alokasi tiket</h2>
+              <p className="text-xs text-[#7F89A0]">Daftar tiket berdasarkan konser</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={concertFilter}
+                onChange={(e) => setConcertFilter(e.target.value)}
+                className="bg-[#1B1E2C] border border-[#2A2E40] rounded-lg px-2.5 py-1.5 text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+              >
+                <option value="Semua">Semua konser</option>
+                {concerts.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+
+              <select
+                value={availabilityFilter}
+                onChange={(e) => setAvailabilityFilter(e.target.value)}
+                className="bg-[#1B1E2C] border border-[#2A2E40] rounded-lg px-2.5 py-1.5 text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+              >
+                <option value="Semua">Semua ketersediaan</option>
+                <option value="Tersedia">Tersedia</option>
+                <option value="Habis">Habis</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-[#7F89A0] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari kelas tiket atau nama konser..."
+              className="w-full bg-[#10121C] border border-[#1B1E2C] rounded-xl pl-9 pr-4 py-2 text-xs text-[#F4F5FA] placeholder-[#7F89A0] focus:outline-none focus:border-[#7953E8]"
+            />
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-[#1B1E2C] text-[#7F89A0] text-[10px] uppercase font-semibold">
+                  <th className="pb-2.5">Kelas Tiket</th>
+                  <th className="pb-2.5">Konser</th>
+                  <th className="pb-2.5">Harga</th>
+                  <th className="pb-2.5">Terjual / Kuota</th>
+                  <th className="pb-2.5">Sisa</th>
+                  <th className="pb-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1B1E2C]">
+                {filteredCategories.map((cat, idx) => (
+                  <tr key={idx} className="hover:bg-[#1B1E2C]/50 transition-colors">
+                    <td className="py-3 font-semibold text-[#F4F5FA]">{cat.name}</td>
+                    <td className="py-3 text-[#A7AEC3] max-w-[180px] truncate">{cat.concertName}</td>
+                    <td className="py-3 text-[#F4F5FA] font-medium">Rp{cat.price.toLocaleString('id-ID')}</td>
+                    <td className="py-3 text-[#A7AEC3]">
+                      {cat.sold} / {cat.quota}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => openEdit(cat)} className="p-1.5 rounded-[12px] hover:bg-surface text-text-muted hover:text-secondary-accent transition-colors cursor-pointer"><Edit2 size={15} /></button>
-                        <button onClick={() => { setEditing(cat); setDeleteDialog(true); }} className="p-1.5 rounded-[12px] hover:bg-surface text-text-muted hover:text-error transition-colors cursor-pointer"><Trash2 size={15} /></button>
-                      </div>
+                    <td className="py-3 font-medium text-[#F4F5FA]">{cat.remaining} tersisa</td>
+                    <td className="py-3">
+                      <StatusBadge status={cat.remaining > 0 ? 'Tersedia' : 'Habis'} />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
-          </>
-        )}
-      </div>
+        </div>
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Kategori' : 'Tambah Kategori'}>
-        <div className="space-y-4">
-          <Input label="Nama Kelas" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="mis. VIP, Festival, Reguler" />
-          <Input label="Event" value={form.event} onChange={(e) => setForm({ ...form, event: e.target.value })} />
-          <Input label="Harga" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-          <Input label="Kuota" type="number" value={form.quota} onChange={(e) => setForm({ ...form, quota: e.target.value })} />
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Batal</Button>
-            <Button onClick={handleSave}>{editing ? 'Perbarui' : 'Buat'}</Button>
+        {/* Side Summary */}
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C]">
+            <h2 className="text-xs font-semibold text-[#A7AEC3] uppercase tracking-wider mb-2">
+              Rangkuman kelas tiket
+            </h2>
+            <p className="text-xs text-[#F4F5FA] font-medium mb-1">
+              Alokasi tiket yang jelas, penjualan lebih terkontrol.
+            </p>
+            <p className="text-xs text-[#7F89A0] mb-4">
+              Setiap kategori terhubung ke satu konser, dengan harga dan kuota tersendiri.
+            </p>
+
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="text-xs font-semibold text-[#A78BFA]">VIP</div>
+                <div className="text-xs text-[#A7AEC3] mt-0.5">Akses premium, baris terdepan dan lounge</div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="text-xs font-semibold text-[#F4F5FA]">Kategori 1 & 2</div>
+                <div className="text-xs text-[#A7AEC3] mt-0.5">Area bernomor dengan sudut pandang panggung utama</div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="text-xs font-semibold text-[#8DE2BD]">Festival / Reguler</div>
+                <div className="text-xs text-[#A7AEC3] mt-0.5">Area umum berdiri di depan panggung utama</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-[11px] text-[#7F89A0]">
+            Data contoh • Kuota tersedia = kuota total − tiket terjual
           </div>
         </div>
-      </Modal>
+      </div>
 
-      <ConfirmDialog isOpen={deleteDialog} onClose={() => setDeleteDialog(false)} onConfirm={handleDelete} message={`Apakah Anda yakin ingin menghapus kelas "${editing?.name}"?`} />
-      <Toast {...toast} isOpen={toast.show} onClose={() => setToast({ ...toast, show: false })} />
-    </div>
+      {/* Add Category Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-[#151824] border border-[#1B1E2C] shadow-2xl p-6">
+            <h2 className="text-base font-bold text-[#F4F5FA] mb-1">Tambah kategori tiket</h2>
+            <p className="text-xs text-[#A7AEC3] mb-4">
+              Tentukan kelas tiket, harga, dan alokasi kuota.
+            </p>
+            <form onSubmit={handleCreateCategory} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#A7AEC3] mb-1">Pilih Konser</label>
+                <select
+                  value={selectedConcertId}
+                  onChange={(e) => setSelectedConcertId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-[#10121C] border border-[#1B1E2C] text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+                >
+                  {concerts.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#A7AEC3] mb-1">Nama Kategori</label>
+                <input
+                  type="text"
+                  required
+                  value={categoryName}
+                  onChange={(e) => setCategoryName(e.target.value)}
+                  placeholder="Contoh: Super VIP"
+                  className="w-full px-3 py-2 rounded-lg bg-[#10121C] border border-[#1B1E2C] text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#A7AEC3] mb-1">Harga (Rp)</label>
+                <input
+                  type="number"
+                  value={categoryPrice}
+                  onChange={(e) => setCategoryPrice(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-[#10121C] border border-[#1B1E2C] text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#A7AEC3] mb-1">Kuota Tiket</label>
+                <input
+                  type="number"
+                  value={categoryQuota}
+                  onChange={(e) => setCategoryQuota(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-[#10121C] border border-[#1B1E2C] text-xs text-[#F4F5FA] focus:outline-none focus:border-[#7953E8]"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#A7AEC3] hover:text-[#F4F5FA]"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white"
+                >
+                  Simpan Kategori
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </WorkspaceLayout>
   );
 }

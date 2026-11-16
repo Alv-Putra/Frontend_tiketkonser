@@ -1,249 +1,160 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, Eye, Clock, Music } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Skeleton from '@/components/ui/Skeleton';
-import EmptyState from '@/components/ui/EmptyState';
-import Toast from '@/components/ui/Toast';
-import Modal from '@/components/ui/Modal';
-import festivalService from '@/services/festivalService';
-import { FESTIVAL_STATUS } from '@/lib/constants';
-import { formatDate, formatCurrency } from '@/lib/formatters';
+import { useState } from 'react';
+import { RotateCw, CheckCircle2, ShieldCheck, ArrowRight, FileText } from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-const statusConfig = {
-  [FESTIVAL_STATUS.PENDING_APPROVAL]: { label: 'Menunggu Persetujuan', variant: 'warning' },
-  [FESTIVAL_STATUS.PUBLISHED]: { label: 'Dipublikasikan', variant: 'success' },
-  [FESTIVAL_STATUS.REJECTED]: { label: 'Ditolak', variant: 'error' },
-  [FESTIVAL_STATUS.DRAFT]: { label: 'Draft', variant: 'default' },
-};
+export default function AdminApprovalsPage() {
+  const concerts = useMonitoringStore((state) => state.concerts);
+  const approvals = useMonitoringStore((state) => state.approvals);
+  const refreshMetrics = useMonitoringStore((state) => state.refreshMetrics);
 
-function ApprovalsContent() {
-  const [festivals, setFestivals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState(FESTIVAL_STATUS.PENDING_APPROVAL);
-  const [selected, setSelected] = useState(null);
-  const [processing, setProcessing] = useState(false);
-  const [toast, setToast] = useState({ isOpen: false, type: 'success', message: '' });
+  const [activeTab, setActiveTab] = useState('Menunggu');
 
-  useEffect(() => {
-    const load = async () => {
-      const result = await festivalService.getCreatedFestivals();
-      setFestivals(result);
-      setLoading(false);
-    };
-    load();
-  }, [selected]);
+  const publishedCount = concerts.filter((c) => c.salesOpen).length;
 
-  const filtered = festivals.filter((f) => activeFilter === 'all' || f.status === activeFilter);
-
-  const handleApprove = async () => {
-    if (!selected) return;
-    setProcessing(true);
-    await festivalService.approveFestival(selected.id);
-    setProcessing(false);
-    setSelected(null);
-    setToast({ isOpen: true, type: 'success', message: 'Festival berhasil dipublikasikan.' });
-    const result = await festivalService.getCreatedFestivals();
-    setFestivals(result);
+  const handleRefresh = () => {
+    refreshMetrics();
+    alert('Antrean pengajuan festival telah diperbarui.');
   };
-
-  const handleReject = async () => {
-    if (!selected) return;
-    setProcessing(true);
-    await festivalService.rejectFestival(selected.id);
-    setProcessing(false);
-    setSelected(null);
-    setToast({ isOpen: true, type: 'warning', message: 'Festival ditolak.' });
-    const result = await festivalService.getCreatedFestivals();
-    setFestivals(result);
-  };
-
-  if (loading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-56 mb-8" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20" />)}
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-2xl md:text-3xl font-black">Persetujuan Festival</h1>
-        <p className="text-text-muted text-sm mt-1">
-          Tinjau festival yang diajukan oleh organizer sebelum dipublikasikan.
-        </p>
-      </motion.div>
+    <WorkspaceLayout title="Persetujuan Festival">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Persetujuan festival</h1>
+          <p className="text-xs text-[#A7AEC3]">
+            Tinjau pengajuan organizer sebelum konser ditampilkan ke publik.
+          </p>
+        </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {[
-          { value: FESTIVAL_STATUS.PENDING_APPROVAL, label: 'Menunggu' },
-          { value: FESTIVAL_STATUS.PUBLISHED, label: 'Dipublikasikan' },
-          { value: FESTIVAL_STATUS.REJECTED, label: 'Ditolak' },
-          { value: 'all', label: 'Semua' },
-        ].map((filter) => (
-          <button
-            key={filter.value}
-            onClick={() => setActiveFilter(filter.value)}
-            className={`px-4 py-2 rounded-full text-sm transition-all cursor-pointer ${
-              activeFilter === filter.value
-                ? 'bg-gradient-primary text-primary-bg font-semibold'
-                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
+        <button
+          onClick={handleRefresh}
+          type="button"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#151824] hover:bg-[#1B1E2C] border border-[#1B1E2C] text-[#F4F5FA] text-xs font-semibold transition-all self-start md:self-auto"
+        >
+          <RotateCw className="w-3.5 h-3.5 text-[#A78BFA]" />
+          <span>Muat ulang</span>
+        </button>
       </div>
 
-      {filtered.length === 0 ? (
-        <EmptyState
-          icon={Music}
-          title="Tidak ada festival"
-          description="Belum ada festival dalam kategori ini."
-        />
-      ) : (
-        <div className="space-y-4">
-          {filtered.map((festival) => {
-            const config = statusConfig[festival.status] || statusConfig[FESTIVAL_STATUS.DRAFT];
-            const sold = (festival.ticketTypes || []).reduce((s, t) => s + t.sold, 0);
-            return (
-              <motion.div
-                key={festival.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-secondary-bg border border-border rounded-[24px] p-5"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-[12px] bg-cover bg-center shrink-0"
-                    style={{ backgroundImage: `url(${festival.image})` }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-text-primary truncate">{festival.title}</h3>
-                    <p className="text-xs text-text-muted">
-                      {festival.artist} • {formatDate(festival.date)} • {festival.city}
-                    </p>
-                    <div className="mt-2">
-                      <Badge variant={config.variant}>
-                        {festival.status === FESTIVAL_STATUS.PENDING_APPROVAL && <Clock size={12} />}
-                        {config.label}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="hidden md:block text-right">
-                    <p className="text-xs text-text-muted">Mulai dari</p>
-                    <p className="font-bold text-gradient">{formatCurrency(festival.priceStart)}</p>
-                    <p className="text-xs text-text-muted mt-1">{sold} tiket terjual</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setSelected(festival)}>
-                    <Eye size={14} />
-                    Tinjau
-                  </Button>
-                </div>
-              </motion.div>
-            );
-          })}
+      {/* Status Queue Banner */}
+      <div className="p-4 rounded-xl bg-[#151824] border border-[#193029] flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-[#193029] text-[#8DE2BD] flex items-center justify-center shrink-0">
+          <CheckCircle2 className="w-4 h-4" />
         </div>
-      )}
+        <div>
+          <div className="text-xs font-semibold text-[#8DE2BD]">Semua beres. Tidak ada pengajuan tertunda.</div>
+          <div className="text-xs text-[#A7AEC3]">Pengajuan baru dari organizer akan muncul di halaman ini.</div>
+        </div>
+      </div>
 
-      <Modal
-        isOpen={Boolean(selected)}
-        onClose={() => setSelected(null)}
-        title={selected ? selected.title : ''}
-        size="lg"
-      >
-        {selected && (
+      {/* Main Content & Review Guide */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Approvals Queue */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] flex flex-col justify-between">
           <div>
-            <div className="h-48 rounded-[18px] bg-cover bg-center mb-6"
-              style={{ backgroundImage: `url(${selected.image})` }}
-            />
-            <div className="space-y-3 text-sm mb-6">
-              <div className="flex justify-between">
-                <span className="text-text-muted">Artis / Headliner</span>
-                <span className="text-text-primary font-medium">{selected.artist}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Genre</span>
-                <span className="text-text-primary font-medium">{selected.genre}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Tanggal</span>
-                <span className="text-text-primary font-medium">{formatDate(selected.date)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Venue</span>
-                <span className="text-text-primary font-medium">{selected.venue}, {selected.city}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Organizer</span>
-                <span className="text-text-primary font-medium">{selected.organizer?.name || '-'}</span>
-              </div>
-            </div>
-
-            <h4 className="font-semibold text-text-primary mb-3">Jenis Tiket</h4>
-            <div className="bg-surface rounded-[18px] border border-border p-4 space-y-2 mb-6">
-              {selected.ticketTypes.map((t) => (
-                <div key={t.id} className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t.name}</span>
-                  <span className="text-text-primary font-medium">
-                    {formatCurrency(t.price)} • {t.sold}/{t.quota}
-                  </span>
-                </div>
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#10121C] border border-[#1B1E2C] mb-6 self-start inline-flex">
+              {[
+                { label: 'Menunggu', count: approvals.length },
+                { label: 'Dipublikasikan', count: publishedCount },
+                { label: 'Ditolak', count: 0 },
+                { label: 'Semua', count: publishedCount }
+              ].map((tab) => (
+                <button
+                  key={tab.label}
+                  onClick={() => setActiveTab(tab.label)}
+                  type="button"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    activeTab === tab.label
+                      ? 'bg-[#2A2240] text-[#A78BFA] font-semibold'
+                      : 'text-[#A7AEC3] hover:text-[#F4F5FA]'
+                  }`}
+                >
+                  {tab.label} <span className="opacity-70 ml-0.5">{tab.count}</span>
+                </button>
               ))}
             </div>
 
-            <p className="text-text-muted text-sm leading-relaxed mb-6">{selected.description}</p>
-
-            {selected.status === FESTIVAL_STATUS.PENDING_APPROVAL ? (
-              <div className="flex gap-3">
-                <Button
-                  variant="success"
-                  className="flex-1"
-                  onClick={handleApprove}
-                  disabled={processing}
-                >
-                  <CheckCircle2 size={16} />
-                  Setujui & Publikasikan
-                </Button>
-                <Button
-                  variant="danger"
-                  className="flex-1"
-                  onClick={handleReject}
-                  disabled={processing}
-                >
-                  <XCircle size={16} />
-                  Tolak
-                </Button>
+            {/* Empty State Card matching Figma */}
+            <div className="py-12 px-4 text-center rounded-xl bg-[#10121C] border border-[#1B1E2C]">
+              <div className="w-12 h-12 rounded-2xl bg-[#151824] text-[#A78BFA] border border-[#2A2E40] flex items-center justify-center mx-auto mb-3">
+                <FileText className="w-6 h-6" />
               </div>
-            ) : (
-              <Badge variant={statusConfig[selected.status]?.variant}>
-                {statusConfig[selected.status]?.label}
-              </Badge>
-            )}
+              <h3 className="text-sm font-bold text-[#F4F5FA] mb-1">Belum ada festival yang perlu ditinjau</h3>
+              <p className="text-xs text-[#A7AEC3] max-w-md mx-auto leading-relaxed mb-4">
+                Saat organizer mengirim pengajuan baru, kamu bisa memeriksa detail dan memberikan persetujuan di sini.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('Dipublikasikan')}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#A78BFA] hover:text-[#DCD1FF]"
+              >
+                <span>Lihat seluruh pengajuan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        )}
-      </Modal>
 
-      <Toast
-        isOpen={toast.isOpen}
-        type={toast.type}
-        message={toast.message}
-        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
-      />
-    </div>
+          <div className="pt-4 text-center text-[11px] text-[#7F89A0]">
+            Keadaan kosong mengikuti referensi • Belum ada pengajuan menunggu
+          </div>
+        </div>
+
+        {/* Review Guide Side Card */}
+        <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+          <div>
+            <h2 className="text-xs font-semibold text-[#A7AEC3] uppercase tracking-wider mb-1">
+              Sebelum menyetujui
+            </h2>
+            <p className="text-xs text-[#F4F5FA] font-semibold mb-3">
+              Pastikan informasi berikut sudah lengkap.
+            </p>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="font-bold text-[#A78BFA] mb-0.5">01 Informasi konser</div>
+                <div className="text-[#A7AEC3]">Judul, deskripsi, dan poster jelas.</div>
+              </div>
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="font-bold text-[#A78BFA] mb-0.5">02 Jadwal & lokasi</div>
+                <div className="text-[#A7AEC3]">Tanggal dan tempat sesuai.</div>
+              </div>
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+                <div className="font-bold text-[#A78BFA] mb-0.5">03 Artis & penampil</div>
+                <div className="text-[#A7AEC3]">Lineup dan kesiapan jadwal terkonfirmasi.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Transparent Submission Flow 3 Phases */}
+      <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C]">
+        <h2 className="text-sm font-semibold text-[#F4F5FA] mb-4">Alur pengajuan yang transparan</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+            <div className="text-xs font-bold text-[#A78BFA] mb-1">1. Diajukan organizer</div>
+            <p className="text-xs text-[#A7AEC3] leading-relaxed">
+              Organizer melengkapi detail konser dan mengirimkannya untuk ditinjau.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+            <div className="text-xs font-bold text-[#A78BFA] mb-1">2. Ditinjau admin</div>
+            <p className="text-xs text-[#A7AEC3] leading-relaxed">
+              Admin memeriksa kelengkapan data dan kesesuaian informasi konser.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#1B1E2C] border border-[#2A2E40]">
+            <div className="text-xs font-bold text-[#8DE2BD] mb-1">3. Keputusan diberikan</div>
+            <p className="text-xs text-[#A7AEC3] leading-relaxed">
+              Konser disetujui untuk dipublikasikan atau dikembalikan dengan alasan.
+            </p>
+          </div>
+        </div>
+      </div>
+    </WorkspaceLayout>
   );
-}
-
-export default function ApprovalsPage() {
-  return <ApprovalsContent />;
 }

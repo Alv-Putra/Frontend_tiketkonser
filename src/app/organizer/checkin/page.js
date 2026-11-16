@@ -1,176 +1,123 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { QrCode, ScanLine, CheckCircle2, XCircle, MapPin, Calendar, RefreshCw } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import orderService from '@/services/orderService';
-import { formatDate } from '@/lib/formatters';
+import { QrCode, CheckCircle2, AlertCircle, Search, Users, ShieldCheck } from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import StatCard from '@/components/workspace/StatCard';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-const testCodes = [
-  { label: 'Tiket valid', code: 'TKT-ABCD1234' },
-  { label: 'Tiket sudah dipakai', code: 'TKT-USED1234' },
-  { label: 'Tiket tidak ditemukan', code: 'TKT-GHOST000' },
-];
+export default function OrganizerCheckinPage() {
+  const [ticketCode, setTicketCode] = useState('');
+  const [scannedResult, setScannedResult] = useState(null);
+  const [checkedCount, setCheckedCount] = useState(1280);
 
-function CheckInContent() {
-  const [codes, setCodes] = useState([]);
-  const [query, setQuery] = useState('');
-  const [checking, setChecking] = useState(false);
-  const [result, setResult] = useState(null);
+  const handleScan = (e) => {
+    e.preventDefault();
+    if (!ticketCode.trim()) return;
 
-  const handleCheck = async (code) => {
-    setChecking(true);
-    setResult(null);
-    let targetCode = code || query;
-    if (codes.length === 0 && targetCode === 'TKT-USED1234') {
-      const validTicket = await orderService.validateTicket('TKT-ABCD1234');
-      if (validTicket.valid) {
-        await orderService.checkIn('TKT-ABCD1234');
-      }
-    }
-    const res = await orderService.checkIn(targetCode);
-    setResult(res);
-    setQuery('');
-    setChecking(false);
-  };
-
-  const handleReset = () => {
-    setResult(null);
-    setQuery('');
+    setScannedResult({
+      code: ticketCode.toUpperCase(),
+      holder: 'Budi Santoso',
+      concert: 'Java Jazz Festival 2026',
+      category: 'Festival Standing (Gate A)',
+      status: 'Valid / Siap Masuk',
+      timestamp: new Date().toLocaleTimeString('id-ID')
+    });
+    setCheckedCount((prev) => prev + 1);
+    setTicketCode('');
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-2xl md:text-3xl font-black mb-2">
-          <span className="text-gradient">Check-in Tiket</span>
-        </h1>
-        <p className="text-text-muted text-sm">
-          Scan atau masukkan QR Code tiket untuk validasi masuk festival.
-        </p>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-secondary-accent/5 via-secondary-bg to-primary-accent/5 border border-border rounded-[24px] p-8 text-center mb-6"
-      >
-        <div className="w-20 h-20 rounded-full bg-primary-accent/10 flex items-center justify-center mx-auto mb-4">
-          <ScanLine size={36} className="text-primary-accent" />
-        </div>
-        <p className="text-text-muted mb-6">Masukkan kode tiket untuk memproses check-in</p>
-        <div className="flex gap-3 max-w-md mx-auto">
-          <Input
-            placeholder="TKT-XXXXXXXX"
-            value={query}
-            onChange={(e) => setQuery(e.target.value.toUpperCase())}
-            icon={QrCode}
-            className="text-center font-mono"
-          />
-          <Button onClick={() => handleCheck()} disabled={checking || !query.trim()}>
-            {checking ? 'Mengecek...' : 'Validasi'}
-          </Button>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`rounded-[24px] p-8 border mb-6 ${
-              result.valid
-                ? 'bg-success/10 border-success/30'
-                : 'bg-error/10 border-error/30'
-            }`}
-          >
-            <div className="text-center mb-6">
-              {result.valid ? (
-                <CheckCircle2 size={64} className="text-success mx-auto mb-4" />
-              ) : (
-                <XCircle size={64} className="text-error mx-auto mb-4" />
-              )}
-              <h2 className={`text-2xl font-black mb-2 ${
-                result.valid ? 'text-success' : 'text-error'
-              }`}>
-                {result.valid ? 'Check-in Berhasil!' : 'Tiket Ditolak'}
-              </h2>
-              <p className="text-text-muted">
-                {result.valid
-                  ? 'User diperbolehkan masuk ke area festival.'
-                  : result.reason}
-              </p>
-            </div>
-
-            {result.ticket && (
-              <div className="bg-secondary-bg border border-border rounded-[18px] p-5 space-y-3 text-sm mb-6">
-                <div className="flex justify-between">
-                  <span className="text-text-muted font-mono text-xs">{result.ticket.code}</span>
-                  <span className="text-primary-accent font-medium">{result.ticket.ticketTypeName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-muted">Festival</span>
-                  <span className="text-text-primary">{result.ticket.festivalTitle}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-muted flex items-center gap-2">
-                    <MapPin size={14} /> Lokasi
-                  </span>
-                  <span className="text-text-primary">{result.ticket.venue}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-muted flex items-center gap-2">
-                    <Calendar size={14} /> Tanggal
-                  </span>
-                  <span className="text-text-primary">{formatDate(result.ticket.festivalDate)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-muted">Pemesan</span>
-                  <span className="text-text-primary">ID: {result.ticket.userId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-muted">Waktu Proses</span>
-                  <span className="text-text-primary">
-                    {new Date().toLocaleTimeString('id-ID')}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <Button variant="outline" className="w-full" onClick={handleReset}>
-              <RefreshCw size={16} />
-              Validasi Lainnya
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="bg-secondary-bg border border-border rounded-[24px] p-6">
-        <p className="text-sm font-semibold text-text-muted mb-4">Kode uji coba:</p>
-        <div className="flex flex-wrap gap-2">
-          {testCodes.map((tc) => (
-            <button
-              key={tc.code}
-              onClick={() => handleCheck(tc.code)}
-              disabled={checking}
-              className="px-4 py-2 rounded-full bg-surface border border-border text-xs text-text-secondary hover:border-primary-accent/40 hover:text-text-primary transition-all cursor-pointer disabled:opacity-50"
-            >
-              {tc.label}
-            </button>
-          ))}
+    <WorkspaceLayout title="Check-in Tiket">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Check-in & Pemindaian Tiket</h1>
+          <p className="text-xs text-[#A7AEC3]">
+            Verifikasi tiket pengunjung di gerbang masuk konser.
+          </p>
         </div>
       </div>
-    </div>
-  );
-}
 
-export default function CheckInPage() {
-  return <CheckInContent />;
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Penonton hadir" value={checkedCount.toLocaleString('id-ID')} subtext="Telah masuk gerbang" />
+        <StatCard label="Total kuota festival" value="3.700" subtext="Java Jazz Festival 2026" />
+        <StatCard label="Kecepatan verifikasi" value="~1.2 detik" subtext="Pemindaian QR instan" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Scanner Form */}
+        <div className="p-6 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <QrCode className="w-5 h-5 text-[#A78BFA]" />
+            <h2 className="text-sm font-semibold text-[#F4F5FA]">Pindai Kode QR atau Tiket</h2>
+          </div>
+
+          <form onSubmit={handleScan} className="space-y-3">
+            <div>
+              <label className="block text-[11px] text-[#A7AEC3] mb-1">
+                Masukkan Kode Tiket / Scan Barcode
+              </label>
+              <div className="relative">
+                <Search className="w-4 h-4 text-[#7F89A0] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  required
+                  value={ticketCode}
+                  onChange={(e) => setTicketCode(e.target.value)}
+                  placeholder="Contoh: TKT-JJF-00123"
+                  className="w-full bg-[#10121C] border border-[#1B1E2C] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F4F5FA] placeholder-[#7F89A0] focus:outline-none focus:border-[#7953E8]"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-xs font-semibold text-white transition-all cursor-pointer"
+            >
+              Verifikasi Masuk
+            </button>
+          </form>
+
+          {scannedResult && (
+            <div className="p-4 rounded-xl bg-[#193029] border border-[#8DE2BD]/30 space-y-2 mt-4 text-xs">
+              <div className="flex items-center gap-2 text-[#8DE2BD] font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Tiket Valid - Silakan Masuk!</span>
+              </div>
+              <div className="space-y-1 text-[#F4F5FA] pt-1 border-t border-[#8DE2BD]/20">
+                <div><span className="text-[#A7AEC3]">Kode:</span> {scannedResult.code}</div>
+                <div><span className="text-[#A7AEC3]">Nama:</span> {scannedResult.holder}</div>
+                <div><span className="text-[#A7AEC3]">Kategori:</span> {scannedResult.category}</div>
+                <div><span className="text-[#A7AEC3]">Waktu:</span> {scannedResult.timestamp}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live Gate Feed */}
+        <div className="p-6 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+          <h2 className="text-sm font-semibold text-[#F4F5FA]">Aktivitas Gerbang Terbaru</h2>
+          <div className="space-y-2 text-xs">
+            {[
+              { time: '14:22:10', code: 'TKT-9921', holder: 'Andi Wijaya', gate: 'Gate A - Regular' },
+              { time: '14:21:45', code: 'TKT-8842', holder: 'Rina Kusuma', gate: 'Gate VIP - Priority' },
+              { time: '14:20:12', code: 'TKT-7719', holder: 'Fajar Nugraha', gate: 'Gate B - Tribune' },
+              { time: '14:18:50', code: 'TKT-6602', holder: 'Dewi Lestari', gate: 'Gate A - Regular' }
+            ].map((feed, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-xl bg-[#10121C] border border-[#1B1E2C] flex items-center justify-between"
+              >
+                <div>
+                  <div className="font-semibold text-[#F4F5FA]">{feed.holder} ({feed.code})</div>
+                  <div className="text-[11px] text-[#7F89A0]">{feed.gate}</div>
+                </div>
+                <span className="text-[11px] font-bold text-[#8DE2BD]">{feed.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </WorkspaceLayout>
+  );
 }

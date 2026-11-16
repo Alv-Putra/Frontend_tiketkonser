@@ -1,251 +1,305 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Ticket, Users, DollarSign, TrendingUp, Calendar, Music, ShoppingCart, ArrowUp, ArrowDown, Eye, MoreHorizontal, ChevronRight, Clock } from 'lucide-react';
-import StatCard from '@/components/admin/StatCard';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import Link from 'next/link';
+import {
+  Download,
+  Calendar,
+  ArrowRight,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown
+} from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import StatCard from '@/components/workspace/StatCard';
+import StatusBadge from '@/components/workspace/StatusBadge';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-const stats = [
-  { icon: Ticket, label: 'Tiket Terjual', value: '12.450', change: 12.5, color: 'primary-accent' },
-  { icon: DollarSign, label: 'Total Pendapatan', value: 'Rp 8,2M', change: 18.3, color: 'success' },
-  { icon: Users, label: 'Total Pelanggan', value: '8.920', change: 8.1, color: 'secondary-accent' },
-  { icon: TrendingUp, label: 'Event Aktif', value: '24', change: -2.4, color: 'warning' },
-];
+export default function AdminDashboardPage() {
+  const adminMetrics = useMonitoringStore((state) => state.adminMetrics);
+  const orders = useMonitoringStore((state) => state.orders);
+  const concerts = useMonitoringStore((state) => state.concerts);
 
-const recentOrders = [
-  { id: 'ORD-001', customer: 'Budi Santoso', event: 'Java Jazz 2026', amount: 350000, status: 'Paid', time: '2 menit lalu' },
-  { id: 'ORD-002', customer: 'Siti Rahma', event: 'Coldplay Tour', amount: 1700000, status: 'Pending', time: '5 menit lalu' },
-  { id: 'ORD-003', customer: 'Ahmad Fauzi', event: 'Dewa 19 Reunion', amount: 500000, status: 'Paid', time: '12 menit lalu' },
-  { id: 'ORD-004', customer: 'Dewi Lestari', event: 'Festival Musik 2026', amount: 250000, status: 'Cancelled', time: '1 jam lalu' },
-  { id: 'ORD-005', customer: 'Rudi Hartono', event: 'Rich Brian Tour', amount: 400000, status: 'Pending', time: '2 jam lalu' },
-];
+  const [period, setPeriod] = useState('1–30 April 2026');
 
-const topEvents = [
-  { name: 'Java Jazz Festival 2026', sold: 2350, quota: 3700, revenue: 'Rp 1.2B', trend: 15 },
-  { name: 'Coldplay: Music of the Spheres', sold: 5000, quota: 5000, revenue: 'Rp 4.2B', trend: 0 },
-  { name: 'Dewa 19 Reunion Tour', sold: 1800, quota: 3000, revenue: 'Rp 900M', trend: 8 },
-];
+  const recentOrders = orders.slice(0, 5);
 
-const quickActions = [
-  { label: 'Tambah Event', icon: Music, href: '/admin/concerts', color: 'primary' },
-  { label: 'Lihat Pesanan', icon: ShoppingCart, href: '/admin/orders', color: 'secondary' },
-  { label: 'Persetujuan', icon: Eye, href: '/admin/approvals', color: 'warning' },
-];
-
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const handleExport = () => {
+    alert('Laporan platform ConserId (Periode: ' + period + ') berhasil diekspor.');
+  };
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <WorkspaceLayout title="Dashboard">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Dashboard</h1>
-          <p className="text-text-muted text-sm mt-1">Selamat datang di ConserId Admin Panel</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Ringkasan platform</h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2A2240] text-[#A78BFA] border border-[#362A54]">
+              DATA DEMO
+            </span>
+          </div>
+          <p className="text-xs text-[#A7AEC3]">
+            Selamat datang kembali. Ini performa ConserId hari ini.
+          </p>
         </div>
+
+        {/* Action Controls */}
         <div className="flex items-center gap-3">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link key={action.label} href={action.href}>
-                <Button size="sm" variant={action.color === 'warning' ? 'outline' : 'primary'}>
-                  <Icon size={16} />
-                  {action.label}
-                </Button>
-              </Link>
-            );
-          })}
+          <div className="relative">
+            <button
+              type="button"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#151824] border border-[#1B1E2C] text-xs font-medium text-[#F4F5FA] hover:bg-[#1B1E2C] transition-colors"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#7F89A0]" />
+              <span>{period}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-[#7F89A0]" />
+            </button>
+          </div>
+
+          <button
+            onClick={handleExport}
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Ekspor laporan</span>
+          </button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-          >
-            <StatCard {...stat} />
-          </motion.div>
-        ))}
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Tiket terjual"
+          value={adminMetrics.tiketTerjual.value}
+          trendText={adminMetrics.tiketTerjual.change}
+          trend={adminMetrics.tiketTerjual.trend}
+          subtext={adminMetrics.tiketTerjual.period}
+        />
+        <StatCard
+          label="Total pendapatan"
+          value={adminMetrics.totalPendapatan.value}
+          trendText={adminMetrics.totalPendapatan.change}
+          trend={adminMetrics.totalPendapatan.trend}
+          subtext={adminMetrics.totalPendapatan.period}
+        />
+        <StatCard
+          label="Total pelanggan"
+          value={adminMetrics.totalPelanggan.value}
+          trendText={adminMetrics.totalPelanggan.change}
+          trend={adminMetrics.totalPelanggan.trend}
+          subtext={adminMetrics.totalPelanggan.period}
+        />
+        <StatCard
+          label="Konser aktif"
+          value={adminMetrics.konserAktif.value}
+          trendText={adminMetrics.konserAktif.change}
+          trend={adminMetrics.konserAktif.trend}
+          subtext={adminMetrics.konserAktif.period}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Recent Orders */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2 bg-secondary-bg border border-border rounded-2xl p-6"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-accent/10 rounded-xl flex items-center justify-center">
-                <ShoppingCart size={20} className="text-primary-accent" />
-              </div>
-              <div>
-                <h2 className="font-bold text-text-primary">Pesanan Terbaru</h2>
-                <p className="text-xs text-text-muted">5 transaksi terakhir</p>
-              </div>
+      {/* Verification Notice Banner */}
+      {adminMetrics.pendingPaymentsCount > 0 && (
+        <div className="p-4 rounded-xl bg-[#151824] border border-[#332B1B] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F1C875] shrink-0" />
+            <div>
+              <span className="text-xs font-semibold text-[#F4F5FA] mr-2">
+                {adminMetrics.pendingPaymentsCount} pembayaran perlu diverifikasi
+              </span>
+              <span className="text-xs text-[#A7AEC3]">
+                Periksa bukti pembayaran agar tiket dapat diterbitkan.
+              </span>
             </div>
-            <Link href="/admin/orders" className="text-sm text-primary-accent hover:underline flex items-center gap-1">
-              Lihat Semua <ChevronRight size={16} />
+          </div>
+          <Link
+            href="/admin/payments"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F1C875] hover:text-[#F8DE9E] shrink-0"
+          >
+            <span>Tinjau pembayaran</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
+
+      {/* Middle Row: Ticket Sales Chart & Concert Capacity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Ticket Sales Chart */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[#F4F5FA]">Penjualan tiket</h2>
+              <p className="text-xs text-[#7F89A0]">Tren tiket terjual selama April 2026</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-[#A78BFA]">
+              <span className="w-2 h-2 rounded-full bg-[#7953E8]" />
+              <span>Tiket terjual</span>
+            </div>
+          </div>
+
+          {/* Chart Graphic Bars */}
+          <div className="pt-4 pb-2">
+            <div className="h-44 flex items-end justify-between gap-3 px-2">
+              {[
+                { date: '01 Apr', height: '35%', count: '450' },
+                { date: '05 Apr', height: '55%', count: '780' },
+                { date: '08 Apr', height: '48%', count: '690' },
+                { date: '12 Apr', height: '75%', count: '1.100' },
+                { date: '15 Apr', height: '65%', count: '920' },
+                { date: '19 Apr', height: '88%', count: '1.320' },
+                { date: '22 Apr', height: '70%', count: '1.050' },
+                { date: '26 Apr', height: '95%', count: '1.450' },
+                { date: '29 Apr', height: '82%', count: '1.240' }
+              ].map((bar, idx) => (
+                <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
+                  <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1B1E2C] border border-[#2A2E40] text-[10px] text-[#F4F5FA] px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap z-10">
+                    {bar.count} tiket
+                  </div>
+                  <div
+                    style={{ height: bar.height }}
+                    className="w-full max-w-[28px] rounded-t-md bg-[#7953E8] group-hover:bg-[#A78BFA] transition-all"
+                  />
+                  <span className="text-[10px] text-[#7F89A0]">{bar.date}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Capacity Comparison */}
+        <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] flex flex-col justify-between">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-[#F4F5FA]">Kapasitas konser</h2>
+            <p className="text-xs text-[#7F89A0]">Terjual dibandingkan kuota tersedia</p>
+          </div>
+
+          <div className="space-y-4">
+            {concerts.slice(0, 3).map((concert) => {
+              const pct = Math.round((concert.sold / concert.quota) * 100);
+              const isFull = pct >= 100;
+              return (
+                <div key={concert.id} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-[#F4F5FA] truncate max-w-[170px]">
+                      {concert.name}
+                    </span>
+                    <span className="font-semibold text-[#A78BFA]">{pct}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-[#1B1E2C] overflow-hidden">
+                    <div
+                      style={{ width: `${pct}%` }}
+                      className={`h-full rounded-full transition-all ${
+                        isFull ? 'bg-[#FFA4B8]' : 'bg-[#7953E8]'
+                      }`}
+                    />
+                  </div>
+                  <div className="text-[11px] text-[#7F89A0]">
+                    {concert.sold.toLocaleString('id-ID')} / {concert.quota.toLocaleString('id-ID')} tiket
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-4 border-t border-[#1B1E2C]">
+            <Link
+              href="/admin/concerts"
+              className="inline-flex items-center gap-1.5 text-xs text-[#A78BFA] hover:text-[#DCD1FF] font-medium"
+            >
+              <span>Lihat seluruh konser</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Recent Orders & Operational Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Orders Table */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[#F4F5FA]">Pesanan terbaru</h2>
+              <p className="text-xs text-[#7F89A0]">Daftar transaksi pelanggan terakhir</p>
+            </div>
+            <Link
+              href="/admin/orders"
+              className="inline-flex items-center gap-1 text-xs text-[#A78BFA] hover:text-[#DCD1FF] font-medium"
+            >
+              <span>Lihat semua</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="space-y-3">
-            {recentOrders.map((order, index) => (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25 + index * 0.05 }}
-                className="flex items-center justify-between p-4 bg-surface/50 rounded-xl hover:bg-surface transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    order.status === 'Paid' ? 'bg-success/10' :
-                    order.status === 'Pending' ? 'bg-warning/10' : 'bg-error/10'
-                  }`}>
-                    {order.status === 'Paid' ? (
-                      <ArrowUp size={18} className="text-success" />
-                    ) : order.status === 'Pending' ? (
-                      <Clock size={18} className="text-warning" />
-                    ) : (
-                      <ArrowDown size={18} className="text-error" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-text-primary text-sm">{order.customer}</p>
-                    <p className="text-xs text-text-muted">{order.event}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-text-primary text-sm">Rp{order.amount.toLocaleString('id-ID')}</p>
-                  <p className="text-xs text-text-muted">{order.time}</p>
-                </div>
-                <Badge variant={order.status === 'Paid' ? 'success' : order.status === 'Pending' ? 'warning' : 'error'}>
-                  {order.status === 'Paid' ? 'Lunas' : order.status === 'Pending' ? 'Menunggu' : 'Batal'}
-                </Badge>
-              </motion.div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-[#1B1E2C] text-[#7F89A0] text-[10px] uppercase font-semibold">
+                  <th className="pb-2.5">ID Pesanan</th>
+                  <th className="pb-2.5">Pelanggan</th>
+                  <th className="pb-2.5">Konser</th>
+                  <th className="pb-2.5">Total</th>
+                  <th className="pb-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1B1E2C]">
+                {recentOrders.map((ord) => (
+                  <tr key={ord.id} className="hover:bg-[#1B1E2C]/50 transition-colors">
+                    <td className="py-3 font-semibold text-[#F4F5FA]">{ord.id}</td>
+                    <td className="py-3 text-[#A7AEC3]">{ord.customer}</td>
+                    <td className="py-3 text-[#F4F5FA]">{ord.concert}</td>
+                    <td className="py-3 font-medium text-[#F4F5FA]">{ord.total}</td>
+                    <td className="py-3">
+                      <StatusBadge status={ord.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Top Events */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-secondary-bg border border-border rounded-2xl p-6"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-accent/10 rounded-xl flex items-center justify-center">
-                <TrendingUp size={20} className="text-primary-accent" />
+        {/* Operational Attention Cards */}
+        <div className="p-5 rounded-2xl bg-[#151824] border border-[#1B1E2C] flex flex-col justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-[#F4F5FA] mb-1">Perlu perhatian</h2>
+            <p className="text-xs text-[#7F89A0] mb-4">Aktivitas operasional yang memerlukan tindakan</p>
+
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40] flex items-start gap-3">
+                <span className="text-lg font-bold text-[#F1C875]">02</span>
+                <div>
+                  <div className="text-xs font-semibold text-[#F4F5FA]">Pembayaran tertunda</div>
+                  <div className="text-xs text-[#A7AEC3] mt-0.5">Verifikasi bukti transfer</div>
+                </div>
               </div>
-              <div>
-                <h2 className="font-bold text-text-primary">Event Terpopuler</h2>
-                <p className="text-xs text-text-muted">Penjualan tertinggi</p>
+
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40] flex items-start gap-3">
+                <span className="text-lg font-bold text-[#FFA4B8]">01</span>
+                <div>
+                  <div className="text-xs font-semibold text-[#F4F5FA]">Konser habis terjual</div>
+                  <div className="text-xs text-[#A7AEC3] mt-0.5">Coldplay • penjualan ditutup</div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-[#1B1E2C] border border-[#2A2E40] flex items-start gap-3">
+                <span className="text-lg font-bold text-[#8DE2BD]">00</span>
+                <div>
+                  <div className="text-xs font-semibold text-[#F4F5FA]">Pengajuan festival</div>
+                  <div className="text-xs text-[#A7AEC3] mt-0.5">Semua pengajuan sudah ditinjau</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-5">
-            {topEvents.map((event, index) => (
-              <motion.div
-                key={event.name}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 + index * 0.1 }}
-                className="pb-4 border-b border-border/50 last:border-0 last:pb-0"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-text-primary line-clamp-1">{event.name}</h3>
-                  {event.trend > 0 && (
-                    <span className="flex items-center gap-0.5 text-xs text-success">
-                      <ArrowUp size={12} /> {event.trend}%
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between text-xs text-text-muted mb-2">
-                  <span>{event.sold.toLocaleString('id-ID')} / {event.quota.toLocaleString('id-ID')} sold</span>
-                  <span className="font-medium text-primary-accent">{event.revenue}</span>
-                </div>
-                <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((event.sold / event.quota) * 100, 100)}%` }}
-                    transition={{ delay: 0.4 + index * 0.1, duration: 0.8, ease: 'easeOut' }}
-                    className="h-full bg-gradient-primary rounded-full"
-                  />
-                </div>
-              </motion.div>
-            ))}
+          <div className="pt-4 border-t border-[#1B1E2C] text-center text-[11px] text-[#7F89A0]">
+            Ringkasan seluruh konser • Data contoh untuk pratinjau desain
           </div>
-        </motion.div>
+        </div>
       </div>
-
-      {/* Quick Stats Row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-5"
-      >
-        <div className="bg-secondary-bg border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-text-muted">Konversi Penjualan</span>
-            <div className="w-8 h-8 bg-success/10 rounded-lg flex items-center justify-center">
-              <TrendingUp size={16} className="text-success" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-text-primary mb-1">78.5%</p>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-success flex items-center gap-1">
-              <ArrowUp size={12} /> 5.2%
-            </span>
-            <span className="text-text-muted">vs bulan lalu</span>
-          </div>
-        </div>
-
-        <div className="bg-secondary-bg border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-text-muted">Avg. Order Value</span>
-            <div className="w-8 h-8 bg-primary-accent/10 rounded-lg flex items-center justify-center">
-              <DollarSign size={16} className="text-primary-accent" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-text-primary mb-1">Rp 458K</p>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-success flex items-center gap-1">
-              <ArrowUp size={12} /> 12.8%
-            </span>
-            <span className="text-text-muted">vs bulan lalu</span>
-          </div>
-        </div>
-
-        <div className="bg-secondary-bg border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-text-muted">Tiket per Order</span>
-            <div className="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
-              <Ticket size={16} className="text-warning" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-text-primary mb-1">2.3</p>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-error flex items-center gap-1">
-              <ArrowDown size={12} /> 0.2
-            </span>
-            <span className="text-text-muted">vs bulan lalu</span>
-          </div>
-        </div>
-      </motion.div>
-    </div>
+    </WorkspaceLayout>
   );
 }

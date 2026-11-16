@@ -1,177 +1,64 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, Ticket, Users, Wallet } from 'lucide-react';
-import EmptyState from '@/components/ui/EmptyState';
-import Skeleton from '@/components/ui/Skeleton';
-import Badge from '@/components/ui/Badge';
-import orderService from '@/services/orderService';
-import festivalService from '@/services/festivalService';
-import { storageDB } from '@/services/storageService';
-import { mockFestivals } from '@/services/mockData';
-import { formatCurrency, formatDateTime } from '@/lib/formatters';
+import { useState } from 'react';
+import Link from 'next/link';
+import { Download, TrendingUp, Calendar, ArrowRight } from 'lucide-react';
+import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
+import StatCard from '@/components/workspace/StatCard';
+import useMonitoringStore from '@/stores/monitoringStore';
 
-function StatCard({ icon: Icon, label, value, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="bg-secondary-bg border border-border rounded-[18px] p-6"
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary-accent/10 flex items-center justify-center">
-          <Icon size={20} className="text-primary-accent" />
-        </div>
-        <span className="text-sm text-text-muted">{label}</span>
-      </div>
-      <p className="text-2xl font-black text-text-primary">{value}</p>
-    </motion.div>
-  );
-}
+export default function OrganizerSalesPage() {
+  const organizerMetrics = useMonitoringStore((state) => state.organizerMetrics);
+  const concerts = useMonitoringStore((state) => state.concerts);
 
-function SalesContent() {
-  const [orders, setOrders] = useState([]);
-  const [festivalSales, setFestivalSales] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const allOrders = await orderService.getOrdersByUser('all');
-      const festivals = storageDB.festivals && storageDB.festivals.length ? storageDB.festivals : mockFestivals;
-
-      const sales = festivals.map((f) => {
-        const festivalOrders = allOrders.filter((o) => o.festivalId === f.id && o.status === 'paid');
-        const sold = (f.ticketTypes || []).reduce((s, t) => s + t.sold, 0);
-        const revenue = festivalOrders.reduce((sum, o) => sum + o.total, 0);
-        return { ...f, sold, revenue, orderCount: festivalOrders.length };
-      }).sort((a, b) => b.revenue - a.revenue);
-
-      setOrders(allOrders.filter((o) => o.status === 'paid'));
-      setFestivalSales(sales);
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-48 mb-8" />
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28" />)}
-        </div>
-      </div>
-    );
-  }
-
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const totalSold = festivalSales.reduce((sum, f) => sum + f.sold, 0);
-  const totalQuota = festivalSales.reduce((sum, f) => sum + (f.ticketTypes || []).reduce((s, t) => s + t.quota, 0), 0);
+  const handleDownload = () => {
+    alert('Laporan rincian penjualan tiket berhasil diunduh.');
+  };
 
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-2xl md:text-3xl font-black">Data Penjualan</h1>
-        <p className="text-text-muted text-sm mt-1">Pantau performa penjualan tiket festival kamu.</p>
-      </motion.div>
+    <WorkspaceLayout title="Laporan Penjualan">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#1B1E2C]">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F4F5FA]">Laporan Penjualan Tiket</h1>
+          <p className="text-xs text-[#A7AEC3]">
+            Rincian pendapatan kotor, tiket terbayar, dan performa per kategori konser.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={TrendingUp} label="Total Pendapatan" value={formatCurrency(totalRevenue)} delay={0} />
-        <StatCard icon={Ticket} label="Tiket Terjual" value={totalSold.toLocaleString('id-ID')} delay={0.05} />
-        <StatCard icon={Wallet} label="Omzet per Festival" value={`${festivalSales.length} festival`} delay={0.1} />
-        <StatCard icon={Users} label="Total Pendapatan Escrow" value={formatCurrency(totalRevenue)} delay={0.15} />
+        <button
+          onClick={handleDownload}
+          type="button"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#7953E8] hover:bg-[#673EE0] text-white text-xs font-semibold shadow-lg shadow-[#7953E8]/20 transition-all self-start md:self-auto cursor-pointer"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span>Ekspor CSV / Excel</span>
+        </button>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-secondary-bg border border-border rounded-[24px] p-6"
-      >
-        <h2 className="font-bold text-lg mb-6">Performa per Festival</h2>
-        {festivalSales.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-5">
-            {festivalSales.map((f) => {
-              const percentage = totalQuota ? Math.round((f.sold / totalQuota) * 100) : 0;
-              return (
-                <div key={f.id} className="p-4 rounded-[18px] bg-surface border border-border">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-text-primary">{f.title}</p>
-                      <p className="text-xs text-text-muted">{f.venue}, {f.city}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gradient">{formatCurrency(f.revenue)}</p>
-                      <p className="text-xs text-text-muted">{f.orderCount} pesanan</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-text-muted mb-1">
-                    <span>{f.sold}/{f.ticketTypes?.reduce((s, t) => s + t.quota, 0) || 0} tiket terjual</span>
-                    <span>{percentage}%</span>
-                  </div>
-                  <div className="h-2 bg-white rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-primary rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </motion.div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Total tiket terjual" value={organizerMetrics.tiketTerjual.value} subtext="Dari seluruh kategori tiket" />
+        <StatCard label="Total pendapatan bersih" value={organizerMetrics.pendapatanTiket.value} subtext="Dana telah diproses ke rekening" />
+        <StatCard label="Tingkat okupansi" value={`${organizerMetrics.tiketTerjual.percentage}%`} subtext="Kapasitas venue terisi" />
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-        className="mt-6 bg-secondary-bg border border-border rounded-[24px] overflow-hidden"
-      >
-        <div className="p-6 pb-0">
-          <h2 className="font-bold text-lg">Pesanan Terbayar Terbaru</h2>
+      <div className="p-6 rounded-2xl bg-[#151824] border border-[#1B1E2C] space-y-4">
+        <h2 className="text-sm font-semibold text-[#F4F5FA]">Rincian Penjualan Mingguan</h2>
+        <div className="h-44 flex items-end justify-around gap-4 px-4 pt-6 pb-2">
+          {organizerMetrics.weeklySales.map((w, idx) => {
+            const heightPct = Math.round((w.sold / 800) * 100);
+            return (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                <span className="text-xs font-semibold text-[#F4F5FA]">{w.sold}</span>
+                <div
+                  style={{ height: `${heightPct}%` }}
+                  className="w-full max-w-[48px] rounded-t-md bg-[#7953E8]"
+                />
+                <span className="text-[11px] text-[#7F89A0]">{w.week}</span>
+              </div>
+            );
+          })}
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm mt-4">
-            <thead>
-              <tr className="border-b border-border text-left text-text-muted">
-                <th className="p-5 font-medium">No. Pesanan</th>
-                <th className="p-5 font-medium">Festival</th>
-                <th className="p-5 font-medium">Tanggal</th>
-                <th className="p-5 font-medium">Metode</th>
-                <th className="p-5 font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.slice(0, 10).map((o) => (
-                <tr key={o.id} className="border-b border-border last:border-0 hover:bg-surface transition-colors">
-                  <td className="p-5 font-mono text-xs text-text-secondary">{o.orderNumber}</td>
-                  <td className="p-5 text-text-primary">{o.festivalTitle}</td>
-                  <td className="p-5 text-text-secondary whitespace-nowrap">
-                    {formatDateTime(o.paidAt || o.createdAt)}
-                  </td>
-                  <td className="p-5">
-                    <Badge variant="primary">{o.paymentMethod || '-'}</Badge>
-                  </td>
-                  <td className="p-5 font-bold text-text-primary">{formatCurrency(o.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
-    </div>
+      </div>
+    </WorkspaceLayout>
   );
-}
-
-export default function SalesPage() {
-  return <SalesContent />;
 }
