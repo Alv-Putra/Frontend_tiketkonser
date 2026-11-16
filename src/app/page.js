@@ -1065,6 +1065,7 @@ export default function HomePage() {
                   <button
                     onClick={() => setVideoModalOpen(true)}
                     type="button"
+                    suppressHydrationWarning
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2A2240] hover:bg-[#7953E8] text-[#A78BFA] hover:text-white border border-[#362A54] text-xs font-semibold transition-all cursor-pointer shadow-lg"
                   >
                     <Play className="w-4 h-4 fill-current" />
@@ -1444,7 +1445,7 @@ export default function HomePage() {
           <div className="w-full max-w-xl rounded-2xl bg-[#151824] border border-[#1B1E2C] p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-[#F4F5FA]">Cuplikan Live Performance</h3>
-              <button onClick={() => setVideoModalOpen(false)} className="text-[#7F89A0] hover:text-[#F4F5FA] cursor-pointer">
+              <button onClick={() => setVideoModalOpen(false)} suppressHydrationWarning className="text-[#7F89A0] hover:text-[#F4F5FA] cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
