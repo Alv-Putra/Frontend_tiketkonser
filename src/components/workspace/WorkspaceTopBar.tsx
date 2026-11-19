@@ -110,8 +110,6 @@ export default function WorkspaceTopBar({ pageTitle }) {
                 {user?.email || (isOrganizer ? 'Organizer role' : 'Super admin')}
               </div>
             </div>
-              </div>
-            </div>
             <ChevronDown className="w-3.5 h-3.5 text-[#71717A]" />
           </button>
 
