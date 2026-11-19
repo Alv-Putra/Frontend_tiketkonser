@@ -25,6 +25,8 @@ const customJestConfig = {
     'src/stores/**/*.{ts,tsx}',
     'src/services/**/*.{ts,tsx}',
     '!src/services/mockData.ts',
+    // Hanya registrasi plugin GSAP untuk browser; tidak ada logika yang perlu diuji.
+    '!src/lib/gsap.ts',
     '!**/*.test.{ts,tsx}',
     '!**/__tests__/**',
   ],

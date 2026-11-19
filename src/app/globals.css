@@ -39,6 +39,20 @@
   --color-status-danger: #FFA4B8;
   --color-status-danger-bg: #36202C;
 
+  /* Neon Blaze — palet Tixo (selaras dengan app mobile) */
+  --color-ink: #09090B;
+  --color-onyx: #141417;
+  --color-line: #27272A;
+  --color-blaze: #FF4D00;
+  --color-tangerine: #FF7A00;
+  --color-mute: #A1A1AA;
+  --color-paper: #FFF4EC;
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee-reverse: marquee 32s linear infinite reverse;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
   /* Radii */
   --radius-xs: 6px;
   --radius-sm: 8px;
@@ -46,6 +60,12 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
+}
+
+/* Font landing: variabel diisi next/font di src/app/page.tsx. 'inline' agar var() dibaca di elemen, bukan di :root. */
+@theme inline {
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-body: var(--font-spline), system-ui, sans-serif;
 }
 
 @layer base {
@@ -85,7 +105,49 @@
   }
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--tilt, 0deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-spin-slow,
+  .animate-float {
+    animation: none;
+  }
+}
+
 @layer utilities {
+  /* Tekstur grain halus ala poster cetak */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Lubang sobekan tiket di sisi kiri & kanan */
+  .ticket-notch {
+    -webkit-mask: radial-gradient(circle 14px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 14px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask: radial-gradient(circle 14px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 14px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--stroke, #FFFFFF);
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
