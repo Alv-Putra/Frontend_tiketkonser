@@ -2,34 +2,34 @@
 @import "tailwindcss";
 
 /* ============================================================
-   ConserId Design System (Figma: Konser)
+   ConserId Design System — palet Neon Blaze (selaras dengan app mobile)
    Dark theme, crafted for concert & live music platform.
    ============================================================ */
 @theme {
   --font-sans: var(--font-pt-sans, 'PT Sans'), 'PT Sans', system-ui, -apple-system, sans-serif;
 
   /* Surfaces */
-  --color-primary-bg: #0B0D14;
-  --color-secondary-bg: #10121C;
-  --color-card-bg: #151824;
-  --color-surface: #1B1E2C;
-  --color-surface-hover: #232638;
+  --color-primary-bg: #09090B;
+  --color-secondary-bg: #0F0F12;
+  --color-card-bg: #141417;
+  --color-surface: #27272A;
+  --color-surface-hover: #2F2F33;
 
   /* Brand Colors */
-  --color-brand-primary: #7953E8;
-  --color-brand-primary-hover: #673EE0;
-  --color-brand-violet: #A78BFA;
-  --color-brand-violet-light: #DCD1FF;
-  --color-brand-violet-bg: #2A2240;
+  --color-brand-primary: #FF4D00;
+  --color-brand-primary-hover: #E64500;
+  --color-brand-violet: #FF7A00;
+  --color-brand-violet-light: #FFD9BF;
+  --color-brand-violet-bg: #2A1000;
 
   /* Text Colors */
-  --color-text-primary: #F4F5FA;
-  --color-text-secondary: #A7AEC3;
-  --color-text-tertiary: #7F89A0;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
 
   /* Borders & Dividers */
-  --color-border: #1B1E2C;
-  --color-border-hover: #2A2E40;
+  --color-border: #27272A;
+  --color-border-hover: #3F3F46;
 
   /* Status Colors */
   --color-status-success: #8DE2BD;
@@ -51,18 +51,18 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #0B0D14;
+    background-color: #09090B;
     color-scheme: dark;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #1B1E2C transparent;
+    scrollbar-color: #27272A transparent;
   }
 
   body {
-    background-color: #0B0D14;
-    color: #F4F5FA;
+    background-color: #09090B;
+    color: #FFFFFF;
     font-family: var(--font-pt-sans, 'PT Sans'), 'PT Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -76,12 +76,12 @@
   }
 
   select option {
-    background-color: #151824;
-    color: #F4F5FA;
+    background-color: #141417;
+    color: #FFFFFF;
   }
 
   ::placeholder {
-    color: #7F89A0;
+    color: #71717A;
   }
 }
 

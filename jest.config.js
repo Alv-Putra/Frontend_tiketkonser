@@ -9,24 +9,23 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
-  modulePathIgnorePatterns: ['<rootDir>/frontend_konser/'],
-  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/frontend_konser/'],
+  testPathIgnorePatterns: ['/node_modules/'],
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['@swc/jest', {
+    '^.+\.(ts|tsx|js|jsx)$': ['@swc/jest', {
       jsc: {
-        parser: { syntax: 'ecmascript', jsx: true },
+        parser: { syntax: 'typescript', tsx: true },
         transform: { react: { runtime: 'automatic' } },
       },
     }],
   },
   collectCoverageFrom: [
-    'src/lib/**/*.{js,jsx}',
-    'src/stores/**/*.{js,jsx}',
-    'src/services/**/*.{js,jsx}',
-    '!src/services/mockData.js',
-    '!**/*.test.js',
+    'src/lib/**/*.{ts,tsx}',
+    'src/stores/**/*.{ts,tsx}',
+    'src/services/**/*.{ts,tsx}',
+    '!src/services/mockData.ts',
+    '!**/*.test.{ts,tsx}',
     '!**/__tests__/**',
   ],
   coverageThreshold: {
@@ -37,7 +36,7 @@ const customJestConfig = {
       statements: 100,
     },
   },
-  testMatch: ['**/__tests__/**/*.test.js', '**/?(*.)+(spec|test).js'],
+  testMatch: ['**/__tests__/**/*.test.{ts,tsx}', '**/?(*.)+(spec|test).{ts,tsx}'],
 };
 
 module.exports = createJestConfig(customJestConfig);
