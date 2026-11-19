@@ -166,6 +166,15 @@ export default function LoginPage() {
                   Kirim ulang
                 </Link>
               </p>
+              <div className="mt-4 pt-4 border-t border-border/40">
+                <Link
+                  href="/admin/login"
+                  className="text-xs text-text-muted hover:text-primary-accent inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <span>Masuk ke Admin Workspace</span>
+                  <span>→</span>
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>

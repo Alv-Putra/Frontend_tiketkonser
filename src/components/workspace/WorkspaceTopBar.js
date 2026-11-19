@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, ChevronDown, Check, User, ArrowRight } from 'lucide-react';
+import { Search, Bell, ChevronDown, Check, User, ArrowRight, LogOut } from 'lucide-react';
 import useMonitoringStore from '@/stores/monitoringStore';
+import useAuthStore from '@/stores/authStore';
 
 export default function WorkspaceTopBar({ pageTitle }) {
   const router = useRouter();
@@ -15,6 +16,14 @@ export default function WorkspaceTopBar({ pageTitle }) {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    setProfileOpen(false);
+    await logout();
+    router.push('/admin/login');
+  };
 
   const isOrganizer = workspace === 'organizer';
 
@@ -90,15 +99,15 @@ export default function WorkspaceTopBar({ pageTitle }) {
             type="button"
             className="flex items-center gap-3 pl-3 pr-2.5 py-1.5 rounded-xl bg-[#151824] border border-[#1B1E2C] hover:bg-[#1B1E2C] transition-colors text-left"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#2A2240] text-[#A78BFA] flex items-center justify-center font-bold text-xs">
-              {isOrganizer ? 'J' : 'A'}
+            <div className="w-7 h-7 rounded-lg bg-[#2A2240] text-[#A78BFA] flex items-center justify-center font-bold text-xs uppercase">
+              {user?.name?.[0] || user?.full_name?.[0] || (isOrganizer ? 'O' : 'A')}
             </div>
             <div className="hidden sm:block">
-              <div className="text-xs font-semibold text-[#F4F5FA]">
-                {isOrganizer ? 'Java Festival Prod.' : 'Administrator'}
+              <div className="text-xs font-semibold text-[#F4F5FA] max-w-[140px] truncate">
+                {user?.name || user?.full_name || (isOrganizer ? 'Java Festival Prod.' : 'Administrator')}
               </div>
-              <div className="text-[10px] text-[#7F89A0]">
-                {isOrganizer ? 'Organizer role' : 'Super admin'}
+              <div className="text-[10px] text-[#7F89A0] max-w-[140px] truncate">
+                {user?.email || (isOrganizer ? 'Organizer role' : 'Super admin')}
               </div>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[#7F89A0]" />
@@ -137,6 +146,15 @@ export default function WorkspaceTopBar({ pageTitle }) {
                 <span>Lihat Beranda</span>
                 <ArrowRight className="w-3.5 h-3.5 text-[#7F89A0]" />
               </Link>
+              <div className="my-1 border-t border-[#1B1E2C]" />
+              <button
+                onClick={handleLogout}
+                type="button"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-[#EF4444] hover:bg-[#45121A]/30 transition-colors cursor-pointer"
+              >
+                <span>Keluar dari Akun</span>
+                <LogOut className="w-3.5 h-3.5 text-[#EF4444]" />
+              </button>
             </div>
           )}
         </div>

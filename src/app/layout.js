@@ -1,6 +1,7 @@
 import './globals.css';
 import { PT_Sans } from 'next/font/google';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import AuthProvider from '@/context/AuthProvider';
 
 const ptSans = PT_Sans({
   weight: ['400', '700'],
@@ -23,7 +24,9 @@ export default function RootLayout({ children }) {
         className={`${ptSans.variable} min-h-screen flex flex-col bg-[#0B0D14] text-[#F4F5FA] font-sans antialiased`}
       >
         <ErrorBoundary>
-          <div className="flex-1 flex flex-col min-h-0">{children}</div>
+          <AuthProvider>
+            <div className="flex-1 flex flex-col min-h-0">{children}</div>
+          </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

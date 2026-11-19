@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import useAuthStore from '@/stores/authStore';
 import { ROLES } from '@/lib/constants';
 
-export default function ProtectedRoute({ children, roles = [ROLES.CUSTOMER] }) {
+export default function ProtectedRoute({
+  children,
+  roles = [ROLES.CUSTOMER],
+  redirectTo = '/auth/login',
+  fallback = null,
+}) {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isHydrated = useAuthStore((state) => state.isHydrated);
@@ -17,20 +22,24 @@ export default function ProtectedRoute({ children, roles = [ROLES.CUSTOMER] }) {
         typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}`
           : '/';
-      router.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
+      router.replace(`${redirectTo}?redirect=${encodeURIComponent(currentPath)}`);
       return;
     }
     if (roles.length && !roles.includes(user.role)) {
-      router.replace('/');
+      if (roles.includes(ROLES.ADMIN)) {
+        router.replace(`${redirectTo}?error=unauthorized`);
+      } else {
+        router.replace('/');
+      }
     }
-  }, [user, isHydrated, roles, router]);
+  }, [user, isHydrated, roles, redirectTo, router]);
 
   if (!isHydrated || !user) {
-    return null;
+    return fallback;
   }
 
   if (roles.length && !roles.includes(user.role)) {
-    return null;
+    return fallback;
   }
 
   return children;

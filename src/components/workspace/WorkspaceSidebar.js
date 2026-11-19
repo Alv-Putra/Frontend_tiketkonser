@@ -16,9 +16,11 @@ import {
   ChevronDown,
   ArrowLeft,
   QrCode,
-  ListChecks
+  ListChecks,
+  LogOut
 } from 'lucide-react';
 import useMonitoringStore from '@/stores/monitoringStore';
+import useAuthStore from '@/stores/authStore';
 
 export default function WorkspaceSidebar() {
   const pathname = usePathname();
@@ -30,6 +32,13 @@ export default function WorkspaceSidebar() {
   const pendingPaymentsCount = payments.filter((p) => p.status === 'Perlu verifikasi').length;
 
   const isOrganizer = pathname.startsWith('/organizer') || workspace === 'organizer';
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/admin/login');
+  };
 
   const handleRoleToggle = () => {
     if (isOrganizer) {
@@ -240,6 +249,28 @@ export default function WorkspaceSidebar() {
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke website</span>
         </Link>
+
+        {/* User Account & Logout */}
+        <div className="pt-2 border-t border-[#1B1E2C]/80">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <div className="truncate mr-2">
+              <div className="text-xs font-semibold text-[#F4F5FA] truncate">
+                {user?.name || user?.full_name || (isOrganizer ? 'Organizer' : 'Administrator')}
+              </div>
+              <div className="text-[11px] text-[#7F89A0] truncate">
+                {user?.email || 'admin@conserid.com'}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            type="button"
+            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg text-xs font-medium text-[#EF4444] hover:bg-[#45121A]/40 border border-transparent hover:border-[#F87171]/20 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Keluar dari Akun</span>
+          </button>
+        </div>
 
         <div className="text-center text-[11px] text-[#7F89A0]">ConserId © 2026</div>
       </div>
