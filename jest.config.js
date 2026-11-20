@@ -25,6 +25,8 @@ const customJestConfig = {
     'src/stores/**/*.{ts,tsx}',
     'src/services/**/*.{ts,tsx}',
     '!src/services/mockData.ts',
+    // Loader GSAP khusus browser.
+    '!src/lib/gsap.ts',
     '!**/*.test.{ts,tsx}',
     '!**/__tests__/**',
   ],

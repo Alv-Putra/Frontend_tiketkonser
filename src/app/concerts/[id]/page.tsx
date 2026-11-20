@@ -405,7 +405,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
       <header className="sticky top-0 z-40 bg-[#09090B]/90 backdrop-blur-md border-b border-[#27272A]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link
-            href="/#jelajahi"
+            href="/#event"
             className="inline-flex items-center gap-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#FFFFFF] transition-colors py-2 px-3 rounded-lg hover:bg-[#141417]"
           >
             <ArrowLeft className="w-4 h-4 text-[#FF7A00]" />

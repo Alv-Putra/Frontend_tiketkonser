@@ -22,3 +22,33 @@ jest.mock('next/navigation', () => {
     redirect: jest.fn(),
   };
 });
+// Polyfill untuk jsdom.
+if (typeof window !== 'undefined') {
+  if (!window.matchMedia) {
+    window.matchMedia = (query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    });
+  }
+  if (!window.IntersectionObserver) {
+    window.IntersectionObserver = class {
+      constructor(callback) {
+        this.callback = callback;
+      }
+      observe(target) {
+        this.callback([{ isIntersecting: true, intersectionRatio: 1, target }], this);
+      }
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    };
+  }
+}

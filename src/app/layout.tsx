@@ -8,11 +8,13 @@ const ptSans = PT_Sans({
   subsets: ['latin'],
   variable: '--font-pt-sans',
   display: 'swap',
+  // Tidak di-preload: landing memakai font lain.
+  preload: false,
 });
 
 export const metadata = {
-  title: 'ConserId - Platform Tiket Konser & Festival Musik Resmi',
-  description: 'Satu tiket. Seribu cerita. Temukan konser favoritmu, beli tiket resmi dengan mudah dan aman.',
+  title: 'Tixo — Tiket konser favoritmu',
+  description: 'Beli tiket konser resmi lewat app Tixo, atau jadi organizer dan jual tiket acaramu.',
 };
 
 export default function RootLayout({
