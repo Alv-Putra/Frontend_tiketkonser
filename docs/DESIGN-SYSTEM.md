@@ -199,6 +199,18 @@ useGsap(({ gsap }) => {
 - **Durasi:** mikro-interaksi 0,2–0,35 dtk; elemen masuk 0,6–1,2 dtk; loop latar 5–40 dtk (pelan).
 - **Masuk bertahap:** jeda 0,06–0,1 dtk antar elemen (pakai variabel `--d` seperti di login admin).
 
+### Skills design pendukung
+
+Untuk AI agent / workflow desain, pakai skill populer ini (detail pemasangan di [`AGENTS.md`](../AGENTS.md)):
+
+- **`frontend-design`** (Anthropic) — arah visual & tipografi saat membuat atau mendesain ulang UI.
+- **`web-design-guidelines`** (Vercel) — review aksesibilitas & UX setelah UI jadi.
+- **`vercel-react-best-practices`** (Vercel) — performa komponen React/Next.js.
+- **`webapp-testing`** (Anthropic) — cek tampilan di browser dengan Playwright.
+- **`ui-ux-pro-max`** — referensi pola UX & chart; abaikan palet/font bawaannya.
+
+Skill membantu proses; **aturan di dokumen ini tetap yang berlaku** (palet Neon Blaze, Bricolage + Spline, animasi ringan).
+
 ---
 
 ## 7. Gambar
@@ -225,6 +237,7 @@ useGsap(({ gsap }) => {
 - [ ] Judul memakai `font-display`; halaman dibungkus `brandFonts`.
 - [ ] Animasi hanya `transform`/`opacity`, tanpa `blur`/`backdrop-blur`.
 - [ ] Loop berhenti saat tidak terlihat; ada fallback reduce motion.
+- [ ] Sudah direview dengan `web-design-guidelines` (aksesibilitas & UX).
 - [ ] Tampilan dicek di lebar 390 px (mobile) tanpa scroll horizontal.
 - [ ] `npm test`, `npx eslint src`, dan `npx tsc --noEmit` bersih.
 
