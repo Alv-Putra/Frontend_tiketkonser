@@ -1,7 +1,4 @@
-/**
- * Teks yang "menggulung" saat elemen induk (class `group`) di-hover:
- * salinan atas naik keluar, salinan bawah naik masuk. Murni CSS, tanpa JavaScript.
- */
+/** Teks menggulung saat induk `group` di-hover (CSS). */
 export default function TextRoll({ children, className = '' }: { children: string; className?: string }) {
   return (
     <span className={`relative inline-flex overflow-hidden ${className}`}>

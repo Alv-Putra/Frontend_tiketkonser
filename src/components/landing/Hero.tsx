@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { m, useMotionValue, useSpring } from 'framer-motion';
-import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 import { BAND_PHOTOS } from './data';
 import DemoQR from './DemoQR';
 import { Magnetic } from './motion';
@@ -14,6 +14,8 @@ import TextRoll from './TextRoll';
 function SpinSticker() {
   return (
     <div data-hero="sticker" className="absolute -left-6 top-6 z-30 h-28 w-28 sm:-left-10 sm:h-32 sm:w-32">
+      {/* Intro CSS terpisah dari transform GSAP */}
+      <div className="hero-pop relative h-full w-full" style={{ ['--d' as string]: '0.8s' }}>
       <svg data-hero="sticker-ring" viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
         <defs>
           <path id="sticker-circle" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
@@ -24,6 +26,7 @@ function SpinSticker() {
         </text>
       </svg>
       <span className="absolute inset-0 grid place-items-center font-display text-3xl font-extrabold text-ink">★</span>
+      </div>
     </div>
   );
 }
@@ -48,7 +51,7 @@ function PhoneTicket() {
         </div>
         <div className="mx-4 border-t-2 border-dashed border-ink/40" />
         <div className="flex items-center gap-3 p-4">
-          <div data-hero="qr" className="overflow-hidden rounded-lg">
+          <div data-hero="qr" className="hero-pop overflow-hidden rounded-lg" style={{ ['--d' as string]: '0.95s' }}>
             <DemoQR size={76} />
           </div>
           <div className="text-[10px] font-bold uppercase leading-relaxed tracking-wider">
@@ -75,9 +78,10 @@ function PhoneTicket() {
 
 function Polaroid({ index, className, tilt }: { index: number; className: string; tilt: string }) {
   const photo = BAND_PHOTOS[index];
-  // Wrapper luar: parallax (GSAP). Tengah: melayang (GSAP). Figure: miring & hover (Framer).
+  // Satu lapisan per sistem animasi: parallax > intro > melayang > hover.
   return (
     <div data-hero="polaroid" className={`absolute z-10 ${className}`}>
+      <div className="hero-pop" style={{ ['--d' as string]: `${0.6 + index * 0.12}s` }}>
       <div data-hero="float">
         <m.figure
           initial={{ rotate: tilt }}
@@ -100,11 +104,12 @@ function Polaroid({ index, className, tilt }: { index: number; className: string
           </figcaption>
         </m.figure>
       </div>
+      </div>
     </div>
   );
 }
 
-// Lampu sorot: kerucut gradien tanpa filter blur. Hanya transform yang dianimasikan.
+// Lampu sorot (tanpa blur).
 const BEAMS = ['left-[14%]', 'left-[78%]'];
 const beamStyle = {
   background: 'linear-gradient(to bottom, rgba(255,122,0,0.22), rgba(255,77,0,0.05) 55%, transparent 85%)',
@@ -114,55 +119,41 @@ const beamStyle = {
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        // 1) Intro: judul naik dari balik masker, lalu panggung "jatuh" ke tempatnya.
-        const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-        tl.from('[data-hero="beam"]', { scaleY: 0, opacity: 0, transformOrigin: '50% 0%', duration: 1.2, stagger: 0.15 }, 0)
-          .from('[data-hero="eyebrow"]', { y: 24, opacity: 0, rotate: -8, duration: 0.7 }, 0.05)
-          .from('[data-hero="line"]', { yPercent: 110, rotate: 4, duration: 1, stagger: 0.1 }, 0.1)
-          .from('[data-hero="badge"]', { scaleX: 0, transformOrigin: 'left center', duration: 0.6, ease: 'back.out(2)' }, 0.45)
-          .from('[data-hero="fade"]', { y: 24, opacity: 0, duration: 0.8, stagger: 0.08 }, 0.5)
-          .from('[data-hero="phone"]', { y: 280, rotate: 20, opacity: 0, duration: 1.2 }, 0.25)
-          .from('[data-hero="qr"]', { scale: 0, rotate: -90, duration: 0.7, ease: 'back.out(2.2)' }, 0.9)
-          .from('[data-hero="polaroid"]', { scale: 0, rotate: (i) => (i ? 30 : -30), duration: 0.9, ease: 'back.out(1.6)', stagger: 0.12 }, 0.6)
-          .from('[data-hero="sticker"]', { scale: 0, rotate: -180, duration: 1, ease: 'back.out(1.8)' }, 0.8);
-
-        // 2) Gerak terus-menerus, dijeda otomatis saat hero tidak terlihat.
-        const loops = [
-          gsap.to('[data-hero="sticker-ring"]', { rotate: 360, duration: 14, ease: 'none', repeat: -1, transformOrigin: '50% 50%' }),
-          ...gsap.utils.toArray<HTMLElement>('[data-hero="float"]').map((el, i) =>
-            gsap.to(el, { y: -14, duration: 2.6 + i * 0.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.4 })
-          ),
-          ...gsap.utils.toArray<HTMLElement>('[data-hero="beam"]').map((el, i) =>
-            gsap.fromTo(
-              el,
-              { rotate: i ? 12 : -12 },
-              { rotate: i ? -8 : 8, duration: 5 + i * 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1 }
-            )
-          ),
-        ];
-        ScrollTrigger.create({
-          trigger: root.current,
-          start: 'top bottom',
-          end: 'bottom top',
-          onToggle: (self) => loops.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-        });
-
-        // 3) Parallax saat scroll keluar dari hero.
-        const scrub = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 };
-        gsap.to('[data-hero="phone"]', { y: -140, rotate: -8, ease: 'none', scrollTrigger: scrub });
-        gsap.to('[data-hero="polaroid"]', { y: (i) => (i === 0 ? -240 : 150), ease: 'none', scrollTrigger: scrub });
-        gsap.to('[data-hero="sticker"]', { y: -180, scale: 1.25, ease: 'none', scrollTrigger: scrub });
-        gsap.to('[data-hero="line-shift"]', { x: (i) => (i % 2 === 0 ? -70 : 70), ease: 'none', scrollTrigger: scrub });
+  useGsap(
+    ({ gsap, ScrollTrigger }) => {
+      // Intro memakai CSS (.hero-* di globals.css).
+      // Loop, dijeda saat hero tidak terlihat.
+      const loops = [
+        gsap.to('[data-hero="sticker-ring"]', { rotate: 360, duration: 14, ease: 'none', repeat: -1, transformOrigin: '50% 50%' }),
+        ...gsap.utils.toArray<HTMLElement>('[data-hero="float"]').map((el, i) =>
+          gsap.to(el, { y: -14, duration: 2.6 + i * 0.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.4 })
+        ),
+        ...gsap.utils.toArray<HTMLElement>('[data-hero="beam"]').map((el, i) =>
+          gsap.fromTo(
+            el,
+            { rotate: i ? 12 : -12 },
+            { rotate: i ? -8 : 8, duration: 5 + i * 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1 }
+          )
+        ),
+      ];
+      ScrollTrigger.create({
+        trigger: root.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: (self) => loops.forEach((t) => (self.isActive ? t.resume() : t.pause())),
       });
+
+      // Parallax saat scroll.
+      const scrub = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 };
+      gsap.to('[data-hero="phone"]', { y: -140, rotate: -8, ease: 'none', scrollTrigger: scrub });
+      gsap.to('[data-hero="polaroid"]', { y: (i) => (i === 0 ? -240 : 150), ease: 'none', scrollTrigger: scrub });
+      gsap.to('[data-hero="sticker"]', { y: -180, scale: 1.25, ease: 'none', scrollTrigger: scrub });
+      gsap.to('[data-hero="line-shift"]', { x: (i) => (i % 2 === 0 ? -70 : 70), ease: 'none', scrollTrigger: scrub });
     },
-    { scope: root }
+    root
   );
 
-  // Spotlight kursor: elemen kecil yang digeser lewat transform (tanpa repaint seluruh section).
+  // Spotlight mengikuti kursor.
   const mx = useSpring(useMotionValue(-600), { stiffness: 150, damping: 22 });
   const my = useSpring(useMotionValue(-600), { stiffness: 150, damping: 22 });
 
@@ -177,7 +168,7 @@ export default function Hero() {
       }}
       className="grain relative overflow-hidden border-b border-line"
       style={{
-        // Cahaya panggung statis: gradien murah, tanpa filter blur.
+        // Cahaya panggung statis.
         backgroundImage:
           'radial-gradient(600px 480px at 92% 8%, rgba(255,77,0,0.22), transparent 70%), radial-gradient(520px 420px at 0% 100%, rgba(255,122,0,0.12), transparent 70%)',
       }}
@@ -193,7 +184,7 @@ export default function Hero() {
           key={pos}
           aria-hidden
           data-hero="beam"
-          className={`pointer-events-none absolute -top-16 ${pos} hidden h-[120%] w-56 origin-top will-change-transform md:block`}
+          className={`hero-fade-in pointer-events-none absolute -top-16 ${pos} hidden h-[120%] w-56 origin-top will-change-transform md:block`}
           style={beamStyle}
         />
       ))}
@@ -202,7 +193,7 @@ export default function Hero() {
         <div>
           <p
             data-hero="eyebrow"
-            className="inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-tangerine px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-tangerine"
+            className="hero-fade inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-tangerine px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-tangerine"
           >
             <span className="h-2 w-2 animate-pulse rounded-full bg-blaze" />
             Musim <RotatingWord words={['konser', 'festival', 'tur', 'gig']} className="text-white" /> sudah mulai
@@ -210,30 +201,30 @@ export default function Hero() {
 
           <h1 className="mt-6 font-display text-[clamp(3rem,9vw,7.5rem)] font-extrabold uppercase leading-[0.86] tracking-tight">
             <span data-hero="line-shift" className="block overflow-hidden pb-[0.06em]">
-              <span data-hero="line" className="block">
+              <span data-hero="line" className="hero-rise block" style={{ ['--d' as string]: '0.1s' }}>
                 Jangan cuma
               </span>
             </span>{' '}
             <span data-hero="line-shift" className="block overflow-hidden px-1 py-[0.06em]">
-              <span data-hero="line" className="block">
-                <span data-hero="badge" className="relative inline-block -rotate-2 bg-blaze px-3 text-ink">
+              <span data-hero="line" className="hero-rise block" style={{ ['--d' as string]: '0.2s' }}>
+                <span data-hero="badge" className="hero-stretch relative inline-block -rotate-2 bg-blaze px-3 text-ink">
                   nonton
                 </span>
               </span>
             </span>{' '}
             <span data-hero="line-shift" className="block overflow-hidden pb-[0.06em]">
-              <span data-hero="line" className="block">
+              <span data-hero="line" className="hero-rise block" style={{ ['--d' as string]: '0.3s' }}>
                 <span className="text-outline">story</span> orang.
               </span>
             </span>
           </h1>
 
-          <p data-hero="fade" className="mt-7 max-w-xl text-lg leading-relaxed text-mute">
+          <p data-hero="fade" style={{ ['--d' as string]: '0.50s' }} className="hero-fade mt-7 max-w-xl text-lg leading-relaxed text-mute">
             Tixo menaruhmu di barisan depan. Beli tiket resmi lewat app dalam beberapa tap, atau buka panggungmu
             sendiri sebagai organizer dan jual tiket ke ribuan penonton.
           </p>
 
-          <div data-hero="fade" className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <div data-hero="fade" style={{ ['--d' as string]: '0.58s' }} className="hero-fade mt-9 flex flex-col gap-3 sm:flex-row">
             <Magnetic className="w-full sm:w-auto">
               <a
                 href="#penonton"
@@ -254,7 +245,7 @@ export default function Hero() {
             </Magnetic>
           </div>
 
-          <dl data-hero="fade" className="mt-12 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-6">
+          <dl data-hero="fade" style={{ ['--d' as string]: '0.66s' }} className="hero-fade mt-12 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-6">
             {[
               ['100%', 'Tiket resmi'],
               ['< 1 mnt', 'Checkout'],
@@ -272,7 +263,7 @@ export default function Hero() {
           <SpinSticker />
           <Polaroid index={0} tilt="-9deg" className="-left-2 bottom-16 sm:left-0" />
           <Polaroid index={2} tilt="8deg" className="-right-2 top-4 sm:right-0" />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="hero-drop absolute inset-0 flex items-center justify-center" style={{ ['--d' as string]: '0.25s' }}>
             <PhoneTicket />
           </div>
         </div>

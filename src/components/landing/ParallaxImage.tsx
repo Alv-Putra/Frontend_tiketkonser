@@ -2,9 +2,9 @@
 
 import { useRef } from 'react';
 import Image from 'next/image';
-import { gsap, MOTION_OK, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 
-/** Foto yang bergeser lebih lambat dari scroll di dalam bingkainya (GSAP scrub). */
+/** Foto dengan efek parallax. */
 export default function ParallaxImage({
   src,
   alt,
@@ -20,30 +20,27 @@ export default function ParallaxImage({
 }) {
   const frame = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.fromTo(
-          '[data-parallax="img"]',
-          { yPercent: -12, scale: 1.25 },
-          {
-            yPercent: 12,
-            scale: 1.1,
-            ease: 'none',
-            scrollTrigger: { trigger: frame.current, start: 'top bottom', end: 'bottom top', scrub: true },
-          }
-        );
-        gsap.from(frame.current, {
-          scale: 0.86,
-          opacity: 0,
-          duration: 1.2,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: frame.current, start: 'top 80%', once: true },
-        });
+  useGsap(
+    ({ gsap }) => {
+      gsap.fromTo(
+        '[data-parallax="img"]',
+        { yPercent: -12, scale: 1.25 },
+        {
+          yPercent: 12,
+          scale: 1.1,
+          ease: 'none',
+          scrollTrigger: { trigger: frame.current, start: 'top bottom', end: 'bottom top', scrub: true },
+        }
+      );
+      gsap.from(frame.current, {
+        scale: 0.86,
+        opacity: 0,
+        duration: 1.2,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: frame.current, start: 'top 80%', once: true },
       });
     },
-    { scope: frame }
+    frame
   );
 
   return (

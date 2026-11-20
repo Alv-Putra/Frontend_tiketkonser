@@ -8,6 +8,8 @@ const ptSans = PT_Sans({
   subsets: ['latin'],
   variable: '--font-pt-sans',
   display: 'swap',
+  // Tidak di-preload: landing memakai font lain.
+  preload: false,
 });
 
 export const metadata = {

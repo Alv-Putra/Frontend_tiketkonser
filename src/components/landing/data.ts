@@ -1,9 +1,6 @@
 // Konten statis landing page Tixo.
 
-/**
- * Tautan unduh app Tixo. Isi saat app sudah terbit di toko;
- * selama masih `null`, tombol tampil sebagai "Segera hadir".
- */
+/** Link unduh app; `null` = "Segera hadir". */
 export const APP_LINKS: { playStore: string | null; appStore: string | null } = {
   playStore: null,
   appStore: null,
@@ -21,7 +18,7 @@ export interface BandPhoto {
   source: string;
 }
 
-// Foto Wikimedia Commons (CC). Atribusi ditampilkan di footer.
+// Foto band (kredit: docs/photo-credits.md).
 export const BAND_PHOTOS: BandPhoto[] = [
   {
     name: 'Slank',
@@ -116,7 +113,7 @@ export interface EventPhoto {
   source: string;
 }
 
-// Foto sampul tiket: JPEG 640×400 terkompresi (14–60 KB), dari Wikimedia Commons.
+// Foto sampul tiket (JPEG 640×400).
 const PHOTO: Record<string, EventPhoto> = {
   'rock-revolution': { src: '/images/events/rock-revolution.jpg', credit: 'Raph_PH', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:GunsNRoses160617-61_(35271773841).jpg' },
   'java-jazz': { src: '/images/events/java-jazz.jpg', credit: 'Azwari Nugraha', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Hubert_Laws_at_the_Jakarta_International_Java_Jazz_Festival_2010.jpg' },
@@ -130,9 +127,9 @@ const PHOTO: Record<string, EventPhoto> = {
   'stadium-stage': { src: '/images/events/stadium-stage.jpg', credit: 'Ian Hughes', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Guns_n_Roses_concert_at_Tottenham_July_2022.jpg' },
 };
 
-// Event yang dikenal dipasangkan dengan foto artis/panggung yang sesuai.
+// Pasangan event → foto.
 const PHOTO_RULES: [RegExp, string][] = [
-  // Urutan penting: judul spesifik lebih dulu (Java Jazz di data mock juga mencantumkan Guns N Roses).
+  // Java Jazz harus lebih dulu (artisnya Guns N Roses).
   [/java jazz/i, 'java-jazz'],
   [/rock revolution|guns n/i, 'rock-revolution'],
   [/coldplay/i, 'coldplay'],
@@ -145,7 +142,7 @@ const PHOTO_RULES: [RegExp, string][] = [
   [/soundrenaline/i, 'crowd-lights'],
 ];
 
-// Cadangan untuk event lain (mis. event baru dari backend), dipilih stabil berdasarkan judul.
+// Foto cadangan untuk event lain.
 const FALLBACK = ['live-band-night', 'summer-festival', 'stadium-stage', 'crowd-lights', 'dj-stage'];
 
 export function photoForEvent(event: { title?: string; artist?: string; genre?: string }): EventPhoto {

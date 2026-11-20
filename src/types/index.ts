@@ -1,6 +1,4 @@
-// Tipe domain bersama untuk store, service, dan komponen.
-// Bentuk data dari backend belum seragam, jadi field opsional diberi `?`
-// dan objek mentah dari API memakai `ApiRecord`.
+// Tipe domain bersama.
 
 export type ApiRecord = Record<string, any>;
 

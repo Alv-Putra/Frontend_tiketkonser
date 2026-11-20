@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
-import { gsap, MOTION_OK, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 import { ORGANIZER_HREF } from './data';
 import { Magnetic } from './motion';
 import TextRoll from './TextRoll';
@@ -18,29 +18,26 @@ const LINES = [
 export default function FinalCta() {
   const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        // Baris meluncur bergantian dari kiri & kanan, terkunci di tengah saat scroll.
-        gsap.from('[data-cta="line"]', {
-          xPercent: (i) => (i % 2 ? 60 : -60),
-          rotate: (i) => (i % 2 ? 6 : -6),
-          opacity: 0,
-          ease: 'none',
-          stagger: 0.1,
-          scrollTrigger: { trigger: root.current, start: 'top 85%', end: 'center 55%', scrub: 0.9 },
-        });
-        gsap.from('[data-cta="actions"]', {
-          y: 60,
-          opacity: 0,
-          duration: 1,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: '[data-cta="actions"]', start: 'top 92%', once: true },
-        });
+  useGsap(
+    ({ gsap }) => {
+      // Baris meluncur dari kiri & kanan.
+      gsap.from('[data-cta="line"]', {
+        xPercent: (i) => (i % 2 ? 60 : -60),
+        rotate: (i) => (i % 2 ? 6 : -6),
+        opacity: 0,
+        ease: 'none',
+        stagger: 0.1,
+        scrollTrigger: { trigger: root.current, start: 'top 85%', end: 'center 55%', scrub: 0.9 },
+      });
+      gsap.from('[data-cta="actions"]', {
+        y: 60,
+        opacity: 0,
+        duration: 1,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: '[data-cta="actions"]', start: 'top 92%', once: true },
       });
     },
-    { scope: root }
+    root
   );
 
   return (

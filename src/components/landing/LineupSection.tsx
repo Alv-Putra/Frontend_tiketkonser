@@ -14,7 +14,7 @@ const ROWS = [
   { photo: 3, tag: 'Pop · sejak 1996' },
 ];
 
-/** Daftar nama raksasa; foto band muncul dan mengikuti kursor saat baris di-hover. */
+/** Nama band; foto mengikuti kursor saat hover. */
 export default function LineupSection() {
   const [active, setActive] = useState<number | null>(null);
   const x = useSpring(useMotionValue(0), { stiffness: 260, damping: 26, mass: 0.6 });
@@ -82,7 +82,7 @@ export default function LineupSection() {
             );
           })}
 
-          {/* Foto melayang mengikuti kursor (hanya perangkat dengan hover). */}
+          {/* Foto mengikuti kursor */}
           <m.div
             aria-hidden
             className="pointer-events-none absolute left-0 top-0 z-10 hidden [@media(hover:hover)]:block"

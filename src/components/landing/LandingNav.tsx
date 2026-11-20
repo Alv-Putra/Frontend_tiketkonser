@@ -15,7 +15,7 @@ const LINKS = [
   { id: 'organizer', label: 'Organizer' },
 ];
 
-/** Section yang sedang dibaca, untuk menandai link aktif. */
+/** Section yang sedang dibaca. */
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
   useEffect(() => {
@@ -42,10 +42,9 @@ export default function LandingNav() {
   const { scrollY, scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, restDelta: 0.001 });
 
-  // Setelah lewat bagian atas halaman, navbar mengecil (tetap terlihat).
+  // Navbar mengecil saat di-scroll.
   useMotionValueEvent(scrollY, 'change', (y) => {
     const next = y > 40;
-    // Hanya render ulang saat status benar-benar berubah, bukan tiap frame scroll.
     setCompact((prev) => (prev === next ? prev : next));
   });
 
@@ -137,7 +136,7 @@ export default function LandingNav() {
         </nav>
       </header>
 
-      {/* Menu mobile layar penuh: terbuka melingkar dari tombol, link besar muncul bergantian */}
+      {/* Menu mobile */}
       <AnimatePresence>
         {open && (
           <m.div

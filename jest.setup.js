@@ -22,7 +22,7 @@ jest.mock('next/navigation', () => {
     redirect: jest.fn(),
   };
 });
-// jsdom belum punya API ini; GSAP (matchMedia) dan Framer Motion (IntersectionObserver) membutuhkannya.
+// Polyfill untuk jsdom.
 if (typeof window !== 'undefined') {
   if (!window.matchMedia) {
     window.matchMedia = (query) => ({
@@ -37,7 +37,6 @@ if (typeof window !== 'undefined') {
     });
   }
   if (!window.IntersectionObserver) {
-    // Langsung melapor "terlihat" agar konten yang dimuat saat masuk viewport ikut dirender di test.
     window.IntersectionObserver = class {
       constructor(callback) {
         this.callback = callback;

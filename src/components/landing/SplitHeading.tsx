@@ -9,13 +9,9 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { gsap, MOTION_OK, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 
-/**
- * Bungkus setiap kata dalam masker (`overflow-hidden`) agar bisa naik dari bawah.
- * Dilakukan saat render (juga di server), jadi browser tidak perlu mengukur
- * tata letak seperti plugin SplitText. Elemen bersarang (mis. <span class>) tetap dipertahankan.
- */
+/** Bungkus tiap kata dalam masker agar bisa dianimasikan. */
 function splitWords(node: ReactNode, keyPrefix = 'w'): ReactNode {
   return Children.map(node, (child, i) => {
     if (typeof child === 'string') {
@@ -39,7 +35,7 @@ function splitWords(node: ReactNode, keyPrefix = 'w'): ReactNode {
   });
 }
 
-/** Judul yang katanya naik bergantian saat masuk viewport (GSAP + ScrollTrigger). */
+/** Judul yang katanya naik saat terlihat. */
 export default function SplitHeading({
   as: Tag = 'h2',
   children,
@@ -51,22 +47,19 @@ export default function SplitHeading({
 }) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from('[data-split-word]', {
-          yPercent: 110,
-          rotate: 6,
-          duration: 0.9,
-          ease: 'expo.out',
-          stagger: 0.06,
-          clearProps: 'transform,willChange',
-          scrollTrigger: { trigger: ref.current, start: 'top 88%', once: true },
-        });
+  useGsap(
+    ({ gsap }) => {
+      gsap.from('[data-split-word]', {
+        yPercent: 110,
+        rotate: 6,
+        duration: 0.9,
+        ease: 'expo.out',
+        stagger: 0.06,
+        clearProps: 'transform,willChange',
+        scrollTrigger: { trigger: ref.current, start: 'top 88%', once: true },
       });
     },
-    { scope: ref }
+    ref
   );
 
   return (

@@ -35,7 +35,7 @@ export function Reveal({
   );
 }
 
-/** Pembungkus yang "menempel" ke kursor seperti magnet. */
+/** Efek magnet ke kursor. */
 export function Magnetic({
   children,
   strength = 0.35,
@@ -75,7 +75,7 @@ export function Magnetic({
   );
 }
 
-/** Kartu yang miring 3D mengikuti posisi kursor. */
+/** Kartu miring 3D mengikuti kursor. */
 export function TiltCard({
   children,
   className = '',

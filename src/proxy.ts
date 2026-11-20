@@ -5,7 +5,6 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === '/festivals') {
-    // Daftar festival kini ada di section event landing page.
     return NextResponse.redirect(new URL('/#event', request.url));
   }
 

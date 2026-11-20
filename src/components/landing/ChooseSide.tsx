@@ -4,7 +4,7 @@ import { ORGANIZER_HREF } from './data';
 import { Reveal, TiltCard } from './motion';
 import SplitHeading from './SplitHeading';
 
-/** Dua jalur utama: penonton (beli tiket di app) dan organizer (jual tiket). */
+/** Jalur penonton & organizer. */
 export default function ChooseSide() {
   return (
     <section id="jalur" className="scroll-mt-24 border-b border-line py-20 sm:py-28">

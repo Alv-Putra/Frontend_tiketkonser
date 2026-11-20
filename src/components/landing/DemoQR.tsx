@@ -1,8 +1,4 @@
-/**
- * Pola QR dekoratif untuk tiket contoh di hero. Bukan kode yang bisa dipindai;
- * dibuat deterministik (sama di server & browser) dalam satu <path> agar ringan,
- * tanpa memuat pustaka QR.
- */
+/** Pola QR dekoratif (tidak bisa dipindai). */
 const SIZE = 21;
 
 function buildPath(seed: number) {

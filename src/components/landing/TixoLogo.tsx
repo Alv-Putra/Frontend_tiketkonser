@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-/** Wordmark Tixo: huruf "o" dibuat seperti lubang sobekan tiket. */
+/** Logo Tixo. */
 export default function TixoLogo({ className = '' }: { className?: string }) {
   return (
     <Link

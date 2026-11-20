@@ -8,7 +8,7 @@ import { formatCurrency } from '@/lib/formatters';
 import type { Festival } from '@/types';
 import { photoForEvent } from './data';
 
-// Warna nama di atas foto bergantian agar deretan tiket tidak monoton.
+// Warna nama bergantian.
 const NAME_COLORS = ['text-white', 'text-blaze', 'text-paper', 'text-tangerine'];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -27,7 +27,7 @@ function dateParts(iso?: string) {
   };
 }
 
-/** Nama besar di poster: artis utama, atau judul tanpa embel-embel tahun/tur. */
+/** Nama besar di poster. */
 function posterName(event: Festival) {
   const base = (event.artist && event.artist.length <= 18 ? event.artist : event.title) || 'Live';
   return base.split(':')[0].replace(/\b(20\d\d|festival|tour|the)\b/gi, '').trim() || base;
@@ -47,7 +47,7 @@ export default function TicketCard({
   const { day, month, weekday, year } = dateParts(event.date);
   const status = STATUS_LABEL[event.ticketStatus as string];
   const name = posterName(event);
-  // Nama panjang dikecilkan agar tetap utuh di poster.
+  // Nama panjang dikecilkan.
   const nameSize = name.length > 16 ? 'text-[1.7rem]' : name.length > 10 ? 'text-[2.15rem]' : 'text-[2.8rem]';
   const code = `TX-${String(event.id).replace(/\W/g, '').slice(-4).toUpperCase().padStart(4, '0')}`;
 
@@ -68,7 +68,7 @@ export default function TicketCard({
         aria-label={`${event.title}, ${day} ${month} ${year}`}
         className="group block overflow-hidden rounded-[28px] bg-onyx ring-1 ring-line transition-[box-shadow] duration-300 hover:ring-2 hover:ring-blaze"
       >
-        {/* Poster foto (JPEG asli, tanpa konversi format) */}
+        {/* Poster foto */}
         <div className="relative h-48 overflow-hidden bg-line">
           <Image
             src={photo.src}

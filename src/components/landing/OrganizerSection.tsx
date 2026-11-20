@@ -4,48 +4,43 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { m, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, BarChart3, QrCode, Sparkles, Tags } from 'lucide-react';
-import { gsap, MOTION_OK, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 import { ORGANIZER_FEATURES, ORGANIZER_HREF } from './data';
 import { Magnetic, Reveal } from './motion';
 import SplitHeading from './SplitHeading';
 
 const ICONS = [Sparkles, Tags, BarChart3, QrCode];
-// Contoh penjualan harian (ilustrasi dashboard).
+// Data ilustrasi dashboard.
 const BARS = [32, 48, 41, 66, 58, 82, 74, 95, 88, 100];
 
 function DashboardMock() {
   const root = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: root.current, start: 'top 75%', end: 'center 45%', scrub: 0.8 },
-        });
-        tl.from('[data-bar]', { scaleY: 0, transformOrigin: 'bottom', stagger: 0.06, ease: 'power2.out' }, 0);
+  useGsap(
+    ({ gsap }) => {
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: root.current, start: 'top 75%', end: 'center 45%', scrub: 0.8 },
+      });
+      tl.from('[data-bar]', { scaleY: 0, transformOrigin: 'bottom', stagger: 0.06, ease: 'power2.out' }, 0);
 
-        // Angka menghitung naik sekali saat terlihat.
-        gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el) => {
-          const target = Number(el.dataset.count);
-          const prefix = el.dataset.prefix ?? '';
-          const suffix = el.dataset.suffix ?? '';
-          const counter = { v: 0 };
-          gsap.to(counter, {
-            v: target,
-            duration: 2,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
-            onUpdate: () => {
-              el.textContent = `${prefix}${Math.round(counter.v).toLocaleString('id-ID')}${suffix}`;
-            },
-          });
+      // Angka menghitung naik sekali saat terlihat.
+      gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el) => {
+        const target = Number(el.dataset.count);
+        const prefix = el.dataset.prefix ?? '';
+        const suffix = el.dataset.suffix ?? '';
+        const counter = { v: 0 };
+        gsap.to(counter, {
+          v: target,
+          duration: 2,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: root.current, start: 'top 75%', once: true },
+          onUpdate: () => {
+            el.textContent = `${prefix}${Math.round(counter.v).toLocaleString('id-ID')}${suffix}`;
+          },
         });
-
-        gsap.to('[data-live-dot]', { scale: 1.8, opacity: 0, duration: 1.2, repeat: -1, ease: 'power1.out' });
       });
     },
-    { scope: root }
+    root
   );
 
   return (
@@ -60,7 +55,7 @@ function DashboardMock() {
         </div>
         <span className="flex items-center gap-2 rounded-full bg-blaze/15 px-3 py-1 text-xs font-bold text-tangerine">
           <span className="relative flex h-2 w-2">
-            <span data-live-dot className="absolute inset-0 rounded-full bg-blaze" />
+            <span className="absolute inset-0 animate-ping rounded-full bg-blaze" />
             <span className="relative h-2 w-2 rounded-full bg-blaze" />
           </span>
           Live

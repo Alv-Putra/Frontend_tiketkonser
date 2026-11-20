@@ -1,11 +1,11 @@
 'use client';
 
 import { useRef } from 'react';
-import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from '@/lib/gsap';
+import { useGsap } from '@/lib/gsap';
 import { TAPE_WORDS } from './data';
 
 function Tape({ tone, className }: { tone: 'blaze' | 'paper'; className: string }) {
-  // Kata digandakan agar loop -50% menyambung tanpa jeda.
+  // Digandakan agar loop menyambung.
   const words = [...TAPE_WORDS, ...TAPE_WORDS];
   const colors = tone === 'blaze' ? 'bg-blaze text-ink' : 'bg-paper text-ink';
 
@@ -26,73 +26,66 @@ function Tape({ tone, className }: { tone: 'blaze' | 'paper'; className: string 
   );
 }
 
-/**
- * Dua pita "caution tape" bersilangan. GSAP menjalankan loop tanpa henti;
- * kecepatan scroll mempercepat, membalik arah, dan memiringkan pita.
- */
+/** Dua pita bersilangan yang bereaksi terhadap scroll. */
 export default function TapeMarquee() {
   const root = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const tracks = gsap.utils.toArray<HTMLElement>('[data-tape="track"]');
-        const loops = tracks.map((track, i) =>
-          gsap.fromTo(
-            track,
-            { xPercent: i === 0 ? -50 : 0 },
-            { xPercent: i === 0 ? 0 : -50, duration: 30 + i * 4, ease: 'none', repeat: -1, paused: true }
-          )
-        );
-
-        const skewTo = gsap.utils.toArray<HTMLElement>('[data-tape="track"]').map((el) =>
-          gsap.quickTo(el, 'skewX', { duration: 0.5, ease: 'power3.out' })
-        );
-
-        // Satu objek kecepatan untuk semua loop: lebih murah daripada membuat tween per event scroll.
-        const speed = { value: 1 };
-        const applySpeed = () => loops.forEach((loop) => loop.timeScale(speed.value));
-        let direction = 1;
-
-        // Saat scroll berhenti: pita kembali tegak dan kecepatan kembali normal.
-        const settle = gsap
-          .delayedCall(0.15, () => {
-            skewTo.forEach((fn) => fn(0));
-            gsap.to(speed, { value: direction, duration: 1.2, ease: 'power2.out', overwrite: true, onUpdate: applySpeed });
-          })
-          .pause();
-
-        ScrollTrigger.create({
-          trigger: root.current,
-          start: 'top bottom',
-          end: 'bottom top',
-          // Loop hanya berjalan saat pita terlihat.
-          onToggle: (self) => loops.forEach((loop) => (self.isActive ? loop.resume() : loop.pause())),
-          onUpdate: (self) => {
-            const velocity = self.getVelocity();
-            direction = self.direction;
-            const boost = gsap.utils.clamp(1, 6, 1 + Math.abs(velocity) / 400);
-            gsap.to(speed, { value: boost * direction, duration: 0.2, overwrite: true, onUpdate: applySpeed });
-            const skew = gsap.utils.clamp(-12, 12, velocity / -120);
-            skewTo.forEach((fn) => fn(skew));
-            settle.restart(true);
-          },
-        });
-
-        // Pita berputar saat melintasi layar. Nilai absolut: GSAP menggantikan rotasi CSS dasarnya.
+  useGsap(
+    ({ gsap, ScrollTrigger }) => {
+      const tracks = gsap.utils.toArray<HTMLElement>('[data-tape="track"]');
+      const loops = tracks.map((track, i) =>
         gsap.fromTo(
-          '[data-tape="band"]',
-          { rotate: (i) => (i === 0 ? 10 : -9) },
-          {
-            rotate: (i) => (i === 0 ? 5 : -4),
-            ease: 'none',
-            scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
-          }
-        );
+          track,
+          { xPercent: i === 0 ? -50 : 0 },
+          { xPercent: i === 0 ? 0 : -50, duration: 30 + i * 4, ease: 'none', repeat: -1, paused: true }
+        )
+      );
+
+      const skewTo = gsap.utils.toArray<HTMLElement>('[data-tape="track"]').map((el) =>
+        gsap.quickTo(el, 'skewX', { duration: 0.5, ease: 'power3.out' })
+      );
+
+      // Satu objek kecepatan untuk semua loop.
+      const speed = { value: 1 };
+      const applySpeed = () => loops.forEach((loop) => loop.timeScale(speed.value));
+      let direction = 1;
+
+      // Kembali normal saat scroll berhenti.
+      const settle = gsap
+        .delayedCall(0.15, () => {
+          skewTo.forEach((fn) => fn(0));
+          gsap.to(speed, { value: direction, duration: 1.2, ease: 'power2.out', overwrite: true, onUpdate: applySpeed });
+        })
+        .pause();
+
+      ScrollTrigger.create({
+        trigger: root.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: (self) => loops.forEach((loop) => (self.isActive ? loop.resume() : loop.pause())),
+        onUpdate: (self) => {
+          const velocity = self.getVelocity();
+          direction = self.direction;
+          const boost = gsap.utils.clamp(1, 6, 1 + Math.abs(velocity) / 400);
+          gsap.to(speed, { value: boost * direction, duration: 0.2, overwrite: true, onUpdate: applySpeed });
+          const skew = gsap.utils.clamp(-12, 12, velocity / -120);
+          skewTo.forEach((fn) => fn(skew));
+          settle.restart(true);
+        },
       });
+
+      // Pita berputar saat melintasi layar.
+      gsap.fromTo(
+        '[data-tape="band"]',
+        { rotate: (i) => (i === 0 ? 10 : -9) },
+        {
+          rotate: (i) => (i === 0 ? 5 : -4),
+          ease: 'none',
+          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
+        }
+      );
     },
-    { scope: root }
+    root
   );
 
   return (

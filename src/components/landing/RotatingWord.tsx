@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 
-/** Kata yang berganti bergiliran dengan efek naik-masuk / naik-keluar. */
+/** Kata yang berganti bergiliran. */
 export default function RotatingWord({
   words,
   interval = 2200,
@@ -19,7 +19,6 @@ export default function RotatingWord({
   useEffect(() => {
     if (reduce) return;
     const id = window.setInterval(() => {
-      // Tidak perlu berganti saat tab tidak terlihat.
       if (!document.hidden) setIndex((i) => (i + 1) % words.length);
     }, interval);
     return () => window.clearInterval(id);
@@ -27,7 +26,7 @@ export default function RotatingWord({
 
   return (
     <span className={`relative inline-grid justify-items-center overflow-hidden align-bottom ${className}`}>
-      {/* Kata terpanjang menjaga lebar agar teks di sekitarnya tidak bergeser. */}
+      {/* Penjaga lebar */}
       <span aria-hidden className="invisible col-start-1 row-start-1">
         {words.reduce((a, b) => (b.length > a.length ? b : a))}
       </span>

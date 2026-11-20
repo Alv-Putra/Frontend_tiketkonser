@@ -10,12 +10,8 @@ const MIN_EVENTS = 8;
 const MAX_EVENTS = 12;
 const ALL = 'Semua';
 
-/**
- * Event dari backend ditampilkan lebih dulu. Bila jumlahnya sedikit,
- * dilengkapi event tayang dari data lokal agar etalase tidak kosong.
- */
+/** Event backend lebih dulu, dilengkapi data lokal bila sedikit. */
 async function loadEvents(): Promise<Festival[]> {
-  // Dimuat saat dibutuhkan agar data mock tidak ikut bundle awal halaman.
   const { default: festivalService } = await import('@/services/festivalService');
   const [live, local] = await Promise.all([
     festivalService.getPublishedFestivals({ useApi: true }).catch(() => [] as Festival[]),
@@ -42,8 +38,7 @@ export default function EventStubs() {
   const [events, setEvents] = useState<Festival[] | null>(null);
   const [genre, setGenre] = useState(ALL);
 
-  // Ambil event saat browser senggang (setelah konten utama tampil), agar data mock
-  // tidak membebani muatan awal halaman.
+  // Muat event saat browser senggang.
   useEffect(() => {
     let active = true;
     const start = () =>
@@ -60,7 +55,7 @@ export default function EventStubs() {
     };
   }, []);
 
-  // Kartu baru dianimasikan hanya setelah filter diganti (bukan saat pertama tampil).
+  // Animasi kartu hanya saat filter diganti.
   const [animateCards, setAnimateCards] = useState(false);
   const pickGenre = (g: string) => {
     setAnimateCards(true);
@@ -77,7 +72,7 @@ export default function EventStubs() {
     [events, genre]
   );
 
-  // Geser native (scroll-snap): tanpa pin atau animasi terikat scroll halaman.
+  // Geser native (scroll-snap).
   const [progress, setProgress] = useState(0);
   const onTrackScroll = () => {
     const el = track.current;
@@ -104,7 +99,7 @@ export default function EventStubs() {
           </p>
         </div>
 
-        {/* Filter genre: pil oranye meluncur ke genre aktif (Framer layoutId). */}
+        {/* Filter genre */}
         <div role="tablist" aria-label="Filter genre" className="no-scrollbar mt-8 flex gap-2 overflow-x-auto pb-1">
           {genres.map((g) => {
             const active = g === genre;
