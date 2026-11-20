@@ -73,6 +73,18 @@ describe('useAuthStore', () => {
     expect(useAuthStore.getState().isAuthenticated()).toBe(false);
   });
 
+  it('meneruskan error validasi per kolom dari backend', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        ok: false,
+        status: 400,
+        body: { success: false, message: 'Validasi gagal', errors: [{ field: 'email', message: 'Invalid email' }] },
+      })
+    );
+    const result = await useAuthStore.getState().login('salah', 'x');
+    expect(result).toMatchObject({ success: false, error: 'Validasi gagal', fieldErrors: { email: 'Invalid email' } });
+  });
+
   it('registers a user without auto-login', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse({

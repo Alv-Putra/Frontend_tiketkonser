@@ -51,15 +51,9 @@ function ResetPasswordContent() {
   const validateForm = () => {
     const newErrors: FormErrors = {};
 
-    // Check password strength
-    if (strengthIndex < 3) {
-      newErrors.password = 'Password terlalu lemah. Gunakan kombinasi huruf besar, kecil, dan angka.';
-    }
-
-    // Check confirm password
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Password tidak cocok';
-    }
+    // Aturan kekuatan password dicek backend; indikator di atas hanya petunjuk.
+    if (!password) newErrors.password = 'Password wajib diisi';
+    if (password !== confirmPassword) newErrors.confirmPassword = 'Password tidak cocok';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

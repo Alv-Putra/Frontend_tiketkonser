@@ -98,3 +98,14 @@ export async function apiFetch(path: string, options: ApiFetchOptions = {}) {
 
   return payload && 'data' in payload ? payload.data : payload;
 }
+/** Ubah error validasi backend ([{ field, message }]) menjadi error per kolom form. */
+export function fieldErrorsFrom(error: unknown): Record<string, string> {
+  const list = error instanceof ApiError && Array.isArray(error.errors) ? error.errors : [];
+  const result: Record<string, string> = {};
+  for (const item of list) {
+    if (item && typeof item.field === 'string' && item.field && typeof item.message === 'string') {
+      result[item.field] = result[item.field] ?? item.message;
+    }
+  }
+  return result;
+}
