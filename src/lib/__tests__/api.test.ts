@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, buildUrl, clearSession, onUnauthorized } from '@/lib/api';
+import { ApiError, apiFetch, buildUrl, clearSession, fieldErrorsFrom, onUnauthorized } from '@/lib/api';
 import { StorageKeys, setItem, getItem } from '@/lib/storage';
 
 function jsonResponse({
@@ -234,5 +234,27 @@ describe('lib/api', () => {
       expect(getItem(StorageKeys.AUTH_TOKEN)).toBeNull();
       expect(getItem(StorageKeys.AUTH_USER)).toBeNull();
     });
+  });
+});
+
+describe('fieldErrorsFrom', () => {
+  it('memetakan error validasi backend ke kolom form', () => {
+    const error = new ApiError('Validasi gagal', {
+      status: 400,
+      errors: [
+        { field: 'email', message: 'Invalid email' },
+        { field: 'email', message: 'Pesan kedua diabaikan' },
+        { field: 'password', message: 'Too short' },
+        { field: '', message: 'tanpa kolom' },
+        { message: 'tanpa field' },
+        null,
+      ],
+    });
+    expect(fieldErrorsFrom(error)).toEqual({ email: 'Invalid email', password: 'Too short' });
+  });
+
+  it('mengembalikan objek kosong untuk error lain', () => {
+    expect(fieldErrorsFrom(new Error('x'))).toEqual({});
+    expect(fieldErrorsFrom(new ApiError('x'))).toEqual({});
   });
 });

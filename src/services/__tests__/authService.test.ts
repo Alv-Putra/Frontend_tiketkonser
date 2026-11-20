@@ -95,6 +95,37 @@ describe('authService', () => {
       expect(getItem(StorageKeys.AUTH_USER).role).toBe('admin');
     });
 
+    it('tanpa cadangan mock: akun mock tetap ditolak saat backend menolak', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse({ ok: false, status: 401, body: { success: false, message: 'Email Atau Password Salah' } })
+      );
+      await expect(authService.login('admin@conserid.com', 'Admin123', { mockFallback: false })).rejects.toThrow(
+        'Email Atau Password Salah'
+      );
+      expect(getItem(StorageKeys.AUTH_TOKEN)).toBeNull();
+    });
+
+    it('mengirim role ke backend agar akun role lain ditolak sebelum sesi dibuat', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse({ ok: false, status: 403, body: { success: false, message: 'Akun ini tidak memiliki akses admin' } })
+      );
+      await expect(
+        authService.login('buyer@mail.com', 'Password123', { mockFallback: false, role: 'admin' })
+      ).rejects.toThrow('Akun ini tidak memiliki akses admin');
+      expect(fetchMock.mock.calls[0][1].body).toBe(
+        JSON.stringify({ email: 'buyer@mail.com', password: 'Password123', role: 'admin' })
+      );
+      expect(getItem(StorageKeys.AUTH_TOKEN)).toBeNull();
+    });
+
+    it('tanpa cadangan mock: memberi pesan jelas saat backend tidak bisa dihubungi', async () => {
+      fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+      await expect(authService.login('admin@conserid.com', 'Admin123', { mockFallback: false })).rejects.toMatchObject({
+        code: 'NETWORK_ERROR',
+        message: 'Tidak dapat terhubung ke server. Pastikan backend sedang berjalan.',
+      });
+    });
+
     it('re-throws error when backend fails and credentials do not match mock user', async () => {
       fetchMock.mockRejectedValue(new Error('Backend offline'));
       await expect(authService.login('wrong@conserid.com', 'Admin123')).rejects.toThrow('Backend offline');

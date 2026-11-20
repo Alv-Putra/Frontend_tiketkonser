@@ -51,19 +51,12 @@ describe('AdminLoginPage component', () => {
     expect(screen.getByLabelText(/Email Administrator/i)).toBeInTheDocument();
     expect(screen.getByLabelText('Kata Sandi', { selector: 'input' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Masuk ke Admin Workspace/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Gunakan Akun Ini/i })).toBeInTheDocument();
   });
 
-  it('populates fields when "Gunakan Akun Ini" is clicked', () => {
+  it('tidak menampilkan kredensial bawaan', () => {
     render(<AdminLoginPage />);
-    const quickFillBtn = screen.getByRole('button', { name: /Gunakan Akun Ini/i });
-    fireEvent.click(quickFillBtn);
-
-    const emailInput = screen.getByLabelText(/Email Administrator/i) as HTMLInputElement;
-    const passwordInput = screen.getByLabelText('Kata Sandi', { selector: 'input' }) as HTMLInputElement;
-
-    expect(emailInput.value).toBe('admin@conserid.com');
-    expect(passwordInput.value).toBe('Admin123');
+    expect(screen.queryByRole('button', { name: /Gunakan Akun Ini/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Admin123/)).not.toBeInTheDocument();
   });
 
   it('toggles password visibility', () => {
@@ -99,14 +92,14 @@ describe('AdminLoginPage component', () => {
     });
 
     render(<AdminLoginPage />);
-    const quickFillBtn = screen.getByRole('button', { name: /Gunakan Akun Ini/i });
-    fireEvent.click(quickFillBtn);
+    fireEvent.change(screen.getByLabelText(/Email Administrator/i), { target: { value: 'admin@tixo.id' } });
+    fireEvent.change(screen.getByLabelText('Kata Sandi', { selector: 'input' }), { target: { value: 'Admin123' } });
 
     const submitBtn = screen.getByRole('button', { name: /Masuk ke Admin Workspace/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(loginMock).toHaveBeenCalledWith('admin@conserid.com', 'Admin123');
+      expect(loginMock).toHaveBeenCalledWith('admin@tixo.id', 'Admin123', { mockFallback: false, role: 'admin' });
       expect(mockReplace).toHaveBeenCalledWith('/admin');
     });
   });
@@ -146,8 +139,8 @@ describe('AdminLoginPage component', () => {
     });
 
     render(<AdminLoginPage />);
-    const quickFillBtn = screen.getByRole('button', { name: /Gunakan Akun Ini/i });
-    fireEvent.click(quickFillBtn);
+    fireEvent.change(screen.getByLabelText(/Email Administrator/i), { target: { value: 'admin@tixo.id' } });
+    fireEvent.change(screen.getByLabelText('Kata Sandi', { selector: 'input' }), { target: { value: 'Admin123' } });
 
     const submitBtn = screen.getByRole('button', { name: /Masuk ke Admin Workspace/i });
     fireEvent.click(submitBtn);

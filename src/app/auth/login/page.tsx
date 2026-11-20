@@ -63,6 +63,7 @@ export default function LoginPage() {
         router.push(redirect || '/');
       }
     } else {
+      setErrors(result.fieldErrors ?? {});
       setToast({ isOpen: true, type: 'error', message: result.error });
     }
   };

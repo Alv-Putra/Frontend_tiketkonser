@@ -70,6 +70,7 @@ export default function RegisterPage() {
     if (result.success) {
       router.push('/auth/login?registered=1');
     } else {
+      setErrors(result.fieldErrors ?? {});
       setToast({ isOpen: true, type: 'error', message: result.error });
     }
   };
