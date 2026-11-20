@@ -1,10 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
 
-/* ============================================================
-   ConserId Design System — palet Neon Blaze (selaras dengan app mobile)
-   Dark theme, crafted for concert & live music platform.
-   ============================================================ */
+/* Design system Tixo — palet Neon Blaze */
 @theme {
   --font-sans: var(--font-pt-sans, 'PT Sans'), 'PT Sans', system-ui, -apple-system, sans-serif;
 
@@ -39,6 +35,20 @@
   --color-status-danger: #FFA4B8;
   --color-status-danger-bg: #36202C;
 
+  /* Neon Blaze */
+  --color-ink: #09090B;
+  --color-onyx: #141417;
+  --color-line: #27272A;
+  --color-blaze: #FF4D00;
+  --color-tangerine: #FF7A00;
+  --color-mute: #A1A1AA;
+  --color-paper: #FFF4EC;
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee-reverse: marquee 32s linear infinite reverse;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
   /* Radii */
   --radius-xs: 6px;
   --radius-sm: 8px;
@@ -46,6 +56,12 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
+}
+
+/* Font landing (variabel dari next/font di page.tsx) */
+@theme inline {
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-body: var(--font-spline), system-ui, sans-serif;
 }
 
 @layer base {
@@ -85,7 +101,96 @@
   }
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--tilt, 0deg)); }
+}
+
+/* Intro hero (CSS, tanpa menunggu JS) */
+@keyframes hero-rise {
+  from { transform: translateY(110%) rotate(4deg); }
+}
+@keyframes hero-fade {
+  from { opacity: 0; transform: translateY(24px); }
+}
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+}
+@keyframes hero-stretch {
+  from { transform: scaleX(0); }
+}
+@keyframes hero-drop {
+  from { opacity: 0; transform: translateY(280px) rotate(20deg); }
+}
+@keyframes hero-pop {
+  0% { opacity: 0; transform: scale(0) rotate(-30deg); }
+  70% { opacity: 1; transform: scale(1.08) rotate(4deg); }
+}
+
+.hero-rise,
+.hero-fade,
+.hero-fade-in,
+.hero-stretch,
+.hero-drop,
+.hero-pop {
+  animation-duration: 1s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: backwards;
+  animation-delay: var(--d, 0s);
+}
+.hero-rise { animation-name: hero-rise; }
+.hero-fade { animation-name: hero-fade; animation-duration: 0.8s; }
+.hero-fade-in { animation-name: hero-fade-in; animation-duration: 1.4s; }
+.hero-stretch { animation-name: hero-stretch; animation-duration: 0.7s; transform-origin: left center; --d: 0.45s; }
+.hero-drop { animation-name: hero-drop; animation-duration: 1.2s; }
+.hero-pop { animation-name: hero-pop; animation-duration: 0.9s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .hero-fade,
+  .hero-fade-in,
+  .hero-stretch,
+  .hero-drop,
+  .hero-pop {
+    animation: none;
+  }
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-spin-slow,
+  .animate-float {
+    animation: none;
+  }
+}
+
 @layer utilities {
+  /* Tekstur grain */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Lubang sobekan tiket */
+  .ticket-notch {
+    -webkit-mask: radial-gradient(circle 14px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 14px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask: radial-gradient(circle 14px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 14px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--stroke, #FFFFFF);
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -96,9 +201,7 @@
   }
 }
 
-/* ============================================================
-   Typography: PT Sans (Harmonious & Unified)
-   ============================================================ */
+/* Tipografi PT Sans */
 .pt-sans-regular {
   font-family: "PT Sans", sans-serif;
   font-weight: 400;
