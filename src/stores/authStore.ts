@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import authService, { mapRole } from '@/services/authService';
-import { onUnauthorized } from '@/lib/api';
+import authService, { mapRole, type LoginOptions } from '@/services/authService';
+import { fieldErrorsFrom, onUnauthorized } from '@/lib/api';
 import { ROLES } from '@/lib/constants';
 import type { ActionResult, User } from '@/types';
 
@@ -10,7 +10,7 @@ export interface AuthState {
   isLoading: boolean;
   isHydrated: boolean;
   hydrate: () => void;
-  login: (email: string, password: string) => Promise<ActionResult>;
+  login: (email: string, password: string, options?: LoginOptions) => Promise<ActionResult>;
   register: (payload: { name?: string; fullName?: string; email: string; password: string }) => Promise<ActionResult>;
   logout: () => Promise<void>;
   logoutLocal: () => void;
@@ -46,15 +46,15 @@ export const useAuthStore = create<AuthState>()((set, get) => {
       set({ user, isHydrated: true });
     },
 
-    login: async (email, password) => {
+    login: async (email, password, options) => {
       set({ isLoading: true });
       try {
-        const { user, token } = await authService.login(email, password);
+        const { user, token } = await authService.login(email, password, options);
         set({ user, token, isLoading: false });
         return { success: true, user };
       } catch (error) {
         set({ isLoading: false });
-        return { success: false, error: error.message };
+        return { success: false, error: error.message, fieldErrors: fieldErrorsFrom(error) };
       }
     },
 
@@ -66,7 +66,7 @@ export const useAuthStore = create<AuthState>()((set, get) => {
         return { success: true, message: result.message, user: result.user };
       } catch (error) {
         set({ isLoading: false });
-        return { success: false, error: error.message };
+        return { success: false, error: error.message, fieldErrors: fieldErrorsFrom(error) };
       }
     },
 

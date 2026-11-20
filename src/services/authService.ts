@@ -1,5 +1,5 @@
 import { getItem, setItem, removeItem, StorageKeys } from '@/lib/storage';
-import { apiFetch, clearSession } from '@/lib/api';
+import { ApiError, apiFetch, clearSession } from '@/lib/api';
 import { mockUsers } from '@/services/mockData';
 
 const ROLE_BUYER_TO_CUSTOMER = 'customer';
@@ -51,19 +51,36 @@ export function decodeJwtPayload(token) {
   }
 }
 
+export interface LoginOptions {
+  /** false = hanya backend, tanpa cadangan akun mock (dipakai login admin). */
+  mockFallback?: boolean;
+  /** Minta backend menolak akun dengan role lain sebelum sesi dibuat. */
+  role?: 'admin' | 'organizer' | 'buyer';
+}
+
 export class AuthService {
-  async login(email, password) {
+  async login(email, password, { mockFallback = true, role }: LoginOptions = {}) {
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
         auth: false,
-        body: { email, password },
+        body: role ? { email, password, role } : { email, password },
       });
       const user = normalizeUser(data.user);
       setItem(StorageKeys.AUTH_TOKEN, data.accessToken);
       setItem(StorageKeys.AUTH_USER, user);
       return { user, token: data.accessToken };
     } catch (error) {
+      if (!mockFallback) {
+        // fetch gagal total (TypeError) = backend tidak bisa dihubungi.
+        if (error instanceof TypeError) {
+          throw new ApiError('Tidak dapat terhubung ke server. Pastikan backend sedang berjalan.', {
+            code: 'NETWORK_ERROR',
+            status: 0,
+          });
+        }
+        throw error;
+      }
       const normalizedEmail = (email || '').trim().toLowerCase();
       const mockUser = mockUsers.find(
         (u) => u.email.toLowerCase() === normalizedEmail && u.password === password
