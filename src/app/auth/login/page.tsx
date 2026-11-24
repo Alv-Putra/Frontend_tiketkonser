@@ -168,7 +168,14 @@ export default function LoginPage() {
                   Kirim ulang
                 </Link>
               </p>
-              <div className="mt-4 pt-4 border-t border-border/40">
+              <div className="mt-4 flex flex-col items-center gap-2 border-t border-border/40 pt-4">
+                <Link
+                  href="/organizer/login"
+                  className="text-xs text-text-muted hover:text-primary-accent inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <span>Masuk ke Organizer Workspace</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
                 <Link
                   href="/admin/login"
                   className="text-xs text-text-muted hover:text-primary-accent inline-flex items-center gap-1.5 transition-colors"

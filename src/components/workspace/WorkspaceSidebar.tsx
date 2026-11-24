@@ -78,7 +78,7 @@ export default function WorkspaceSidebar() {
     setTip({ label, top: rect.top + rect.height / 2, left: root.current.getBoundingClientRect().right + 10 });
   };
   const tipProps = (label: string) => ({ onMouseEnter: showTip(label), onFocus: showTip(label), onMouseLeave: () => setTip(null), onBlur: () => setTip(null) });
-  const logoutUser = async () => { await logout(); router.push(isOrganizer ? '/auth/login' : '/admin/login'); };
+  const logoutUser = async () => { await logout(); router.push(isOrganizer ? '/organizer/login' : '/admin/login'); };
 
   const rowClass = (active: boolean) =>
     `relative isolate flex h-10 items-center gap-3 rounded-xl text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blaze ${collapsed ? 'justify-center' : 'px-3'} ${active ? 'text-ink' : 'text-ink/60 hover:bg-ink/5 hover:text-ink'}`;

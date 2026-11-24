@@ -26,7 +26,7 @@ export default function WorkspaceTopBar() {
   const handleLogout = async () => {
     setProfileOpen(false);
     await logout();
-    router.push(isOrganizer ? '/auth/login' : '/admin/login');
+    router.push(isOrganizer ? '/organizer/login' : '/admin/login');
   };
 
   return (

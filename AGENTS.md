@@ -32,7 +32,7 @@ Package mgr:  npm (package-lock.json)
 - **Alur data:** `Page/Component → Store (Zustand) → Service → lib/api (apiFetch) → Backend`. Komponen tidak memanggil `fetch` langsung.
 - **Proxy API:** request ke `/api/*` diteruskan Next.js ke `${BACKEND_API_URL}/api/v1/*` (lihat `next.config.mjs`). Tidak perlu CORS. Default `BACKEND_API_URL=http://localhost:5000` (lihat `.env.example`).
 - **Validasi:** frontend hanya cek kolom wajib & kecocokan input (`src/lib/validators.ts`). Aturan format/kekuatan ada di backend; tampilkan error per kolom dengan `fieldErrorsFrom()` dari `src/lib/api.ts`.
-- **Auth:** access token & user disimpan di localStorage (`src/lib/storage.ts`), refresh token di cookie httpOnly dari backend. `/admin/*` dilindungi `src/app/admin/layout.tsx` (role admin); login admin memanggil backend dengan `role: 'admin'` dan **tanpa** cadangan mock.
+- **Auth:** access token & user disimpan di localStorage (`src/lib/storage.ts`), refresh token di cookie httpOnly dari backend. `/admin/*` dilindungi `src/app/admin/layout.tsx` (role admin); login admin dan organizer memakai UI Backstage bersama di `WorkspaceLogin`. Kedua login workspace mengirim role masing-masing ke backend tanpa cadangan mock. Akses organizer tanpa sesi dan aksi keluar organizer mengarah ke `/organizer/login`.
 - **Data mock:** `src/services/mockData.ts` + `storageService.ts` hanya cadangan saat backend kosong/mati (mis. etalase event di landing). Jangan pakai mock untuk autentikasi admin.
 - **Next.js 16:** file middleware bernama `src/proxy.ts` (bukan `middleware.ts`). Cek dokumentasi Next 16 sebelum memakai API yang mungkin berubah.
 
@@ -72,7 +72,7 @@ Frontend_tiketkonser/
 - File komponen/halaman `.tsx`, logika non-UI `.ts`. Nama komponen PascalCase, hook `useXxx`.
 - Test di folder `__tests__/` di samping kode (`*.test.ts(x)`).
 - Komponen yang dipakai lintas halaman masuk `components/`; helper lintas domain masuk `lib/`.
-- Animasi khusus satu halaman → CSS Module di folder halaman itu (contoh `src/app/admin/login/login.module.css`).
+- Animasi khusus satu halaman → CSS Module di folder halaman itu (contoh `src/components/workspace/login.module.css`).
 - Ikuti nama & pola yang sudah ada; bila contoh di dokumen ini berbeda dengan repo, **yang di repo yang menang**.
 
 ---

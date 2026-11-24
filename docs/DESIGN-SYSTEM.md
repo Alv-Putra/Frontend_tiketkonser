@@ -187,7 +187,7 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 
 | Kebutuhan | Alat | Contoh |
 |---|---|---|
-| Animasi masuk, loop (berayun, berputar, marquee) | **CSS keyframes** | `.hero-*` di `globals.css`, [`login.module.css`](../src/app/admin/login/login.module.css) |
+| Animasi masuk, loop (berayun, berputar, marquee) | **CSS keyframes** | `.hero-*` di `globals.css`, [`login.module.css`](../src/components/workspace/login.module.css) |
 | Hover, tap, layout/filter berpindah, muncul saat terlihat | **Framer Motion `m.*`** di dalam `MotionProvider` | `TicketCard`, filter genre di `EventStubs` |
 | Efek yang terikat posisi scroll (parallax, scrub) | **GSAP** lewat `useGsap` | `Manifesto.tsx`, `TapeMarquee.tsx` |
 
