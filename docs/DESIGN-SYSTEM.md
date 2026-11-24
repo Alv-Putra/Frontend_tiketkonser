@@ -2,8 +2,6 @@
 
 Panduan agar semua halaman (admin, organizer, customer) senada dengan **landing page** dan **login admin**. Semua contoh di sini diambil dari kode yang sudah berjalan — buka file rujukannya kalau ragu.
 
-> Bagian warna/branding di `docs/design.md` (ConserId, ungu) **sudah tidak berlaku**. Pakai dokumen ini.
-
 **Contoh hidup:** `/` (landing), `/admin/login`, dan `/organizer/login`. Kedua login memakai form dan dekorasi Backstage bersama di `src/components/workspace/`.
 
 ---

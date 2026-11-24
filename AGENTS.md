@@ -43,7 +43,7 @@ Package mgr:  npm (package-lock.json)
 ```
 Frontend_tiketkonser/
 ├── AGENTS.md
-├── docs/                    # DESIGN-SYSTEM.md, photo-credits.md, ERD.md, design.md (alur lama)
+├── docs/                    # DESIGN-SYSTEM.md, photo-credits.md
 ├── public/images/           # bands/ (foto lineup), events/ (sampul tiket JPEG)
 ├── jest.config.js, jest.setup.js
 └── src/
