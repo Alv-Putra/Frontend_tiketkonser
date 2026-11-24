@@ -4,7 +4,7 @@ Panduan agar semua halaman (admin, organizer, customer) senada dengan **landing 
 
 > Bagian warna/branding di `docs/design.md` (ConserId, ungu) **sudah tidak berlaku**. Pakai dokumen ini.
 
-**Contoh hidup:** `/` (landing) dan `/admin/login`.
+**Contoh hidup:** `/` (landing), `/admin/login`, dan `/organizer/login`. Kedua login memakai form dan dekorasi Backstage bersama di `src/components/workspace/`.
 
 ---
 
