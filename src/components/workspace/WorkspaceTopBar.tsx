@@ -1,162 +1,74 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Search, Bell, ChevronDown, Check, User, ArrowRight, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ArrowRight, ChevronDown, LogOut, Search } from 'lucide-react';
 import useMonitoringStore from '@/stores/monitoringStore';
 import useAuthStore from '@/stores/authStore';
+import WorkspaceNotifications from './WorkspaceNotifications';
 
-export default function WorkspaceTopBar({ pageTitle }) {
+export default function WorkspaceTopBar() {
   const router = useRouter();
-  const workspace = useMonitoringStore((state) => state.workspace);
-  const setWorkspace = useMonitoringStore((state) => state.setWorkspace);
+  const pathname = usePathname();
   const searchQuery = useMonitoringStore((state) => state.searchQuery);
   const setSearchQuery = useMonitoringStore((state) => state.setSearchQuery);
-
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileButton = useRef<HTMLButtonElement>(null);
+
+  const isOrganizer = pathname.startsWith('/organizer');
+  const roleLabel = isOrganizer ? 'Organizer' : 'Admin';
+  const name = user?.name || user?.full_name || roleLabel;
+  const profileAction = 'flex min-h-11 w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-paper focus-visible:outline-2 focus-visible:outline-blaze';
 
   const handleLogout = async () => {
     setProfileOpen(false);
     await logout();
-    router.push('/admin/login');
-  };
-
-  const isOrganizer = workspace === 'organizer';
-
-  const handleSwitchRole = (role) => {
-    setWorkspace(role);
-    setProfileOpen(false);
-    if (role === 'organizer') {
-      router.push('/organizer');
-    } else {
-      router.push('/admin');
-    }
+    router.push(isOrganizer ? '/auth/login' : '/admin/login');
   };
 
   return (
-    <header className="h-20 bg-[#0F0F12] border-b border-[#27272A] px-6 lg:px-8 flex items-center justify-between shrink-0 select-none">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <span className="text-[#71717A]">Workspace</span>
-        <span className="text-[#71717A]">/</span>
-        <span className="text-[#FFFFFF] font-semibold">{pageTitle}</span>
+    <header className="relative z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink/10 bg-paper px-4 lg:px-8">
+      <span className="min-w-0 truncate text-sm font-semibold md:hidden">{roleLabel}</span>
+      <div className="relative hidden w-72 md:block lg:w-96">
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink/60" />
+        <input
+          type="search"
+          name="workspace-search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari di workspace…"
+          aria-label="Cari di workspace"
+          className="min-h-11 w-full rounded-xl border border-ink/10 bg-white py-2.5 pl-9 pr-4 text-sm text-ink placeholder:text-ink/65 focus-visible:outline-2 focus-visible:outline-blaze"
+        />
       </div>
 
-      {/* Right Controls */}
-      <div className="flex items-center gap-4">
-        {/* Global Workspace Search */}
-        <div className="relative hidden md:block w-64 lg:w-80">
-          <Search className="w-4 h-4 text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari di workspace..."
-            className="w-full bg-[#141417] border border-[#27272A] rounded-lg pl-9 pr-4 py-2 text-xs text-[#FFFFFF] placeholder-[#71717A] focus:outline-none focus:border-[#FF4D00] transition-colors"
-          />
-        </div>
-
-        {/* Notifications */}
-        <div className="relative">
-          <button
-            onClick={() => setNotificationOpen(!notificationOpen)}
-            type="button"
-            className="w-9 h-9 rounded-lg bg-[#141417] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#FFFFFF] transition-colors relative"
-            aria-label="Notifikasi"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FF4D00]" />
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <WorkspaceNotifications />
+        <div
+          className="relative"
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setProfileOpen(false); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' && profileOpen) {
+              setProfileOpen(false);
+              profileButton.current?.focus();
+            }
+          }}
+        >
+          <button ref={profileButton} type="button" aria-expanded={profileOpen} aria-controls="workspace-profile" aria-label="Menu profil" onClick={() => setProfileOpen(!profileOpen)} className="flex min-h-11 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2 text-left hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze">
+            <span aria-hidden="true" className="grid size-7 place-items-center rounded-lg bg-paper text-xs font-bold uppercase">{name[0]}</span>
+            <span className="hidden max-w-36 sm:block">
+              <span className="block truncate text-xs font-semibold">{name}</span>
+              <span className="block text-xs text-ink/70">{roleLabel}</span>
+            </span>
+            <ChevronDown aria-hidden="true" className="size-4 text-ink/60" />
           </button>
-
-          {notificationOpen && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl bg-[#141417] border border-[#27272A] shadow-2xl p-4 z-50">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-[#FFFFFF]">Notifikasi Operasional</span>
-                <span className="text-[11px] text-[#FF7A00]">2 baru</span>
-              </div>
-              <div className="space-y-2.5">
-                <div className="p-2.5 rounded-lg bg-[#27272A] text-xs">
-                  <div className="text-[#FFFFFF] font-medium">2 Pembayaran perlu verifikasi</div>
-                  <div className="text-[#A1A1AA] text-[11px] mt-0.5">Siti Rahma & Dian Pratama mengirim bukti transfer.</div>
-                </div>
-                <div className="p-2.5 rounded-lg bg-[#27272A] text-xs">
-                  <div className="text-[#FFFFFF] font-medium">Coldplay Tour habis terjual</div>
-                  <div className="text-[#A1A1AA] text-[11px] mt-0.5">Penjualan tiket otomatis ditutup sesuai kuota 5.000.</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* User Profile Pill */}
-        <div className="relative">
-          <button
-            onClick={() => setProfileOpen(!profileOpen)}
-            type="button"
-            className="flex items-center gap-3 pl-3 pr-2.5 py-1.5 rounded-xl bg-[#141417] border border-[#27272A] hover:bg-[#27272A] transition-colors text-left"
-          >
-            <div className="w-7 h-7 rounded-lg bg-[#2A1000] text-[#FF7A00] flex items-center justify-center font-bold text-xs uppercase">
-              {user?.name?.[0] || user?.full_name?.[0] || (isOrganizer ? 'O' : 'A')}
-            </div>
-            <div className="hidden sm:block">
-              <div className="text-xs font-semibold text-[#FFFFFF] max-w-[140px] truncate">
-                {user?.name || user?.full_name || (isOrganizer ? 'Java Festival Prod.' : 'Administrator')}
-              </div>
-              <div className="text-[10px] text-[#71717A] max-w-[140px] truncate">
-                {user?.email || (isOrganizer ? 'Organizer role' : 'Super admin')}
-              </div>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[#71717A]" />
-          </button>
-
-          {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#141417] border border-[#27272A] shadow-2xl p-2 z-50">
-              <div className="px-3 py-2 text-[11px] text-[#71717A] font-semibold uppercase">
-                Ganti Workspace
-              </div>
-              <button
-                onClick={() => handleSwitchRole('admin')}
-                type="button"
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors ${
-                  !isOrganizer ? 'bg-[#2A1000] text-[#FF7A00] font-medium' : 'text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-[#27272A]'
-                }`}
-              >
-                <span>Admin Workspace</span>
-                {!isOrganizer && <Check className="w-3.5 h-3.5 text-[#FF7A00]" />}
-              </button>
-              <button
-                onClick={() => handleSwitchRole('organizer')}
-                type="button"
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors ${
-                  isOrganizer ? 'bg-[#2A1000] text-[#FF7A00] font-medium' : 'text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-[#27272A]'
-                }`}
-              >
-                <span>Organizer Workspace</span>
-                {isOrganizer && <Check className="w-3.5 h-3.5 text-[#FF7A00]" />}
-              </button>
-              <div className="my-1 border-t border-[#27272A]" />
-              <Link
-                href="/"
-                className="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-[#27272A] transition-colors"
-              >
-                <span>Lihat Beranda</span>
-                <ArrowRight className="w-3.5 h-3.5 text-[#71717A]" />
-              </Link>
-              <div className="my-1 border-t border-[#27272A]" />
-              <button
-                onClick={handleLogout}
-                type="button"
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
-              >
-                <span>Keluar dari Akun</span>
-                <LogOut className="w-3.5 h-3.5 text-[#EF4444]" />
-              </button>
-            </div>
-          )}
+          <div id="workspace-profile" hidden={!profileOpen} className="absolute right-0 mt-2 w-44 rounded-xl border border-ink/10 bg-white p-2 shadow-md">
+            <Link href="/" className={profileAction}>Lihat beranda <ArrowRight aria-hidden="true" className="size-4" /></Link>
+            <button type="button" onClick={handleLogout} className={profileAction}>Keluar akun <LogOut aria-hidden="true" className="size-4" /></button>
+          </div>
         </div>
       </div>
     </header>
