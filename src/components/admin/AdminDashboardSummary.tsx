@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Banknote, ClipboardCheck, Music, ShoppingBag, Users } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import type { AdminDashboardData } from '@/types/dashboard';
-import { DashboardStatus, MetricGrid, Panel, PanelHead, ghostButton } from './DashboardKit';
+import { DashboardStatus, MetricGrid, Panel, PanelHead, ghostButton } from '@/components/workspace/DashboardKit';
 
 const dateFormat = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' });
 const numberFormat = new Intl.NumberFormat('id-ID');

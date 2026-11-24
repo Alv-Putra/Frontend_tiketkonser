@@ -2,7 +2,7 @@ import { CalendarDays, MapPin } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { fetchOrganizerDashboardSales } from '@/services/dashboardService';
 import type { OrganizerDashboardEvent } from '@/types/dashboard';
-import { DashboardNotice, DashboardStatus, RefreshButton } from './DashboardKit';
+import { DashboardNotice, DashboardStatus, RefreshButton } from '@/components/workspace/DashboardKit';
 import { eventDate } from './OrganizerEventPicker';
 import OrganizerSalesSummary from './OrganizerSalesSummary';
 

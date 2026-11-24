@@ -4,7 +4,7 @@ import { ClipboardCheck, CreditCard, Music, ShoppingBag, Users } from 'lucide-re
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { fetchAdminDashboard } from '@/services/dashboardService';
 import AdminDashboardSummary from './AdminDashboardSummary';
-import { DashboardFrame, DashboardHeader, DashboardLinks, DashboardNotice, RefreshButton } from './DashboardKit';
+import { DashboardFrame, DashboardHeader, DashboardLinks, DashboardNotice, RefreshButton } from '@/components/workspace/DashboardKit';
 
 export default function AdminDashboard() {
   const { data, status, refresh } = useDashboardData(fetchAdminDashboard);

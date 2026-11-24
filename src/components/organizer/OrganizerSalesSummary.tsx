@@ -2,7 +2,7 @@ import { m, useReducedMotion } from 'framer-motion';
 import { Banknote, ClipboardList, Ticket, TicketCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import type { OrganizerDashboardSales } from '@/types/dashboard';
-import { MetricGrid, Panel, PanelHead, ease } from './DashboardKit';
+import { MetricGrid, Panel, PanelHead, ease } from '@/components/workspace/DashboardKit';
 
 const numberFormat = new Intl.NumberFormat('id-ID');
 

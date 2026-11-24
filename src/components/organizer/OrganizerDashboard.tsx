@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardList, Music, QrCode, Ticket } from 'lucide-react';
-import { DashboardFrame, DashboardHeader, DashboardLinks } from './DashboardKit';
+import { DashboardFrame, DashboardHeader, DashboardLinks } from '@/components/workspace/DashboardKit';
 import OrganizerEventPicker from './OrganizerEventPicker';
 import OrganizerEventSales from './OrganizerEventSales';
 

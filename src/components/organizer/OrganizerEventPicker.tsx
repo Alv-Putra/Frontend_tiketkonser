@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { fetchOrganizerDashboardEvents } from '@/services/dashboardService';
 import type { OrganizerDashboardEvent } from '@/types/dashboard';
-import { DashboardNotice, RefreshButton, ghostButton } from './DashboardKit';
+import { DashboardNotice, RefreshButton, ghostButton } from '@/components/workspace/DashboardKit';
 
 export const eventDate = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeZone: 'Asia/Jakarta' });
 

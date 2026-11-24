@@ -169,7 +169,7 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 - Shell bersama `WorkspaceLayout`: sidebar `bg-white border-r border-ink/10` (menu aktif `bg-blaze text-ink`) (grup menu berjudul, bisa diringkas) + top bar `h-16 border-b` (cari, notifikasi, profil). Jangan bikin layout dashboard sendiri.
 - Halaman di `bg-paper`; kartu = `rounded-2xl border border-ink/10 bg-white p-5`, tanpa bayangan besar. Isian di dalam kartu pakai `bg-paper`. Teks `text-ink`, sekunder `text-ink/60`, tersier `text-ink/45`.
 - Warna status di latar terang: `bg-status-*/25 text-ink` (teks status asli terlalu pucat di putih). Aksen teks/link pakai `text-blaze`.
-- Pakai `DashboardKit.tsx` untuk header, metrik, panel, status, dan akses cepat. Pakai `OrganizerEventPicker` di ringkasan, penjualan, serta check-in. Gunakan `AdminDashboardSummary` untuk isi ringkasan admin dan `OrganizerSalesSummary` untuk metrik serta rincian tiket yang dibagikan antara ringkasan organizer dan laporan penjualan.
+- Simpan komponen khusus peran di `src/components/admin/` atau `src/components/organizer/`. Pakai `DashboardKit.tsx` dari `src/components/workspace/` untuk header, metrik, panel, status, dan akses cepat. Pakai `OrganizerEventPicker` di ringkasan, penjualan, serta check-in. Gunakan `AdminDashboardSummary` untuk isi ringkasan admin dan `OrganizerSalesSummary` untuk metrik serta rincian tiket yang dibagikan antara ringkasan organizer dan laporan penjualan.
 - Framer Motion menangani animasi masuk, umpan balik tombol, dan batang per kelas tiket. GSAP menangani panel di bawah viewport saat masuk area gulir workspace. Keduanya mengikuti preferensi gerak pengguna.
 - Angka di ringkasan berasal dari backend. Tampilkan keadaan memuat, kosong, atau gagal bila sesuai.
 

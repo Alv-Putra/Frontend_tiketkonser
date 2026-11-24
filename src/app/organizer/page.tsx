@@ -1,4 +1,4 @@
-import OrganizerDashboard from '@/components/workspace/OrganizerDashboard';
+import OrganizerDashboard from '@/components/organizer/OrganizerDashboard';
 
 export default function OrganizerDashboardPage() {
   return <OrganizerDashboard />;

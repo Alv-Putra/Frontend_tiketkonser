@@ -56,7 +56,9 @@ Frontend_tiketkonser/
     │   └── auth/, profile/, my-tickets/, ...
     ├── components/
     │   ├── landing/         # section landing + helper animasi (TextRoll, Reveal, MotionProvider, ...)
-    │   ├── workspace/       # layout, sidebar, topbar dashboard
+    │   ├── admin/           # komponen khusus dashboard admin
+    │   ├── organizer/       # komponen ringkasan, penjualan, dan check-in organizer
+    │   ├── workspace/       # shell, kit dashboard, dan login bersama
     │   ├── customer/        # layout halaman customer
     │   ├── common/          # ErrorBoundary, ProtectedRoute
     │   └── ui/              # komponen dasar (Button, Input, Badge, ...)

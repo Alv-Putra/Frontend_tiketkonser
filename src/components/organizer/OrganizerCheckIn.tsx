@@ -6,7 +6,7 @@ import { QrCode } from 'lucide-react';
 import { useStore } from 'zustand';
 import { createTicketCheckInStore } from '@/stores/ticketCheckInStore';
 import type { OrganizerDashboardEvent } from '@/types/dashboard';
-import { DashboardFrame, DashboardHeader, DashboardStatus, Panel, PanelHead, ease, primaryButton } from './DashboardKit';
+import { DashboardFrame, DashboardHeader, DashboardStatus, Panel, PanelHead, ease, primaryButton } from '@/components/workspace/DashboardKit';
 import OrganizerEventPicker from './OrganizerEventPicker';
 
 const timeFormat = new Intl.DateTimeFormat('id-ID', { timeStyle: 'short', timeZone: 'Asia/Jakarta' });
