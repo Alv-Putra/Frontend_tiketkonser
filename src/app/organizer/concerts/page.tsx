@@ -23,6 +23,7 @@ export default function OrganizerConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
   const addConcert = useMonitoringStore((state) => state.addConcert);
+  const createAndPublishConcert = useMonitoringStore((state) => state.createAndPublishConcert);
   const fetchOrganizerData = useMonitoringStore((state) => state.fetchOrganizerData);
 
   const [search, setSearch] = useState('');
@@ -82,35 +83,27 @@ export default function OrganizerConcertsPage() {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newConcertName.trim()) return;
-    addConcert({
-      name: newConcertName,
-      artist: newArtist || 'Festival Artists',
-      location: newLocation || 'JIExpo Kemayoran, Jakarta',
-      schedule: newSchedule || '15–17 Mei 2026',
-      quota: parseInt(newQuota, 10) || 2000,
-      priceFrom: 'Rp350.000',
-      organizer: 'Organizer',
-      salesOpen: false
-    });
-
+    setIsLoading(true);
     try {
-      await monitoringService.createOrganizerEventApi({
-        title: newConcertName,
-        summary: newArtist || newConcertName,
-        description: `Festival musik spektakuler ${newConcertName}`,
-        start_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        end_at: new Date(Date.now() + 32 * 24 * 60 * 60 * 1000).toISOString(),
+      await createAndPublishConcert({
+        name: newConcertName,
+        artist: newArtist || newConcertName,
+        location: newLocation || 'JIExpo Kemayoran, Jakarta',
+        schedule: newSchedule || '15–17 Mei 2026',
+        quota: parseInt(newQuota, 10) || 2000,
+        priceFrom: 350000,
       });
       await fetchOrganizerData();
-    } catch {
-      // Local addition remains intact
+      setNewConcertName('');
+      setNewArtist('');
+      setNewLocation('');
+      setNewSchedule('');
+      setIsAddModalOpen(false);
+    } catch (err: any) {
+      alert(err?.message || 'Gagal menambahkan konser ke backend');
+    } finally {
+      setIsLoading(false);
     }
-
-    setNewConcertName('');
-    setNewArtist('');
-    setNewLocation('');
-    setNewSchedule('');
-    setIsAddModalOpen(false);
   };
 
   return (
@@ -210,7 +203,14 @@ export default function OrganizerConcertsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#27272A]">
-              {filteredConcerts.map((c) => {
+              {filteredConcerts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-sm text-[#71717A]">
+                    Belum ada konser. Klik tombol &quot;Tambah konser&quot; untuk menambahkan konser baru.
+                  </td>
+                </tr>
+              ) : (
+                filteredConcerts.map((c) => {
                 const pct = Math.round((c.sold / c.quota) * 100);
                 return (
                   <tr key={c.id} className="hover:bg-[#27272A]/50 transition-colors">
@@ -250,7 +250,7 @@ export default function OrganizerConcertsPage() {
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

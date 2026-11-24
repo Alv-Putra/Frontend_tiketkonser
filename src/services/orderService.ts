@@ -19,7 +19,7 @@ function wait(ms = LATENCY) {
 }
 
 function getFestivals() {
-  return storageDB.festivals && storageDB.festivals.length ? storageDB.festivals : mockFestivals;
+  return storageDB.festivals && storageDB.festivals.length ? storageDB.festivals : [];
 }
 
 function getOrders() {

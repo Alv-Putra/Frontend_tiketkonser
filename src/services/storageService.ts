@@ -17,7 +17,7 @@ export function getStorageSnapshot() {
     festivals:
       storageDB.festivals && storageDB.festivals.length
         ? storageDB.festivals
-        : mockFestivals,
+        : [],
     orders: storageDB.orders || [],
   };
 }
