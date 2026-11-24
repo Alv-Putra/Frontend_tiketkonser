@@ -13,7 +13,6 @@ import {
   MapPin,
   RotateCw
 } from 'lucide-react';
-import WorkspaceLayout from '@/components/workspace/WorkspaceLayout';
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import useMonitoringStore from '@/stores/monitoringStore';
@@ -114,23 +113,23 @@ export default function OrganizerConcertsPage() {
   };
 
   return (
-    <WorkspaceLayout title="Konser Saya">
+    <>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#27272A]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#FFFFFF]">Konser Saya</h1>
+            <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">Konser Saya</h1>
             {isLive ? (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#193029] text-[#8DE2BD] border border-[#234B3E]">
+              <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-status-success/25 text-ink border border-status-success/40">
                 LIVE BACKEND
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2A1000] text-[#FF7A00] border border-[#4A1D00]">
+              <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-blaze/10 text-blaze border border-blaze/30">
                 {isLoading ? 'MEMUAT...' : 'DATABASE KONSER'}
               </span>
             )}
           </div>
-          <p className="text-xs text-[#A1A1AA]">
+          <p className="text-xs text-ink/60">
             Kelola konser yang diselenggarakan beserta tiket dan penjualannya.
           </p>
         </div>
@@ -139,16 +138,16 @@ export default function OrganizerConcertsPage() {
           <button
             onClick={handleRefresh}
             type="button"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141417] hover:bg-[#27272A] border border-[#27272A] text-[#FFFFFF] text-xs font-semibold transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-paper hover:bg-white border border-ink/10 text-ink text-xs font-semibold transition-all cursor-pointer"
           >
-            <RotateCw className={`w-3.5 h-3.5 text-[#FF7A00] ${isLoading ? 'animate-spin' : ''}`} />
+            <RotateCw className={`w-3.5 h-3.5 text-blaze ${isLoading ? 'animate-spin' : ''}`} />
             <span>Segarkan</span>
           </button>
 
           <button
             onClick={() => setIsAddModalOpen(true)}
             type="button"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FF4D00] hover:bg-[#E64500] text-[#09090B] text-xs font-semibold shadow-lg shadow-[#FF4D00]/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-blaze hover:bg-tangerine text-ink text-xs font-semibold shadow-lg shadow-blaze/20 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Buat Konser Baru</span>
@@ -164,18 +163,18 @@ export default function OrganizerConcertsPage() {
       </div>
 
       {/* Table Section */}
-      <div className="p-5 rounded-2xl bg-[#141417] border border-[#27272A] space-y-4">
+      <div className="p-5 rounded-2xl bg-white border border-ink/10 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-[#FFFFFF]">Daftar Konser & Panggung</h2>
-            <p className="text-xs text-[#71717A]">Daftar pertunjukan langsung dalam monitoring organizer</p>
+            <h2 className="font-display text-base font-bold text-ink">Daftar Konser & Panggung</h2>
+            <p className="text-xs text-ink/45">Daftar pertunjukan langsung dalam monitoring organizer</p>
           </div>
 
           <div className="flex items-center gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#27272A] border border-[#3F3F46] rounded-lg px-2.5 py-1.5 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF4D00]"
+              className="bg-paper border border-ink/10 rounded-full px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-blaze"
             >
               <option value="Semua">Semua status</option>
               <option value="Dibuka">Penjualan Dibuka</option>
@@ -186,13 +185,13 @@ export default function OrganizerConcertsPage() {
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="w-4 h-4 text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-ink/45 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari konser atau artis..."
-            className="w-full bg-[#0F0F12] border border-[#27272A] rounded-xl pl-9 pr-4 py-2 text-xs text-[#FFFFFF] placeholder-[#71717A] focus:outline-none focus:border-[#FF4D00]"
+            className="w-full bg-paper border border-ink/10 rounded-full pl-9 pr-4 py-2 text-xs text-ink placeholder:text-ink/45 focus:outline-none focus:border-blaze"
           />
         </div>
 
@@ -200,7 +199,7 @@ export default function OrganizerConcertsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#27272A] text-[#71717A] text-[10px] uppercase font-semibold">
+              <tr className="border-b border-ink/10 text-ink/45 text-[10px] uppercase font-semibold">
                 <th className="pb-2.5">Konser</th>
                 <th className="pb-2.5">Jadwal</th>
                 <th className="pb-2.5">Lokasi</th>
@@ -209,24 +208,24 @@ export default function OrganizerConcertsPage() {
                 <th className="pb-2.5 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#27272A]">
+            <tbody className="divide-y divide-ink/10">
               {filteredConcerts.map((c) => {
                 const pct = Math.round((c.sold / c.quota) * 100);
                 return (
-                  <tr key={c.id} className="hover:bg-[#27272A]/50 transition-colors">
-                    <td className="py-3 font-medium text-[#FFFFFF]">
-                      <Link href={`/concerts/${c.id}`} className="hover:text-[#FF7A00] transition-colors">
+                  <tr key={c.id} className="hover:bg-ink/[0.03] transition-colors">
+                    <td className="py-3 font-medium text-ink">
+                      <Link href={`/concerts/${c.id}`} className="hover:text-blaze transition-colors">
                         <div>{c.name}</div>
                       </Link>
-                      <div className="text-[11px] text-[#71717A]">{c.artist}</div>
+                      <div className="text-[11px] text-ink/45">{c.artist}</div>
                     </td>
-                    <td className="py-3 text-[#A1A1AA] whitespace-nowrap">{c.schedule}</td>
-                    <td className="py-3 text-[#A1A1AA]">{c.location}</td>
+                    <td className="py-3 text-ink/60 whitespace-nowrap">{c.schedule}</td>
+                    <td className="py-3 text-ink/60">{c.location}</td>
                     <td className="py-3 whitespace-nowrap">
-                      <div className="font-semibold text-[#FFFFFF]">
+                      <div className="font-semibold text-ink">
                         {c.sold.toLocaleString('id-ID')} / {c.quota.toLocaleString('id-ID')}
                       </div>
-                      <div className="text-[10px] text-[#FF7A00]">{pct}% terisi</div>
+                      <div className="text-[10px] text-blaze">{pct}% terisi</div>
                     </td>
                     <td className="py-3">
                       <StatusBadge status={c.salesOpen ? 'Dibuka' : 'Ditutup'} />
@@ -235,14 +234,14 @@ export default function OrganizerConcertsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/concerts/${c.id}`}
-                          className="px-2.5 py-1 rounded bg-[#2A1000] hover:bg-[#FF4D00] text-[11px] text-[#FF7A00] hover:text-[#09090B] font-medium transition-colors"
+                          className="px-2.5 py-1 rounded-full bg-blaze/10 hover:bg-blaze text-[11px] text-blaze hover:text-ink font-medium transition-colors"
                         >
                           Detail
                         </Link>
                         <button
                           onClick={() => toggleConcertSales(c.id)}
                           type="button"
-                          className="px-2.5 py-1 rounded bg-[#27272A] hover:bg-[#3F3F46] border border-[#3F3F46] text-[11px] text-[#FF7A00] font-medium transition-colors"
+                          className="px-2.5 py-1 rounded-full bg-ink/5 hover:bg-border-hover border border-ink/20 text-[11px] text-blaze font-medium transition-colors"
                         >
                           {c.salesOpen ? 'Tutup' : 'Buka'}
                         </button>
@@ -259,49 +258,49 @@ export default function OrganizerConcertsPage() {
       {/* Add Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-[#141417] border border-[#27272A] p-6 space-y-4">
-            <h3 className="text-base font-bold text-[#FFFFFF]">Buat Konser Baru</h3>
+          <div className="w-full max-w-md rounded-2xl bg-white border border-ink/10 p-6 space-y-4">
+            <h3 className="text-base font-bold text-ink">Buat Konser Baru</h3>
             <form onSubmit={handleCreate} className="space-y-3">
               <div>
-                <label className="block text-[11px] text-[#A1A1AA] mb-1">Nama Konser</label>
+                <label className="block text-[11px] text-ink/60 mb-1">Nama Konser</label>
                 <input
                   type="text"
                   required
                   value={newConcertName}
                   onChange={(e) => setNewConcertName(e.target.value)}
                   placeholder="Contoh: Java Jazz Festival 2027"
-                  className="w-full bg-[#0F0F12] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF4D00]"
+                  className="w-full bg-paper border border-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-blaze"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-[#A1A1AA] mb-1">Artis / Headliner</label>
+                <label className="block text-[11px] text-ink/60 mb-1">Artis / Headliner</label>
                 <input
                   type="text"
                   value={newArtist}
                   onChange={(e) => setNewArtist(e.target.value)}
                   placeholder="Contoh: Stevie Wonder"
-                  className="w-full bg-[#0F0F12] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF4D00]"
+                  className="w-full bg-paper border border-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-blaze"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-[#A1A1AA] mb-1">Jadwal</label>
+                  <label className="block text-[11px] text-ink/60 mb-1">Jadwal</label>
                   <input
                     type="text"
                     value={newSchedule}
                     onChange={(e) => setNewSchedule(e.target.value)}
                     placeholder="15 Mei 2027"
-                    className="w-full bg-[#0F0F12] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF4D00]"
+                    className="w-full bg-paper border border-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-blaze"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-[#A1A1AA] mb-1">Kuota Tiket</label>
+                  <label className="block text-[11px] text-ink/60 mb-1">Kuota Tiket</label>
                   <input
                     type="number"
                     value={newQuota}
                     onChange={(e) => setNewQuota(e.target.value)}
                     placeholder="3000"
-                    className="w-full bg-[#0F0F12] border border-[#27272A] rounded-xl px-3 py-2 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF4D00]"
+                    className="w-full bg-paper border border-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-blaze"
                   />
                 </div>
               </div>
@@ -309,13 +308,13 @@ export default function OrganizerConcertsPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#0F0F12] text-xs font-semibold text-[#A1A1AA]"
+                  className="px-4 py-2 rounded-xl bg-paper text-xs font-semibold text-ink/60"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[#FF4D00] hover:bg-[#E64500] text-xs font-semibold text-[#09090B]"
+                  className="px-4 py-2 rounded-full bg-blaze hover:bg-tangerine text-xs font-semibold text-ink"
                 >
                   Simpan Konser
                 </button>
@@ -324,6 +323,6 @@ export default function OrganizerConcertsPage() {
           </div>
         </div>
       )}
-    </WorkspaceLayout>
+    </>
   );
 }
