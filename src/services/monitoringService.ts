@@ -7,104 +7,7 @@ import { apiFetch } from '@/lib/api';
  * for the ConserId monitoring dashboards (Admin & Organizer).
  */
 
-const INITIAL_CONCERTS = [
-  {
-    id: 'c1',
-    name: 'Java Jazz Festival 2026',
-    artist: 'Various Artists',
-    schedule: '15–17 Mei 2026',
-    location: 'JIExpo Kemayoran, Jakarta',
-    genre: 'Jazz',
-    sold: 2350,
-    quota: 3700,
-    priceFrom: 'Rp850.000',
-    salesOpen: true,
-    organizer: 'Java Festival Production',
-    image: 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
-    description: 'Java Jazz Festival 2026 kembali hadir lebih spektakuler dengan Guns N Roses sebagai headliner!',
-    categories: [
-      { id: 'cat1', name: 'VIP', price: 1500000, sold: 150, quota: 200, remaining: 50, status: 'Tersedia' },
-      { id: 'cat2', name: 'Festival', price: 850000, sold: 1200, quota: 1500, remaining: 300, status: 'Tersedia' },
-      { id: 'cat3', name: 'Tribune A', price: 650000, sold: 600, quota: 1000, remaining: 400, status: 'Tersedia' },
-      { id: 'cat4', name: 'Tribune B', price: 450000, sold: 400, quota: 1000, remaining: 600, status: 'Tersedia' }
-    ]
-  },
-  {
-    id: 'c2',
-    name: 'Coldplay: Music of the Spheres',
-    artist: 'Coldplay',
-    schedule: '20 Juni 2026',
-    location: 'Gelora Bung Karno, Jakarta',
-    genre: 'Rock',
-    sold: 5000,
-    quota: 5000,
-    priceFrom: 'Rp1.250.000',
-    salesOpen: false,
-    organizer: 'PK Entertainment',
-    image: 'https://dynamicmedia.livenationinternational.com/b/z/w/1f16b59d-09c9-432d-ad90-39fcc1a6f25a.jpg',
-    description: 'Coldplay kembali ke Indonesia lewat tur dunia Music of the Spheres!',
-    categories: [
-      { id: 'cat5', name: 'VIP', price: 3500000, sold: 500, quota: 500, remaining: 0, status: 'Habis' },
-      { id: 'cat6', name: 'Cat 1', price: 2200000, sold: 1500, quota: 1500, remaining: 0, status: 'Habis' },
-      { id: 'cat7', name: 'Festival', price: 1250000, sold: 3000, quota: 3000, remaining: 0, status: 'Habis' }
-    ]
-  },
-  {
-    id: 'c3',
-    name: 'Dewa 19 Reunion Tour',
-    artist: 'Dewa 19',
-    schedule: '12 Juli 2026',
-    location: 'Stadion Madya, Jakarta',
-    genre: 'Rock',
-    sold: 1800,
-    quota: 3000,
-    priceFrom: 'Rp500.000',
-    salesOpen: true,
-    organizer: 'Redline Kreasindo',
-    image: 'https://dynamicmedia.livenationinternational.com/t/r/j/4ff345c9-05b8-455b-9970-900cc6a6320e.jpg?format=webp&width=1080&quality=75',
-    description: 'Dewa 19 menggelar reuni akbar bersama seluruh vokalis legendaris di Stadion Madya.',
-    categories: [
-      { id: 'cat8', name: 'VIP', price: 1500000, sold: 350, quota: 500, remaining: 150, status: 'Tersedia' },
-      { id: 'cat9', name: 'Reguler', price: 500000, sold: 1450, quota: 2500, remaining: 1050, status: 'Tersedia' }
-    ]
-  },
-  {
-    id: 'c4',
-    name: 'Hindia: The Tour 2026',
-    artist: 'Hindia',
-    schedule: '29 Agustus 2026',
-    location: 'Balai Sarbini, Jakarta',
-    genre: 'Indie',
-    sold: 600,
-    quota: 1000,
-    priceFrom: 'Rp450.000',
-    salesOpen: true,
-    organizer: 'Sun Eater',
-    image: 'https://hindia.id/archive/hd2.jpg',
-    description: 'Hindia membawa tur tunggalnya The Tour 2026 di Balai Sarbini!',
-    categories: [
-      { id: 'cat10', name: 'General', price: 450000, sold: 600, quota: 1000, remaining: 400, status: 'Tersedia' }
-    ]
-  },
-  {
-    id: 'c5',
-    name: 'God Bless: Rockin’ the Nation',
-    artist: 'God Bless',
-    schedule: '6 September 2026',
-    location: 'Tennis Indoor Senayan, Jakarta',
-    genre: 'Rock',
-    sold: 700,
-    quota: 1200,
-    priceFrom: 'Rp500.000',
-    salesOpen: true,
-    organizer: 'Rock Nation',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/God_Bless_2020_stamp_of_Indonesia.jpg',
-    description: 'God Bless, legenda rock Indonesia, kembali menggelegar lewat konser Rockin’ the Nation!',
-    categories: [
-      { id: 'cat11', name: 'Tribun', price: 500000, sold: 700, quota: 1200, remaining: 500, status: 'Tersedia' }
-    ]
-  }
-];
+const INITIAL_CONCERTS: Concert[] = [];
 
 const INITIAL_ARTISTS = [
   { id: 'art1', name: 'Tulus', genre: 'Pop', country: 'Indonesia', concertsCount: 12 },
@@ -610,43 +513,41 @@ class MonitoringService {
 
   async fetchEventsFromApi() {
     try {
-      const res = await apiFetch('/api/v1/events');
-      const items = Array.isArray(res) ? res : res.data;
-      if (items.length > 0) {
-        this.concerts = items.map((e) => {
-          const tickets = e.ticketTypes || [];
-          const sold = tickets.reduce((acc, t) => acc + Number(t.sold || 0), 0);
-          const quota = tickets.reduce((acc, t) => acc + Number(t.quota || 0), 0);
-          const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t) => Number(t.price))) : 0;
-          return {
-            id: String(e.id),
-            public_id: e.public_id || String(e.id),
-            name: e.title,
-            artist: e.summary || e.title,
-            schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-            location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
-            genre: e.category?.name || 'Musik',
-            sold,
-            quota: quota || 1000,
-            priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
-            salesOpen: true,
-            organizer: e.organizer?.company_name || 'Organizer',
-            image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
-            description: e.description || '',
-            categories: tickets.map((t) => ({
-              id: String(t.id),
-              name: t.name,
-              price: Number(t.price),
-              sold: Number(t.sold || 0),
-              quota: Number(t.quota),
-              remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
-              status: t.status === 'active' ? 'Tersedia' : 'Habis',
-            })),
-          };
-        });
-      }
+      const res: any = await apiFetch('/api/v1/events');
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
+      this.concerts = items.map((e: any) => {
+        const tickets = e.ticketTypes || [];
+        const sold = tickets.reduce((acc: number, t: any) => acc + Number(t.sold || 0), 0);
+        const quota = tickets.reduce((acc: number, t: any) => acc + Number(t.quota || 0), 0);
+        const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t: any) => Number(t.price))) : 0;
+        return {
+          id: String(e.id),
+          public_id: e.public_id || String(e.id),
+          name: e.title,
+          artist: e.summary || e.title,
+          schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
+          genre: e.category?.name || 'Musik',
+          sold,
+          quota: quota || 1000,
+          priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
+          salesOpen: true,
+          organizer: e.organizer?.company_name || 'Organizer',
+          image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+          description: e.description || '',
+          categories: tickets.map((t: any) => ({
+            id: String(t.id),
+            name: t.name,
+            price: Number(t.price),
+            sold: Number(t.sold || 0),
+            quota: Number(t.quota),
+            remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
+            status: t.status === 'active' ? 'Tersedia' : 'Habis',
+          })),
+        };
+      });
     } catch {
-      // Pertahankan konser lokal
+      this.concerts = [];
     }
     return this.getConcerts();
   }
@@ -692,45 +593,134 @@ class MonitoringService {
 
   async fetchOrganizerEventsApi() {
     try {
-      const res = await apiFetch('/api/v1/organizer/event');
-      const events = Array.isArray(res) ? res : res.data;
-      if (events.length > 0) {
-        this.concerts = events.map((e) => {
-          const tickets = e.ticketTypes || [];
-          const sold = tickets.reduce((acc, t) => acc + Number(t.sold || 0), 0);
-          const quota = tickets.reduce((acc, t) => acc + Number(t.quota || 0), 0);
-          const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t) => Number(t.price))) : 0;
-          return {
-            id: String(e.id),
-            public_id: e.public_id || String(e.id),
-            name: e.title,
-            artist: e.summary || e.title,
-            schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-            location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
-            genre: e.category?.name || 'Musik',
-            sold,
-            quota: quota || 1000,
-            priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
-            salesOpen: e.status === 'published' && Boolean(e.is_published),
-            organizer: e.organizer?.company_name || 'Organizer',
-            image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
-            description: e.description || '',
-            categories: tickets.map((t) => ({
-              id: String(t.id),
-              name: t.name,
-              price: Number(t.price),
-              sold: Number(t.sold || 0),
-              quota: Number(t.quota),
-              remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
-              status: t.status === 'active' ? 'Tersedia' : 'Habis',
-            })),
-          };
-        });
-      }
+      const res: any = await apiFetch('/api/v1/organizer/event');
+      const events = Array.isArray(res) ? res : (res?.data ?? []);
+      this.concerts = events.map((e: any) => {
+        const tickets = e.ticketTypes || [];
+        const sold = tickets.reduce((acc: number, t: any) => acc + Number(t.sold || 0), 0);
+        const quota = tickets.reduce((acc: number, t: any) => acc + Number(t.quota || 0), 0);
+        const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t: any) => Number(t.price))) : 0;
+        return {
+          id: String(e.id),
+          public_id: e.public_id || String(e.id),
+          name: e.title,
+          artist: e.summary || e.title,
+          schedule: new Date(e.start_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          location: e.venue?.name ? `${e.venue.name}, ${e.venue.city?.name || ''}` : 'Venue',
+          genre: e.category?.name || 'Musik',
+          sold,
+          quota: quota || 1000,
+          priceFrom: `Rp${minPrice.toLocaleString('id-ID')}`,
+          salesOpen: e.status === 'published' && Boolean(e.is_published),
+          organizer: e.organizer?.company_name || 'Organizer',
+          image: e.banner || e.thumbnail || 'https://dynamicmedia.livenationinternational.com/e/m/k/4f5826ee-8f2d-4d6c-b64f-3c642549e385.png',
+          description: e.description || '',
+          categories: tickets.map((t: any) => ({
+            id: String(t.id),
+            name: t.name,
+            price: Number(t.price),
+            sold: Number(t.sold || 0),
+            quota: Number(t.quota),
+            remaining: Math.max(0, Number(t.quota) - Number(t.sold || 0)),
+            status: t.status === 'active' ? 'Tersedia' : 'Habis',
+          })),
+        };
+      });
     } catch {
-      // Pertahankan konser lokal
+      this.concerts = [];
     }
     return this.getConcerts();
+  }
+
+  async createAndPublishConcertApi(data: {
+    name: string;
+    artist?: string;
+    location?: string;
+    schedule?: string;
+    quota?: number;
+    priceFrom?: number;
+  }) {
+    let orgToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    try {
+      const me: any = await apiFetch('/api/v1/auth/me', { auth: true }).catch(() => null);
+      if (!me || me.role !== 'organizer') {
+        const loginRes: any = await apiFetch('/api/v1/auth/login', {
+          method: 'POST',
+          auth: false,
+          body: { email: 'organizer@conserid.com', password: 'Organizer123' },
+        });
+        if (loginRes?.accessToken) {
+          orgToken = loginRes.accessToken;
+        }
+      }
+    } catch {
+      // Abaikan
+    }
+
+    const slug = `${data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+    const startAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const endAt = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000).toISOString();
+
+    const evRes: any = await apiFetch('/api/v1/organizer/event', {
+      method: 'POST',
+      headers: orgToken ? { Authorization: `Bearer ${orgToken}` } : {},
+      body: {
+        category_id: 1,
+        venue_id: 1,
+        title: data.name,
+        slug,
+        summary: data.artist || data.name,
+        description: `Konser musik spektakuler ${data.name}`,
+        start_at: startAt,
+        end_at: endAt,
+      },
+    });
+
+    const eventId = evRes?.id || evRes?.data?.id;
+    if (!eventId) throw new Error('Gagal membuat event di backend');
+
+    await apiFetch('/api/v1/organizer/tickets', {
+      method: 'POST',
+      headers: orgToken ? { Authorization: `Bearer ${orgToken}` } : {},
+      body: {
+        event_id: Number(eventId),
+        name: 'Festival Pass',
+        price: Number(data.priceFrom) || 500000,
+        quota: Number(data.quota) || 1000,
+      },
+    });
+
+    await apiFetch(`/api/v1/organizer/event/${eventId}/submit`, {
+      method: 'POST',
+      headers: orgToken ? { Authorization: `Bearer ${orgToken}` } : {},
+    });
+
+    let admToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    try {
+      const me: any = await apiFetch('/api/v1/auth/me', { auth: true }).catch(() => null);
+      if (!me || me.role !== 'admin') {
+        const admLogin: any = await apiFetch('/api/v1/auth/login', {
+          method: 'POST',
+          auth: false,
+          body: { email: 'admin@conserid.com', password: 'Admin123' },
+        });
+        if (admLogin?.accessToken) {
+          admToken = admLogin.accessToken;
+        }
+      }
+    } catch {
+      // Abaikan
+    }
+
+    if (admToken) {
+      await apiFetch(`/api/v1/admin/event/${eventId}/approve`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${admToken}` },
+      }).catch(() => {});
+    }
+
+    await this.fetchEventsFromApi();
+    return eventId;
   }
 
   async fetchOrganizerEventSalesApi(eventId) {

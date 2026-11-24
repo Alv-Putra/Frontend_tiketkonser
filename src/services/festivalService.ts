@@ -81,11 +81,9 @@ export class FestivalService {
       try {
         const res = await apiFetch('/api/v1/events');
         const items = res?.data || (Array.isArray(res) ? res : []);
-        if (items.length > 0) {
-          return items.map(transformBackendEventToFestival).map(toFestivalCard);
-        }
+        return items.map(transformBackendEventToFestival).map(toFestivalCard);
       } catch {
-        // Fallback ke penyimpanan lokal jika API backend kosong atau offline
+        return [];
       }
     }
     await wait();
