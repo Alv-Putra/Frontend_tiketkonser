@@ -7,6 +7,16 @@ import {
   deleteOrganizerTicket,
   fetchAdminCharts,
   fetchAdminDashboard,
+  fetchNotifications,
+  fetchOrganizerCategories,
+  fetchOrganizerProfile,
+  fetchOrganizerCities,
+  fetchOrganizerEventDocuments,
+  uploadOrganizerEventDocument,
+  fetchOrganizerSeatMap,
+  fetchPublicSeatMap,
+  saveOrganizerSeatMap,
+  markNotificationRead,
   fetchOrganizerCharts,
   fetchOrganizerDashboardEvents,
   fetchOrganizerDashboardSales,
@@ -57,10 +67,9 @@ test('mengirim filter analitik hanya saat diberikan', async () => {
 });
 
 const event = {
-  venue_id: '9007199254740993',
+  venue: { name: 'GBK', city_id: '9007199254740993' },
   category_id: '1',
   title: 'Tixo Live',
-  slug: 'tixo-live',
   start_at: '2026-11-25T12:00:00Z',
   end_at: '2026-11-25T15:00:00Z',
 };
@@ -89,4 +98,55 @@ test('memuat tren admin untuk rentang dan interval yang dipilih', async () => {
   jest.mocked(apiFetch).mockResolvedValue(response);
   await expect(fetchAdminCharts({ interval: 'month', start_date: '2026-09-01', end_date: '2026-11-25' })).resolves.toBe(response);
   expect(apiFetch).toHaveBeenLastCalledWith('/api/v1/admin/dashboard/charts?interval=month&start_date=2026-09-01&end_date=2026-11-25');
+});
+
+test('memakai endpoint notifikasi dan denah organizer', async () => {
+  jest.mocked(apiFetch).mockReset().mockResolvedValue({});
+
+  await fetchNotifications(3);
+  await markNotificationRead('7');
+  await fetchOrganizerSeatMap('23');
+
+  expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/notifications?page=3&limit=10');
+  expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/notifications/7/read', { method: 'PATCH' });
+  expect(apiFetch).toHaveBeenNthCalledWith(3, '/api/v1/organizer/event/23/seat-map');
+});
+
+test('memakai endpoint berkas verifikasi event organizer', async () => {
+  jest.mocked(apiFetch).mockReset().mockResolvedValue({});
+  const file = new File(['pdf'], 'pks.pdf', { type: 'application/pdf' });
+
+  await fetchOrganizerEventDocuments('23');
+  await uploadOrganizerEventDocument('23', 'venue_permit', file);
+
+  expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/organizer/event/23/documents');
+  const [path, options] = jest.mocked(apiFetch).mock.calls[1];
+  expect(path).toBe('/api/v1/organizer/event/23/documents/venue_permit');
+  expect(options.method).toBe('PUT');
+  expect((options.body as FormData).get('file')).toBe(file);
+});
+
+test('memakai endpoint master data form event organizer', async () => {
+  jest.mocked(apiFetch).mockReset().mockResolvedValue([]);
+
+  await fetchOrganizerCategories();
+  await fetchOrganizerCities();
+  await fetchOrganizerProfile();
+
+  expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/organizer/categories');
+  expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/organizer/cities');
+  expect(apiFetch).toHaveBeenNthCalledWith(3, '/api/v1/organizer/profile');
+});
+
+test('menyimpan denah organizer dan mengambil denah publik dengan viewport', async () => {
+  jest.mocked(apiFetch).mockReset().mockResolvedValue({});
+  const payload = { width: 800, height: 600, sections: [], seats: [], shapes: [] };
+
+  await saveOrganizerSeatMap('23', payload);
+  await fetchPublicSeatMap('23');
+  await fetchPublicSeatMap('23', { x: 10.4, y: 0, width: 400.6, height: 300 });
+
+  expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/organizer/event/23/seat-map', { method: 'PUT', body: payload });
+  expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/events/23/seat-map', { auth: false });
+  expect(apiFetch).toHaveBeenNthCalledWith(3, '/api/v1/events/23/seat-map?x=10&y=0&width=401&height=300', { auth: false });
 });

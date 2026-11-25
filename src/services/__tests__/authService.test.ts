@@ -165,6 +165,27 @@ describe('authService', () => {
     });
   });
 
+  describe('registerOrganizer', () => {
+    it('mengirim multipart tanpa token, melewati kolom kosong', async () => {
+      setItem(StorageKeys.AUTH_TOKEN, 't');
+      fetchMock.mockResolvedValue(jsonResponse({ status: 201, body: { success: true, data: { message: 'Verifikasi email lalu tunggu admin.' } } }));
+      const file = new File(['%PDF'], 'nib.pdf', { type: 'application/pdf' });
+      const result = await authService.registerOrganizer({ email: 'o@b.c', phone: undefined }, { nib: file });
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe('/api/auth/register-organizer');
+      expect(init.headers.Authorization).toBeUndefined();
+      expect(init.body.get('email')).toBe('o@b.c');
+      expect(init.body.has('phone')).toBe(false);
+      expect(init.body.get('nib')).toBe(file);
+      expect(result.message).toBe('Verifikasi email lalu tunggu admin.');
+    });
+
+    it('mengembalikan pesan null bila backend tidak mengirim pesan', async () => {
+      fetchMock.mockResolvedValue(jsonResponse({ body: { success: true, data: null } }));
+      await expect(authService.registerOrganizer({}, {})).resolves.toEqual({ message: null });
+    });
+  });
+
   describe('logout', () => {
     it('calls the logout endpoint and clears local session', async () => {
       setItem(StorageKeys.AUTH_TOKEN, 't');

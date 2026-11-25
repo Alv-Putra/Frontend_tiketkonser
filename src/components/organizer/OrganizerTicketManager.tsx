@@ -20,6 +20,8 @@ import { fieldErrorsFrom } from '@/lib/api';
 import OrganizerConfirmDialog from './OrganizerConfirmDialog';
 import OrganizerDialog from './OrganizerDialog';
 import OrganizerField, { organizerInput } from './OrganizerField';
+import Select from '@/components/ui/Select';
+import ColorField from '@/components/ui/ColorField';
 
 const statusConfig: Record<string, { label: string; tone: 'neutral' | 'positive' | 'warning' | 'danger' }> = {
   active: { label: 'Tersedia', tone: 'positive' },
@@ -69,6 +71,7 @@ function TicketModal({
         wave: optionalNumber('wave'),
         max_purchase: optionalNumber('max_purchase'),
         status: value('status') as TicketCreateInput['status'],
+        color: value('color') || undefined,
         sale_start_at: changedDate('sale_start_at', ticket?.sale_start_at),
         sale_end_at: changedDate('sale_end_at', ticket?.sale_end_at),
       };
@@ -128,16 +131,19 @@ function TicketModal({
               {input('wave', 'Gelombang', { type: 'number', defaultValue: ticket ? ticket.wave ?? '' : 1 })}
               {input('max_purchase', 'Maks. Beli', { type: 'number', defaultValue: ticket ? ticket.max_purchase ?? '' : 5 })}
               <OrganizerField id={`${uid}-status`} label="Status" error={fieldErrors.status}>
-                <select id={`${uid}-status`} name="status" defaultValue={ticket?.status ?? 'active'} className={organizerInput}>
-                  <option value="active">Tersedia</option>
-                  <option value="sold_out">Habis</option>
-                  <option value="inactive">Nonaktif</option>
-                </select>
+                <Select
+                  id={`${uid}-status`}
+                  name="status"
+                  variant="field"
+                  defaultValue={ticket?.status ?? 'active'}
+                  options={[{ value: 'active', label: 'Tersedia' }, { value: 'sold_out', label: 'Habis' }, { value: 'inactive', label: 'Nonaktif' }]}
+                />
               </OrganizerField>
             </div>
             <OrganizerField id={`${uid}-description`} label="Deskripsi / Benefit" error={fieldErrors.description}>
               <textarea id={`${uid}-description`} name="description" rows={2} defaultValue={ticket?.description ?? ''} className={organizerInput} />
             </OrganizerField>
+            <ColorField id={`${uid}-color`} name="color" label="Warna di denah kursi" defaultValue={ticket?.color ?? undefined} />
             <div className="grid gap-3 sm:grid-cols-2">
               {input('sale_start_at', 'Mulai Jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_start_at) })}
               {input('sale_end_at', 'Selesai Jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_end_at) })}
@@ -197,7 +203,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
             onClick={loadTickets}
             disabled={loading}
             aria-label="Segarkan"
-            className="grid size-9 place-items-center rounded-xl border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-40"
+            className="grid size-9 place-items-center rounded-sm border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-40"
           >
             <RefreshCw className={`size-4 ${loading ? 'motion-safe:animate-spin' : ''}`} />
           </button>
@@ -205,7 +211,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
             type="button"
             onClick={() => { setEditingTicket(null); setModalOpen(true); }}
             whileTap={reduced ? undefined : { scale: 0.97 }}
-            className="inline-flex items-center gap-2 rounded-full bg-blaze px-4 py-2 text-xs font-semibold text-ink hover:bg-tangerine"
+            className="inline-flex items-center gap-2 rounded-md bg-blaze px-4 py-2 text-xs font-semibold text-ink hover:bg-tangerine"
           >
             <Plus className="size-3.5" />
             Tambah Kelas Tiket
@@ -226,7 +232,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
             <button
               type="button"
               onClick={() => { setEditingTicket(null); setModalOpen(true); }}
-              className="inline-flex items-center gap-2 rounded-full bg-blaze px-4 py-2 text-xs font-semibold text-ink hover:bg-tangerine"
+              className="inline-flex items-center gap-2 rounded-md bg-blaze px-4 py-2 text-xs font-semibold text-ink hover:bg-tangerine"
             >
               <Plus className="size-3.5" />
               Buat Kelas Tiket
@@ -255,7 +261,10 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
                   return (
                     <tr key={t.id} className="hover:bg-ink/[0.025] transition-colors">
                       <td className="px-5 py-3.5 font-semibold text-ink">
-                        <div>{t.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span aria-hidden="true" className="size-3 shrink-0 rounded-[3px] border border-ink/10" style={{ backgroundColor: t.color ?? 'transparent' }} />
+                          {t.name}
+                        </div>
                         {t.description && <div className="text-[11px] font-normal text-ink/50">{t.description}</div>}
                       </td>
                       <td className="px-5 py-3.5 tabular-nums text-ink font-semibold">{formatCurrency(t.price)}</td>
@@ -272,7 +281,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
                             type="button"
                             onClick={() => { setEditingTicket(t); setModalOpen(true); }}
                             aria-label={`Edit ${t.name}`}
-                            className="grid size-7 place-items-center rounded-lg border border-ink/10 text-ink/50 hover:border-blaze hover:text-blaze"
+                            className="grid size-7 place-items-center rounded-sm border border-ink/10 text-ink/50 hover:border-blaze hover:text-blaze"
                           >
                             <Edit2 className="size-3.5" />
                           </button>
@@ -280,7 +289,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
                             type="button"
                             onClick={() => setDeleteTarget(t)}
                             aria-label={`Hapus ${t.name}`}
-                            className="grid size-7 place-items-center rounded-lg border border-ink/10 text-ink/50 hover:border-[#EF4444] hover:text-[#EF4444]"
+                            className="grid size-7 place-items-center rounded-sm border border-ink/10 text-ink/50 hover:border-[#EF4444] hover:text-[#EF4444]"
                           >
                             <Trash2 className="size-3.5" />
                           </button>

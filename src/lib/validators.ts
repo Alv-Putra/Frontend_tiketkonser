@@ -58,3 +58,19 @@ export function validateRegisterForm({
     confirmPassword: validateConfirmPassword(password, confirmPassword),
   });
 }
+
+export const ORGANIZER_DOCUMENTS = ['business_entity', 'nib', 'npwp', 'pic_ktp'] as const;
+
+export function validateOrganizerRegisterForm(
+  { fullName, companyName, email, password, confirmPassword }: Record<'fullName' | 'companyName' | 'email' | 'password' | 'confirmPassword', string | undefined>,
+  files: Partial<Record<(typeof ORGANIZER_DOCUMENTS)[number], File>>,
+) {
+  return collect({
+    fullName: validateName(fullName),
+    companyName: isBlank(companyName) ? 'Nama perusahaan wajib diisi' : null,
+    email: validateEmail(email),
+    password: validatePassword(password),
+    confirmPassword: validateConfirmPassword(password, confirmPassword),
+    ...Object.fromEntries(ORGANIZER_DOCUMENTS.map((type) => [type, files[type] ? null : 'Berkas wajib diunggah'])),
+  });
+}

@@ -1,4 +1,5 @@
 import {
+  validateOrganizerRegisterForm,
   validateEmail,
   validatePassword,
   validateName,
@@ -49,5 +50,27 @@ describe('validators (validasi halaman saja)', () => {
     expect(
       validateRegisterForm({ name: 'A', email: 'a', phone: '1', password: 'x', confirmPassword: 'x' })
     ).toEqual({ isValid: true, errors: {} });
+  });
+});
+
+describe('validateOrganizerRegisterForm', () => {
+  const file = new File(['x'], 'a.pdf');
+  const files = { business_entity: file, nib: file, npwp: file, pic_ktp: file };
+  const form = { fullName: 'Rina', companyName: 'Nusantara Live', email: 'a@b.c', password: 'rahasia123', confirmPassword: 'rahasia123' };
+
+  it('lolos bila kolom wajib dan keempat berkas lengkap', () => {
+    expect(validateOrganizerRegisterForm(form, files)).toEqual({ isValid: true, errors: {} });
+  });
+
+  it('menandai kolom kosong, password beda, dan berkas yang belum diunggah', () => {
+    const { isValid, errors } = validateOrganizerRegisterForm({ ...form, companyName: ' ', confirmPassword: 'beda' }, { nib: file });
+    expect(isValid).toBe(false);
+    expect(errors).toEqual({
+      companyName: 'Nama perusahaan wajib diisi',
+      confirmPassword: 'Password tidak cocok',
+      business_entity: 'Berkas wajib diunggah',
+      npwp: 'Berkas wajib diunggah',
+      pic_ktp: 'Berkas wajib diunggah',
+    });
   });
 });

@@ -28,6 +28,7 @@ import {
 import StatusBadge from '@/components/workspace/StatusBadge';
 import { mockFestivals } from '@/services/mockData';
 import festivalService from '@/services/festivalService';
+import PublicSeatMap from '@/components/seatmap/PublicSeatMap';
 
 const ALL_CONCERTS = [
   {
@@ -590,6 +591,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
             {/* Tab 1: Kategori Tiket */}
             {activeTab === 'tickets' && (
               <div className="space-y-4">
+                <PublicSeatMap eventId={id} />
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-bold text-[#FFFFFF]">Daftar Kategori Tiket</h2>

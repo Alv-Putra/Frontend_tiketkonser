@@ -12,7 +12,7 @@ jest.mock('@/services/dashboardService');
 
 const fetchEvents = jest.mocked(fetchOrganizerDashboardEvents);
 const event = { id: '23', title: 'Tixo Live', start_at: '2026-11-25T12:00:00Z', status: 'draft', venue: null };
-const input = { venue_id: '1', category_id: '2', title: event.title, slug: 'tixo-live', start_at: event.start_at, end_at: '2026-11-25T15:00:00Z' };
+const input = { venue: { name: 'GBK', city_id: '1' }, category_id: '2', title: event.title, start_at: event.start_at, end_at: '2026-11-25T15:00:00Z' };
 
 beforeEach(() => {
   jest.resetAllMocks();

@@ -32,7 +32,8 @@ export default function WorkspaceTopBar() {
   return (
     <header className="relative z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink/10 bg-paper px-4 lg:px-8">
       <span className="min-w-0 truncate text-sm font-semibold md:hidden">{roleLabel}</span>
-      <div className="relative hidden w-72 md:block lg:w-96">
+      {/* Pencarian memakai data monitoring admin; organizer belum punya endpoint cari. */}
+      {isOrganizer ? <span className="hidden md:block" /> : <div className="relative hidden w-72 md:block lg:w-96">
         <Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink/60" />
         <input
           type="search"
@@ -43,7 +44,7 @@ export default function WorkspaceTopBar() {
           aria-label="Cari di workspace"
           className="min-h-11 w-full rounded-xl border border-ink/10 bg-white py-2.5 pl-9 pr-4 text-sm text-ink placeholder:text-ink/65 focus-visible:outline-2 focus-visible:outline-blaze"
         />
-      </div>
+      </div>}
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <WorkspaceNotifications />

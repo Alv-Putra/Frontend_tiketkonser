@@ -1,4 +1,5 @@
 import {
+  slugify,
   formatCurrency,
   formatDate,
   formatDateShort,
@@ -203,5 +204,13 @@ describe('formatters', () => {
       const data = JSON.parse(generateQRData('TKT-ABC12345', 'f1', 'o1'));
       expect(data).toEqual({ code: 'TKT-ABC12345', festival: 'f1', order: 'o1' });
     });
+  });
+});
+describe('slugify', () => {
+  it('membuat slug URL dari teks bebas', () => {
+    expect(slugify('  Nusantara Live Entertainment!  ')).toBe('nusantara-live-entertainment');
+    expect(slugify('Café Déjà Vu & Co.')).toBe('cafe-deja-vu-co');
+    expect(slugify('!!!')).toBe('');
+    expect(slugify(`${'a'.repeat(79)} b`)).toBe('a'.repeat(79));
   });
 });

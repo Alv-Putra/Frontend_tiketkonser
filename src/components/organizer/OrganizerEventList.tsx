@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, SendHorizontal, Trash2, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Plus, Pencil, SendHorizontal, Trash2, ChevronLeft, ChevronRight, RefreshCw, FileText } from 'lucide-react';
 import { useStore } from 'zustand';
 import { m, useReducedMotion } from 'framer-motion';
 import { DashboardFrame, DashboardHeader, DashboardNotice, DashboardStatus, ease, ghostButton, primaryButton } from '@/components/workspace/DashboardKit';
@@ -10,9 +10,10 @@ import { createOrganizerEventStore } from '@/stores/organizerEventStore';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import OrganizerEventForm from './OrganizerEventForm';
 import type { OrganizerDashboardEvent } from '@/types/dashboard';
-import { fetchOrganizerEventDetail } from '@/services/dashboardService';
+import { fetchOrganizerEventDetail, type EventCreateInput } from '@/services/dashboardService';
 import OrganizerConfirmDialog from './OrganizerConfirmDialog';
 import OrganizerDialog from './OrganizerDialog';
+import OrganizerEventDocuments, { readableDocumentError } from './OrganizerEventDocuments';
 
 const statusConfig: Record<string, { label: string; tone: 'neutral' | 'positive' | 'warning' | 'danger' }> = {
   draft: { label: 'Draf', tone: 'neutral' },
@@ -33,6 +34,7 @@ export default function OrganizerEventList() {
   const [form, setForm] = useState<'create' | OrganizerDashboardEvent | null>(null);
   const [confirmation, setConfirmation] = useState<{ action: 'Ajukan' | 'Hapus'; event: OrganizerDashboardEvent } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<OrganizerDashboardEvent | null>(null);
   const reduced = useReducedMotion();
 
   useEffect(() => { void loadEvents(); }, [loadEvents]);
@@ -49,7 +51,7 @@ export default function OrganizerEventList() {
     try {
       await (action === 'Ajukan' ? submitEvent(event.id) : deleteEvent(event.id));
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Aksi gagal. Coba lagi.');
+      setActionError(err instanceof Error ? readableDocumentError(err.message) : 'Aksi gagal. Coba lagi.');
     } finally {
       setConfirmation(null);
     }
@@ -58,13 +60,13 @@ export default function OrganizerEventList() {
   return (
     <MotionProvider>
       <DashboardFrame>
-        <DashboardHeader title="Konser saya" subtitle="Kelola event yang kamu selenggarakan — buat, ajukan ke admin, dan pantau statusnya.">
+        <DashboardHeader title="Event saya" subtitle="Kelola event yang kamu selenggarakan — buat, ajukan ke admin, dan pantau statusnya.">
           <m.button
             type="button"
             onClick={() => openForm('create')}
             disabled={submitting}
             whileTap={reduced ? undefined : { scale: 0.97 }}
-            className="inline-flex items-center gap-2 rounded-full bg-blaze px-5 py-2.5 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze"
+            className="inline-flex items-center gap-2 rounded-md bg-blaze px-5 py-2.5 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze"
           >
             <Plus className="size-4" aria-hidden="true" />
             Buat event baru
@@ -88,7 +90,7 @@ export default function OrganizerEventList() {
               onClick={() => loadEvents(page)}
               disabled={status === 'loading'}
               aria-label="Segarkan"
-              className="grid size-9 place-items-center rounded-xl border border-ink/10 text-ink/60 hover:border-blaze/40 hover:text-blaze disabled:opacity-40"
+              className="grid size-9 place-items-center rounded-sm border border-ink/10 text-ink/60 hover:border-blaze/40 hover:text-blaze disabled:opacity-40"
             >
               <RefreshCw className={`size-4 ${status === 'loading' ? 'motion-safe:animate-spin' : ''}`} aria-hidden="true" />
             </button>
@@ -108,7 +110,7 @@ export default function OrganizerEventList() {
                 type="button"
                 onClick={() => openForm('create')}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-full bg-blaze px-5 py-2.5 text-sm font-semibold text-ink hover:bg-tangerine"
+                className="inline-flex items-center gap-2 rounded-md bg-blaze px-5 py-2.5 text-sm font-semibold text-ink hover:bg-tangerine"
               >
                 <Plus className="size-4" aria-hidden="true" />
                 Buat event
@@ -157,13 +159,22 @@ export default function OrganizerEventList() {
                         </td>
                         <td className="px-5 py-3.5">
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setDocuments(ev)}
+                              aria-label={`Berkas verifikasi ${ev.title}`}
+                              title="Berkas verifikasi"
+                              className="grid size-8 place-items-center rounded-sm border border-ink/10 text-ink/65 hover:border-blaze hover:text-ink"
+                            >
+                              <FileText className="size-3.5" aria-hidden="true" />
+                            </button>
                             {canEdit && (
                               <button
                                 type="button"
                                 onClick={() => openForm(ev)}
                                 disabled={submitting}
                                 aria-label={`Edit event ${ev.title}`}
-                                className="grid size-8 place-items-center rounded-xl border border-ink/10 text-ink/65 hover:border-blaze hover:text-ink disabled:opacity-50"
+                                className="grid size-8 place-items-center rounded-sm border border-ink/10 text-ink/65 hover:border-blaze hover:text-ink disabled:opacity-50"
                               >
                                 <Pencil className="size-3.5" aria-hidden="true" />
                               </button>
@@ -175,7 +186,7 @@ export default function OrganizerEventList() {
                                 disabled={submitting}
                                 whileTap={reduced ? undefined : { scale: 0.95 }}
                                 title="Ajukan ke admin"
-                                className="inline-flex items-center gap-1.5 rounded-full bg-blaze/10 px-3 py-1.5 text-xs font-semibold text-blaze hover:bg-blaze hover:text-ink disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-sm bg-blaze/10 px-3 py-1.5 text-xs font-semibold text-blaze hover:bg-blaze hover:text-ink disabled:opacity-50"
                               >
                                 <SendHorizontal className="size-3.5" aria-hidden="true" />
                                 Ajukan
@@ -189,7 +200,7 @@ export default function OrganizerEventList() {
                                 whileTap={reduced ? undefined : { scale: 0.95 }}
                                 title="Hapus event"
                                 aria-label={`Hapus event ${ev.title}`}
-                                className="grid size-8 place-items-center rounded-xl border border-ink/10 text-ink/40 hover:border-[#EF4444]/40 hover:text-[#EF4444] disabled:opacity-50"
+                                className="grid size-8 place-items-center rounded-sm border border-ink/10 text-ink/40 hover:border-[#EF4444]/40 hover:text-[#EF4444] disabled:opacity-50"
                               >
                                 <Trash2 className="size-3.5" aria-hidden="true" />
                               </m.button>
@@ -212,7 +223,7 @@ export default function OrganizerEventList() {
                 <button
                   onClick={() => loadEvents(page - 1)}
                   disabled={page <= 1 || status === 'loading'}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-blaze/40 disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-ink/10 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-blaze/40 disabled:opacity-40"
                 >
                   <ChevronLeft className="size-3.5" aria-hidden="true" />
                   Sebelumnya
@@ -220,7 +231,7 @@ export default function OrganizerEventList() {
                 <button
                   onClick={() => loadEvents(page + 1)}
                   disabled={page >= totalPages || status === 'loading'}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-blaze/40 disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-ink/10 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-blaze/40 disabled:opacity-40"
                 >
                   Berikutnya
                   <ChevronRight className="size-3.5" aria-hidden="true" />
@@ -232,7 +243,8 @@ export default function OrganizerEventList() {
 
 
         {form === 'create' && (
-          <OrganizerEventForm submitting={submitting} onClose={() => setForm(null)} onSubmit={createEvent} />
+          // Form tanpa event selalu mengirim data lengkap, termasuk venue.
+          <OrganizerEventForm submitting={submitting} onClose={() => setForm(null)} onSubmit={(data) => createEvent(data as EventCreateInput)} />
         )}
         {form && form !== 'create' && (
           <EditEventForm
@@ -243,11 +255,13 @@ export default function OrganizerEventList() {
           />
         )}
 
+        {documents && <OrganizerEventDocuments event={documents} onClose={() => setDocuments(null)} />}
+
         {confirmation && (
           <OrganizerConfirmDialog
             title={`${confirmation.action} “${confirmation.event.title}”?`}
             description={confirmation.action === 'Ajukan'
-              ? 'Event akan dikirim ke admin untuk diperiksa.'
+              ? 'Event akan dikirim ke admin untuk diperiksa. Pastikan kelima berkas verifikasi dan minimal satu kelas tiket sudah ada.'
               : 'Event yang sudah dihapus tidak bisa dikembalikan.'}
             action={confirmation.action}
             busy={submitting}

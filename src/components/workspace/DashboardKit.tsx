@@ -7,8 +7,8 @@ import { ArrowRight, RefreshCw, type LucideIcon } from 'lucide-react';
 import MotionProvider from '@/components/landing/MotionProvider';
 import { useGsap } from '@/lib/gsap';
 
-export const primaryButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-blaze px-4 py-2 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
-export const ghostButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
+export const primaryButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-blaze px-4 py-2 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
+export const ghostButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
 export const ease = [0.22, 1, 0.36, 1] as const;
 
 export function DashboardFrame({ children }: { children: ReactNode }) {

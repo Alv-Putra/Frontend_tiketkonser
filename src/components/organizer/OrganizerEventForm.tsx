@@ -3,24 +3,29 @@
 import { useId, useState, type FormEvent } from 'react';
 import { CalendarDays, FileText, Image as ImageIcon, MapPin, X } from 'lucide-react';
 import { DashboardNotice, ghostButton, primaryButton } from '@/components/workspace/DashboardKit';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import { fieldErrorsFrom } from '@/lib/api';
 import { formatDateTimeInput } from '@/lib/formatters';
-import type { EventCreateInput } from '@/services/dashboardService';
+import { fetchOrganizerCategories, fetchOrganizerCities, type EventCreateInput } from '@/services/dashboardService';
 import type { OrganizerEventDetail } from '@/types/dashboard';
 import OrganizerDialog from './OrganizerDialog';
 import OrganizerField, { organizerInput } from './OrganizerField';
+import Select from '@/components/ui/Select';
 
 interface Props {
   event?: OrganizerEventDetail;
   submitting: boolean;
   onClose: () => void;
-  onSubmit: (data: EventCreateInput) => Promise<void>;
+  onSubmit: (data: Partial<EventCreateInput>) => Promise<void>;
 }
 
 export default function OrganizerEventForm({ event, submitting, onClose, onSubmit }: Props) {
   const uid = useId();
   const [error, setError] = useState<unknown>(null);
   const fieldErrors = fieldErrorsFrom(error);
+  const categories = useDashboardData(fetchOrganizerCategories);
+  const cities = useDashboardData(fetchOrganizerCities);
+  const optionsFailed = categories.status === 'error' || cities.status === 'error';
   const title = event ? `Edit ${event.title}` : 'Buat konser baru';
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -34,14 +39,17 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
       if (previous && input === formatDateTimeInput(previous)) return previous;
       return input ? new Date(input).toISOString() : undefined;
     };
+    const venue = { name: value('venue_name'), address: optional('venue_address'), city_id: value('venue_city_id') };
+    const old = event?.venue;
+    // Venue yang berubah dibuat ulang oleh backend; kirim hanya bila memang diubah.
+    const venueChanged = !old || old.name !== venue.name || (old.address ?? undefined) !== venue.address || String(old.city_id) !== venue.city_id;
     setError(null);
 
     try {
       await onSubmit({
         category_id: value('category_id'),
-        venue_id: value('venue_id'),
+        ...(venueChanged && { venue }),
         title: value('title'),
-        slug: value('slug'),
         summary: optional('summary'),
         description: optional('description'),
         banner: optional('banner'),
@@ -89,27 +97,58 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
           <legend className="mb-2 inline-flex items-center gap-2 text-sm font-bold">
             <FileText className="size-4 text-blaze" aria-hidden="true" /> Info dasar
           </legend>
-          {input('title', 'Judul konser *', { required: true, defaultValue: event?.title })}
+          <div>
+            {input('title', 'Judul konser *', { required: true, defaultValue: event?.title })}
+            <p className="mt-1 text-xs text-ink/60">
+              {event ? <>Link konser: <span className="font-semibold text-ink">/{event.slug}</span></> : 'Link konser dibuat otomatis dari judul.'}
+            </p>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {input('slug', 'Slug URL *', { required: true, defaultValue: event?.slug, spellCheck: false, placeholder: 'java-jazz-2027' })}
-            {input('minimum_age', 'Usia minimum', { type: 'number', defaultValue: event?.minimum_age ?? '' })}
+            <OrganizerField id={`${uid}-category_id`} label="Kategori *" error={fieldErrors.category_id}>
+              <Select
+                id={`${uid}-category_id`}
+                name="category_id"
+                required
+                variant="field"
+                defaultValue={event?.category_id ?? ''}
+                placeholder={categories.data ? 'Pilih kategori' : 'Memuat kategori…'}
+                options={categories.data?.map(({ id, name }) => ({ value: String(id), label: name })) ?? []}
+              />
+            </OrganizerField>
+            {input('minimum_age', 'Usia minimum', { type: 'number', min: 0, defaultValue: event?.minimum_age ?? '' })}
           </div>
           {input('summary', 'Ringkasan', { defaultValue: event?.summary ?? '' })}
           <OrganizerField id={`${uid}-description`} label="Deskripsi lengkap" error={fieldErrors.description}>
             <textarea id={`${uid}-description`} name="description" rows={3} defaultValue={event?.description ?? ''} className={organizerInput} />
           </OrganizerField>
-          {input('dress_code', 'Dress code', { defaultValue: event?.dress_code ?? '' })}
+          {input('dress_code', 'Dress code (opsional)', { defaultValue: event?.dress_code ?? '', placeholder: 'Contoh: serba hitam' })}
         </fieldset>
 
         <fieldset disabled={submitting} className="min-w-0 space-y-3">
           <legend className="mb-2 inline-flex items-center gap-2 text-sm font-bold">
-            <MapPin className="size-4 text-blaze" aria-hidden="true" /> Venue dan kategori
+            <MapPin className="size-4 text-blaze" aria-hidden="true" /> Tempat acara
           </legend>
+          <OrganizerField id={`${uid}-venue_name`} label="Nama tempat *" error={fieldErrors['venue.name']}>
+            <input id={`${uid}-venue_name`} name="venue_name" required defaultValue={event?.venue?.name ?? ''} placeholder="Contoh: Lapangan Banteng" className={organizerInput} />
+          </OrganizerField>
           <div className="grid gap-3 sm:grid-cols-2">
-            {input('venue_id', 'ID Venue *', { inputMode: 'numeric', required: true, defaultValue: event?.venue_id })}
-            {input('category_id', 'ID Kategori *', { inputMode: 'numeric', required: true, defaultValue: event?.category_id })}
+            <OrganizerField id={`${uid}-venue_address`} label="Alamat" error={fieldErrors['venue.address']}>
+              <input id={`${uid}-venue_address`} name="venue_address" defaultValue={event?.venue?.address ?? ''} className={organizerInput} />
+            </OrganizerField>
+            <OrganizerField id={`${uid}-venue_city_id`} label="Kota *" error={fieldErrors['venue.city_id'] ?? fieldErrors.venue}>
+              <Select
+                id={`${uid}-venue_city_id`}
+                name="venue_city_id"
+                required
+                searchable
+                variant="field"
+                defaultValue={event?.venue?.city_id ? String(event.venue.city_id) : ''}
+                placeholder={cities.data ? 'Pilih kota' : 'Memuat kota…'}
+                options={cities.data?.map(({ id, name, province }) => ({ value: String(id), label: province ? `${name}, ${province.name}` : name })) ?? []}
+              />
+            </OrganizerField>
           </div>
-          <p className="text-xs text-ink/70">Hubungi admin untuk mendapatkan ID venue dan kategori yang tersedia.</p>
+          {optionsFailed && <DashboardNotice error>Daftar kategori atau kota gagal dimuat. Tutup form lalu buka lagi.</DashboardNotice>}
         </fieldset>
 
         <fieldset disabled={submitting} className="min-w-0">

@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, MotionConfig, m } from 'framer-motion';
 import {
-  ChevronsLeft, CreditCard, LayoutDashboard, ListChecks, LogOut, Mic, Music, QrCode, Settings, ShieldCheck,
-  ShoppingBag, Ticket, Users, type LucideIcon,
+  Bell, CalendarDays, ChartNoAxesColumn, ChevronsLeft, CreditCard, LayoutDashboard, LogOut, Map, Mic, Music, Receipt,
+  ScanLine, Settings, ShieldCheck, ShoppingBag, Ticket, TicketPercent, Users, UsersRound, Wallet, type LucideIcon,
 } from 'lucide-react';
 import MotionProvider from '@/components/landing/MotionProvider';
 import useAuthStore from '@/stores/authStore';
 
 
-type NavItem = { label: string; icon: LucideIcon; href: string; badge?: number };
+type NavItem = { label: string; icon: LucideIcon; href: string; badge?: number; soon?: boolean };
 type NavGroup = { title: string; items: NavItem[] };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -33,18 +33,31 @@ export default function WorkspaceSidebar() {
 
   const isActive = (href: string) =>
     pathname === href ||
-    (href === '/organizer/concerts' && (pathname.includes('/organizer/concerts') || pathname.includes('/organizer/festivals')));
+    (href === '/organizer/concerts' && (pathname.startsWith('/organizer/concerts') || pathname.startsWith('/organizer/festivals')));
 
+  // Menu bertanda soon belum punya endpoint di backend.
   const groups: NavGroup[] = isOrganizer ? [
-    { title: 'Menu', items: [{ label: 'Dashboard', href: '/organizer', icon: LayoutDashboard }] },
-    { title: 'Kelola', items: [
-      { label: 'Konser saya', href: '/organizer/concerts', icon: Music },
-      { label: 'Kategori tiket', href: '/organizer/categories', icon: Ticket },
-      { label: 'Check-in tiket', href: '/organizer/checkin', icon: QrCode },
+    { title: 'Ikhtisar', items: [
+      { label: 'Dashboard', href: '/organizer', icon: LayoutDashboard },
+      { label: 'Notifikasi', href: '/organizer/notifications', icon: Bell },
     ] },
-    { title: 'Penjualan', items: [
-      { label: 'Laporan penjualan', href: '/organizer/sales', icon: ListChecks },
-      { label: 'Pesanan tiket', href: '/organizer/orders', icon: ShoppingBag },
+    { title: 'Kelola event', items: [
+      { label: 'Event saya', href: '/organizer/concerts', icon: CalendarDays },
+      { label: 'Venue & denah kursi', href: '/organizer/seat-map', icon: Map },
+      { label: 'Kelas tiket', href: '/organizer/categories', icon: Ticket },
+      { label: 'Peserta', href: '/organizer/attendees', icon: Users, soon: true },
+      { label: 'Check-in', href: '/organizer/checkin', icon: ScanLine },
+    ] },
+    { title: 'Bisnis', items: [
+      { label: 'Analitik', href: '/organizer/sales', icon: ChartNoAxesColumn },
+      { label: 'Keuangan', href: '/organizer/finance', icon: Wallet, soon: true },
+      { label: 'Transaksi', href: '/organizer/transactions', icon: Receipt, soon: true },
+      { label: 'Promosi', href: '/organizer/promotions', icon: TicketPercent, soon: true },
+    ] },
+    { title: 'Organisasi', items: [
+      { label: 'Tim', href: '/organizer/team', icon: UsersRound, soon: true },
+      { label: 'Peran & izin', href: '/organizer/roles', icon: ShieldCheck, soon: true },
+      { label: 'Pengaturan', href: '/organizer/settings', icon: Settings },
     ] },
   ] : [
     { title: 'Menu', items: [{ label: 'Dashboard', href: '/admin', icon: LayoutDashboard }] },
@@ -60,7 +73,7 @@ export default function WorkspaceSidebar() {
       { label: 'Pembayaran', href: '/admin/payments', icon: CreditCard },
     ] },
   ];
-  const settings: NavItem = { label: isOrganizer ? 'Pengaturan kuota' : 'Pengaturan', href: isOrganizer ? '/organizer/settings' : '/admin/settings', icon: Settings };
+  const settings: NavItem = { label: 'Pengaturan', href: '/admin/settings', icon: Settings };
 
   // Mobile mulai ringkas.
   useEffect(() => {
@@ -83,8 +96,17 @@ export default function WorkspaceSidebar() {
   const rowClass = (active: boolean) =>
     `relative isolate flex h-10 items-center gap-3 rounded-xl text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blaze ${collapsed ? 'justify-center' : 'px-3'} ${active ? 'text-ink' : 'text-ink/60 hover:bg-ink/5 hover:text-ink'}`;
 
-  const navLink = ({ label, href, icon: Icon, badge }: NavItem) => {
+  const navLink = ({ label, href, icon: Icon, badge, soon }: NavItem) => {
     const active = isActive(href);
+    if (soon) {
+      return (
+        <span aria-disabled="true" aria-label={`${label}, segera hadir`} tabIndex={collapsed ? 0 : undefined} className={`${rowClass(false)} cursor-not-allowed text-ink/35 hover:bg-transparent hover:text-ink/35`} {...tipProps(`${label} (segera)`)}>
+          <Icon aria-hidden="true" className="size-4.5 shrink-0" strokeWidth={1.8} />
+          {!collapsed && <span className="min-w-0 flex-1 truncate">{label}</span>}
+          {!collapsed && <span className="shrink-0 rounded-full bg-paper px-2 py-0.5 text-[10px] font-bold text-ink/55">Segera</span>}
+        </span>
+      );
+    }
     return (
       <Link href={href} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} className={rowClass(active)} {...tipProps(label)}>
         {active && <m.span layoutId="sidebar-active" transition={spring} className="absolute inset-0 -z-10 rounded-xl bg-blaze shadow-sm shadow-blaze/30" />}
@@ -112,7 +134,7 @@ export default function WorkspaceSidebar() {
           <div className={`flex h-16 shrink-0 items-center border-b border-ink/10 ${collapsed ? 'flex-col justify-center' : 'justify-between px-5'}`}>
             <Link href="/" aria-label="Tixo, kembali ke beranda" className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze">
               <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-blaze text-ink"><Ticket className="size-4" strokeWidth={2.5} /></span>
-              {!collapsed && <span className="font-display text-lg font-extrabold tracking-tight text-ink">TIXO</span>}
+              {!collapsed && <span className="font-display text-lg font-extrabold tracking-tight text-ink">TIXO{isOrganizer && <span className="ml-1.5 text-xs font-bold tracking-wide text-ink/50">ORGANIZER</span>}</span>}
             </Link>
             {!collapsed && <ToggleButton collapsed={collapsed} onClick={() => setCollapsed(true)} />}
           </div>
@@ -132,7 +154,7 @@ export default function WorkspaceSidebar() {
           </nav>
 
           <div className="shrink-0 space-y-1 border-t border-ink/10 px-3 py-3">
-            {navLink(settings)}
+            {!isOrganizer && navLink(settings)}
             <button type="button" onClick={logoutUser} aria-label={collapsed ? 'Keluar' : undefined} className={`${rowClass(false)} w-full hover:text-ink`} {...tipProps('Keluar')}>
               <LogOut className="size-4.5 shrink-0" strokeWidth={1.8} />
               {!collapsed && <span className="flex-1 text-left">Keluar</span>}

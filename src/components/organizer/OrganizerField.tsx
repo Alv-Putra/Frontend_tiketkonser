@@ -15,4 +15,4 @@ export default function OrganizerField({ label, id, children, error }: {
   );
 }
 
-export const organizerInput = 'min-h-11 w-full min-w-0 rounded-xl border border-ink/20 bg-paper [color-scheme:light] px-3 py-2 text-sm text-ink placeholder-ink/55 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blaze disabled:opacity-70';
+export const organizerInput = 'min-h-11 w-full min-w-0 rounded-md border border-ink/20 bg-paper [color-scheme:light] px-3 py-2 text-sm text-ink placeholder-ink/55 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blaze disabled:opacity-70';

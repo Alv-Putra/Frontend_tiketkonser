@@ -23,7 +23,7 @@ const metricLabels = {
   paid_orders: { title: 'Pesanan lunas', icon: ShoppingBag },
 } as const;
 
-function dateQuery(days: number, interval: DashboardChartInterval) {
+export function dateQuery(days: number, interval: DashboardChartInterval) {
   const end_date = jakartaDay.format(new Date());
   const start = new Date(end_date);
   start.setUTCDate(start.getUTCDate() - days + 1);
@@ -124,44 +124,12 @@ function OrderDistribution({ chart }: { chart: DashboardChart }) {
   );
 }
 
-function TopConcerts({ chart }: { chart: DashboardChart }) {
-  const revenue = chart.series.find(({ key }) => key === 'gross_sales')?.data ?? [];
-  const sold = chart.series.find(({ key }) => key === 'tickets_sold')?.data ?? [];
-
-  return (
-    <Panel>
-      <PanelHead title="Konser terlaris" subtitle="Diurutkan menurut penjualan kotor pada periode ini." />
-      {chart.labels.length > 0 ? (
-        <table className="w-full table-fixed text-left text-xs sm:text-sm">
-          <thead>
-            <tr className="border-b border-ink/10 text-ink/70">
-              <th scope="col" className="w-2/5 py-2.5 pr-2 font-semibold">Konser</th>
-              <th scope="col" className="w-1/5 py-2.5 text-right font-semibold">Tiket</th>
-              <th scope="col" className="w-2/5 py-2.5 pl-2 text-right font-semibold">Penjualan</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-ink/10">
-            {chart.labels.map((label, index) => (
-              <tr key={index}>
-                <th scope="row" className="wrap-anywhere py-3 pr-2 font-semibold">{label}</th>
-                <td className="wrap-anywhere py-3 text-right tabular-nums">{number.format(sold[index] ?? 0)}</td>
-                <td className="wrap-anywhere py-3 pl-2 text-right font-semibold tabular-nums">{formatCurrency(revenue[index] ?? 0)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : <p className="text-sm text-ink/70">Belum ada konser dengan penjualan pada periode ini.</p>}
-    </Panel>
-  );
-}
-
-function AnalyticsContent({ load, days, interval, metric, onMetric, showTopConcerts }: {
+function AnalyticsContent({ load, days, interval, metric, onMetric }: {
   load: LoadCharts;
   days: number;
   interval: DashboardChartInterval;
   metric: MetricKey;
   onMetric: (metric: MetricKey) => void;
-  showTopConcerts: boolean;
 }) {
   const { data, status, refresh } = useDashboardData(() => load(dateQuery(days, interval)));
   const series = data?.charts.sales_trend.series.find(({ key }) => key === metric);
@@ -190,18 +158,16 @@ function AnalyticsContent({ load, days, interval, metric, onMetric, showTopConce
             ) : <DashboardNotice>Tren untuk metrik ini belum tersedia.</DashboardNotice>}
             <OrderDistribution chart={data.charts.order_status} />
           </div>
-          {showTopConcerts && <TopConcerts chart={data.charts.top_events} />}
         </>
       )}
     </section>
   );
 }
 
-export default function DashboardOverview({ title, subtitle, load, showTopConcerts = false, children }: {
+export default function DashboardOverview({ title, subtitle, load, children }: {
   title: string;
   subtitle: string;
   load: LoadCharts;
-  showTopConcerts?: boolean;
   children: ReactNode;
 }) {
   const [days, setDays] = useState(30);
@@ -236,7 +202,7 @@ export default function DashboardOverview({ title, subtitle, load, showTopConcer
         </select>
       </DashboardHeader>
 
-      <AnalyticsContent key={`${days}-${interval}`} load={load} days={days} interval={interval} metric={metric} onMetric={setMetric} showTopConcerts={showTopConcerts} />
+      <AnalyticsContent key={`${days}-${interval}`} load={load} days={days} interval={interval} metric={metric} onMetric={setMetric} />
       {children}
     </DashboardFrame>
   );

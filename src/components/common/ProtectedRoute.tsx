@@ -10,6 +10,8 @@ interface ProtectedRouteProps {
   roles?: string[];
   redirectTo?: string;
   fallback?: React.ReactNode;
+  /** false: arahkan ke halaman login tanpa query ?redirect=. */
+  rememberPath?: boolean;
 }
 
 export default function ProtectedRoute({
@@ -17,6 +19,7 @@ export default function ProtectedRoute({
   roles = [ROLES.CUSTOMER],
   redirectTo = '/auth/login',
   fallback = null,
+  rememberPath = true,
 }: ProtectedRouteProps) {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -29,6 +32,10 @@ export default function ProtectedRoute({
       return;
     }
     if (!user) {
+      if (!rememberPath) {
+        router.replace(redirectTo);
+        return;
+      }
       const currentPath =
         typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}`
@@ -43,7 +50,7 @@ export default function ProtectedRoute({
         router.replace('/');
       }
     }
-  }, [user, isHydrated, roles, redirectTo, router, hydrate]);
+  }, [user, isHydrated, roles, redirectTo, rememberPath, router, hydrate]);
 
   if (!isHydrated || !user) {
     return <>{fallback}</>;

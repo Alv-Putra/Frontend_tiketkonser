@@ -1,7 +1,6 @@
-'use client';
-
-import AdminArtistsPage from '@/app/admin/artists/page';
+import { redirect } from 'next/navigation';
 
 export default function OrganizerArtistsPage() {
-  return <AdminArtistsPage />;
+  redirect('/organizer');
 }
+

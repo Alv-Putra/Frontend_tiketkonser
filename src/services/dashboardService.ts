@@ -1,15 +1,24 @@
 import { apiFetch } from '@/lib/api';
 import type {
   AdminDashboardData,
+  CityOption,
   DashboardChartData,
   DashboardChartInterval,
+  EventDocument,
+  EventCategoryOption,
+  EventDocumentType,
   OrganizerChartData,
   OrganizerDashboardEvents,
   OrganizerDashboardSales,
+  OrganizerProfile,
   OrganizerEventDetail,
   OrganizerTicket,
+  SeatMap,
+  SeatMapPayload,
   TicketCheckIn,
+  WorkspaceNotification,
   WorkspaceNotificationList,
+  WorkspaceNotificationPage,
 } from '@/types/dashboard';
 
 export function fetchAdminDashboard(): Promise<AdminDashboardData> {
@@ -26,6 +35,28 @@ export function fetchOrganizerDashboardSales(eventId: string): Promise<Organizer
 
 export function fetchWorkspaceNotifications(): Promise<WorkspaceNotificationList> {
   return apiFetch('/api/v1/notifications?limit=5');
+}
+
+export function fetchNotifications(page: number): Promise<WorkspaceNotificationPage> {
+  return apiFetch(`/api/v1/notifications?page=${page}&limit=10`);
+}
+
+export function markNotificationRead(id: string): Promise<WorkspaceNotification> {
+  return apiFetch(`/api/v1/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+}
+
+export function fetchOrganizerSeatMap(eventId: string): Promise<SeatMap> {
+  return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}/seat-map`);
+}
+
+export function saveOrganizerSeatMap(eventId: string, map: SeatMapPayload): Promise<SeatMap> {
+  return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}/seat-map`, { method: 'PUT', body: map });
+}
+
+/** Denah publik event; viewport opsional agar server hanya mengirim kursi yang terlihat. */
+export function fetchPublicSeatMap(eventId: string, viewport?: { x: number; y: number; width: number; height: number }): Promise<SeatMap> {
+  const query = viewport ? `?${new URLSearchParams(Object.entries(viewport).map(([key, value]) => [key, String(Math.round(value))]))}` : '';
+  return apiFetch(`/api/v1/events/${encodeURIComponent(eventId)}/seat-map${query}`, { auth: false });
 }
 
 export function checkInTicket(eventId: string, qrToken: string): Promise<TicketCheckIn> {
@@ -65,11 +96,17 @@ export function fetchOrganizerEventDetail(eventId: string): Promise<OrganizerEve
   return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}`);
 }
 
+export interface EventVenueInput {
+  name: string;
+  address?: string;
+  city_id: string;
+}
+
 export interface EventCreateInput {
   category_id: string;
-  venue_id: string;
+  venue: EventVenueInput;
   title: string;
-  slug: string;
+  slug?: string;
   summary?: string;
   description?: string;
   banner?: string;
@@ -123,6 +160,7 @@ export interface TicketCreateInput {
   sale_start_at?: string;
   sale_end_at?: string;
   status?: 'active' | 'sold_out' | 'inactive';
+  color?: string;
 }
 
 export function createOrganizerTicket(data: TicketCreateInput): Promise<OrganizerTicket> {
@@ -143,4 +181,26 @@ export function deleteOrganizerTicket(ticketId: string): Promise<void> {
   return apiFetch(`/api/v1/organizer/tickets/${encodeURIComponent(ticketId)}`, {
     method: 'DELETE',
   });
+}
+
+export function fetchOrganizerEventDocuments(eventId: string): Promise<EventDocument[]> {
+  return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}/documents`);
+}
+
+export function uploadOrganizerEventDocument(eventId: string, type: EventDocumentType, file: File): Promise<EventDocument> {
+  const body = new FormData();
+  body.append('file', file);
+  return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}/documents/${type}`, { method: 'PUT', body });
+}
+
+export function fetchOrganizerCategories(): Promise<EventCategoryOption[]> {
+  return apiFetch('/api/v1/organizer/categories');
+}
+
+export function fetchOrganizerCities(): Promise<CityOption[]> {
+  return apiFetch('/api/v1/organizer/cities');
+}
+
+export function fetchOrganizerProfile(): Promise<OrganizerProfile> {
+  return apiFetch('/api/v1/organizer/profile');
 }

@@ -1,7 +1,6 @@
-'use client';
-
-import AdminApprovalsPage from '@/app/admin/approvals/page';
+import { redirect } from 'next/navigation';
 
 export default function OrganizerApprovalsPage() {
-  return <AdminApprovalsPage />;
+  redirect('/organizer');
 }
+

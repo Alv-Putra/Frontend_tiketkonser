@@ -6,6 +6,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { fetchOrganizerDashboardEvents } from '@/services/dashboardService';
 import type { OrganizerDashboardEvent } from '@/types/dashboard';
 import { DashboardNotice, RefreshButton, ghostButton } from '@/components/workspace/DashboardKit';
+import Select from '@/components/ui/Select';
 
 export const eventDate = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeZone: 'Asia/Jakarta' });
 
@@ -21,10 +22,16 @@ function EventPage({ page, onPage, children }: { page: number; onPage: (page: nu
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0 flex-1 basis-52">
             <label htmlFor="dashboard-event" className="mb-2 block text-sm font-semibold">Konser yang dipantau</label>
-            <select id="dashboard-event" value={event?.id ?? ''} disabled={!event} onChange={(e) => setSelected(e.target.value)} className="min-h-11 w-full max-w-md rounded-xl border border-paper/25 bg-paper px-3 py-2 font-display text-base font-bold text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tangerine">
-              {!event && <option value="">{status === 'loading' ? 'Memuat konser…' : 'Tidak ada konser di halaman ini'}</option>}
-              {data?.data.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
-            </select>
+            <Select
+              id="dashboard-event"
+              variant="field"
+              className="max-w-md"
+              value={event?.id ?? ''}
+              disabled={!event}
+              onChange={setSelected}
+              placeholder={status === 'loading' ? 'Memuat konser…' : 'Tidak ada konser di halaman ini'}
+              options={data?.data.map((item) => ({ value: item.id, label: item.title })) ?? []}
+            />
           </div>
           <RefreshButton loading={status === 'loading'} refresh={refresh} />
         </div>
