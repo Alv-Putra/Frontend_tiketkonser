@@ -29,6 +29,7 @@ Package mgr:  npm (package-lock.json)
 
 ### Keputusan Arsitektur
 - **Dashboard:** ringkasan admin, penjualan per konser organizer, dan check-in memakai endpoint backend melalui store khusus dashboard. Data ringkasan yang gagal dimuat menampilkan status gagal atau data terakhir, tanpa fallback demo. Workspace organizer dilindungi role organizer. `AdminDashboardSummary` memuat UI metrik, pesanan terbaru, dan pengajuan admin. `OrganizerEventSales` memuat data penjualan konser terpilih dan memakai `OrganizerSalesSummary` untuk metrik serta rincian per kelas tiket di ringkasan dan laporan penjualan.
+- **Pengelolaan konser organizer:** draf dan event ditolak dapat diedit, diajukan, atau dihapus lewat API organizer. Daftar kembali ke halaman terakhir yang tersedia setelah penghapusan. Form menampilkan error validasi backend per kolom. Perubahan kelas tiket setelah event diajukan tidak mengirim harga yang dikunci backend.
 - **Alur data:** `Page/Component → Store (Zustand) → Service → lib/api (apiFetch) → Backend`. Komponen tidak memanggil `fetch` langsung.
 - **Proxy API:** request ke `/api/*` diteruskan Next.js ke `${BACKEND_API_URL}/api/v1/*` (lihat `next.config.mjs`). Tidak perlu CORS. Default `BACKEND_API_URL=http://localhost:5000` (lihat `.env.example`).
 - **Validasi:** frontend hanya cek kolom wajib & kecocokan input (`src/lib/validators.ts`). Aturan format/kekuatan ada di backend; tampilkan error per kolom dengan `fieldErrorsFrom()` dari `src/lib/api.ts`.

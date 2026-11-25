@@ -17,6 +17,10 @@ export function formatDateTime(dateString) {
   return format(new Date(dateString), 'd MMMM yyyy, HH:mm', { locale: id });
 }
 
+export function formatDateTimeInput(dateString?: string | null) {
+  return dateString ? format(new Date(dateString), "yyyy-MM-dd'T'HH:mm") : '';
+}
+
 export function formatTimeAgo(dateString) {
   return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: id });
 }

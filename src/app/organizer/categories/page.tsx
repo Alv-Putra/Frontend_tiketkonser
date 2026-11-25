@@ -1,7 +1,5 @@
-'use client';
-
-import AdminCategoriesPage from '@/app/admin/categories/page';
+import OrganizerTicketManager from '@/components/organizer/OrganizerTicketManager';
 
 export default function OrganizerCategoriesPage() {
-  return <AdminCategoriesPage />;
+  return <OrganizerTicketManager />;
 }

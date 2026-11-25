@@ -3,6 +3,7 @@ import {
   formatDate,
   formatDateShort,
   formatDateTime,
+  formatDateTimeInput,
   formatTimeAgo,
   isExpired,
   isPaymentExpired,
@@ -54,6 +55,17 @@ describe('formatters', () => {
   describe('formatDateTime', () => {
     it('formats date and time with hour', () => {
       expect(formatDateTime('2026-05-15T14:00:00Z')).toMatch(/Mei 2026, \d{2}:\d{2}/);
+    });
+  });
+
+  describe('formatDateTimeInput', () => {
+    it('uses the same local time as a datetime-local input', () => {
+      const localDate = new Date(2026, 10, 25, 19, 30);
+      expect(formatDateTimeInput(localDate.toISOString())).toBe('2026-11-25T19:30');
+    });
+
+    it('leaves optional dates empty', () => {
+      expect(formatDateTimeInput(null)).toBe('');
     });
   });
 
