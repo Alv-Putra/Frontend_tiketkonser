@@ -1,6 +1,8 @@
 import { apiFetch } from '@/lib/api';
 import type {
   AdminDashboardData,
+  DashboardChartData,
+  DashboardChartInterval,
   OrganizerChartData,
   OrganizerDashboardEvents,
   OrganizerDashboardSales,
@@ -33,19 +35,30 @@ export function checkInTicket(eventId: string, qrToken: string): Promise<TicketC
   });
 }
 
-export function fetchOrganizerCharts(params?: {
-  event_id?: string;
-  interval?: 'day' | 'week' | 'month';
+export interface DashboardChartQuery {
+  interval?: DashboardChartInterval;
   start_date?: string;
   end_date?: string;
-}): Promise<OrganizerChartData> {
+}
+
+type OrganizerChartQuery = DashboardChartQuery & { event_id?: string };
+
+function fetchDashboardCharts(role: 'admin' | 'organizer', params?: OrganizerChartQuery) {
   const q = new URLSearchParams();
   if (params?.event_id) q.set('event_id', params.event_id);
   if (params?.interval) q.set('interval', params.interval);
   if (params?.start_date) q.set('start_date', params.start_date);
   if (params?.end_date) q.set('end_date', params.end_date);
   const qs = q.toString();
-  return apiFetch(`/api/v1/organizer/dashboard/charts${qs ? `?${qs}` : ''}`);
+  return apiFetch(`/api/v1/${role}/dashboard/charts${qs ? `?${qs}` : ''}`);
+}
+
+export function fetchAdminCharts(params?: DashboardChartQuery): Promise<DashboardChartData> {
+  return fetchDashboardCharts('admin', params);
+}
+
+export function fetchOrganizerCharts(params?: OrganizerChartQuery): Promise<OrganizerChartData> {
+  return fetchDashboardCharts('organizer', params);
 }
 
 export function fetchOrganizerEventDetail(eventId: string): Promise<OrganizerEventDetail> {

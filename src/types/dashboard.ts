@@ -58,44 +58,51 @@ export interface TicketCheckIn {
   checked_in_at: string;
 }
 
-export interface OrganizerChartSeries {
+export interface DashboardChartSeries {
   key: string;
   name: string;
   unit: 'IDR' | 'count';
   data: number[];
 }
 
-export interface OrganizerChart {
+export interface DashboardChart {
   type: 'line' | 'bar' | 'donut';
   labels: string[];
-  series: OrganizerChartSeries[];
+  series: DashboardChartSeries[];
 }
 
-export interface OrganizerChartKpi {
+export interface DashboardChartKpi {
   value: number;
   previous: number;
   change_pct: number | null;
 }
 
-export interface OrganizerChartData {
+export type DashboardChartInterval = 'day' | 'week' | 'month';
+
+export interface DashboardChartData {
   meta: {
     start_date: string;
     end_date: string;
-    interval: string;
-    event_id: string | null;
+    interval: DashboardChartInterval;
   };
   summary: {
-    gross_sales: OrganizerChartKpi;
-    tickets_sold: OrganizerChartKpi;
-    paid_orders: OrganizerChartKpi;
+    gross_sales: DashboardChartKpi;
+    tickets_sold: DashboardChartKpi;
+    paid_orders: DashboardChartKpi;
   };
   charts: {
-    sales_trend: OrganizerChart;
-    order_status: OrganizerChart;
-    top_events: OrganizerChart;
-    ticket_type_sales: OrganizerChart;
-    check_in: OrganizerChart;
-    event_status: OrganizerChart;
+    sales_trend: DashboardChart;
+    order_status: DashboardChart;
+    top_events: DashboardChart;
+    event_status: DashboardChart;
+  };
+}
+
+export interface OrganizerChartData extends DashboardChartData {
+  meta: DashboardChartData['meta'] & { event_id: string | null };
+  charts: DashboardChartData['charts'] & {
+    ticket_type_sales: DashboardChart;
+    check_in: DashboardChart;
   };
 }
 

@@ -5,6 +5,7 @@ import {
   createOrganizerTicket,
   deleteOrganizerEvent,
   deleteOrganizerTicket,
+  fetchAdminCharts,
   fetchAdminDashboard,
   fetchOrganizerCharts,
   fetchOrganizerDashboardEvents,
@@ -81,4 +82,11 @@ test.each([
 
   await expect(request()).resolves.toBe(response);
   expect(apiFetch).toHaveBeenLastCalledWith(...args);
+});
+
+test('memuat tren admin untuk rentang dan interval yang dipilih', async () => {
+  const response = { chart: 'admin sales' };
+  jest.mocked(apiFetch).mockResolvedValue(response);
+  await expect(fetchAdminCharts({ interval: 'month', start_date: '2026-09-01', end_date: '2026-11-25' })).resolves.toBe(response);
+  expect(apiFetch).toHaveBeenLastCalledWith('/api/v1/admin/dashboard/charts?interval=month&start_date=2026-09-01&end_date=2026-11-25');
 });

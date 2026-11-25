@@ -169,6 +169,7 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 - Warna status di latar terang: `bg-status-*/25 text-ink` (teks status asli terlalu pucat di putih). Aksen teks/link pakai `text-blaze`.
 - Simpan komponen khusus peran di `src/components/admin/` atau `src/components/organizer/`. Pakai `DashboardKit.tsx` dari `src/components/workspace/` untuk header, metrik, panel, status, dan akses cepat. Pakai `OrganizerEventPicker` di ringkasan, penjualan, serta check-in. Gunakan `AdminDashboardSummary` untuk isi ringkasan admin dan `OrganizerSalesSummary` untuk metrik serta rincian tiket yang dibagikan antara ringkasan organizer dan laporan penjualan.
 - Framer Motion menangani animasi masuk, umpan balik tombol, dan batang per kelas tiket. GSAP menangani panel di bawah viewport saat masuk area gulir workspace. Keduanya mengikuti preferensi gerak pengguna.
+- Halaman utama admin dan organizer memakai `DashboardOverview` untuk filter periode, metrik, dan komposisi status pesanan. Kartu metrik memilih seri di `DashboardTrend`. Gunakan panel `bg-ink` dengan garis `tangerine` untuk grafik utama, dan tabel semantik untuk rincian.
 - Angka di ringkasan berasal dari backend. Tampilkan keadaan memuat, kosong, atau gagal bila sesuai.
 
 ## 6. Animasi — banyak tapi ringan

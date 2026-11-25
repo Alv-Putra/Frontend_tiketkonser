@@ -2,24 +2,31 @@
 
 import { ClipboardCheck, CreditCard, Music, ShoppingBag, Users } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { fetchAdminDashboard } from '@/services/dashboardService';
+import { fetchAdminCharts, fetchAdminDashboard } from '@/services/dashboardService';
+import { DashboardLinks, DashboardNotice, RefreshButton } from '@/components/workspace/DashboardKit';
+import DashboardOverview from '@/components/workspace/DashboardOverview';
 import AdminDashboardSummary from './AdminDashboardSummary';
-import { DashboardFrame, DashboardHeader, DashboardLinks, DashboardNotice, RefreshButton } from '@/components/workspace/DashboardKit';
 
 export default function AdminDashboard() {
   const { data, status, refresh } = useDashboardData(fetchAdminDashboard);
-  const totals = data?.totals;
 
   return (
-    <DashboardFrame>
-      <DashboardHeader title="Ringkasan platform" subtitle="Pantau pendapatan, pesanan, dan pengajuan konser.">
-        <RefreshButton loading={status === 'loading'} refresh={refresh} />
-      </DashboardHeader>
-
-      {status === 'error' && <DashboardNotice error>{data ? 'Pembaruan gagal. Data terakhir masih ditampilkan. Pilih Segarkan untuk mencoba lagi.' : 'Ringkasan gagal dimuat. Pilih Segarkan untuk mencoba lagi.'}</DashboardNotice>}
-      {status === 'loading' && !data && <DashboardNotice>Memuat ringkasan platform…</DashboardNotice>}
-
-      {data && totals && <AdminDashboardSummary totals={totals} orders={data.recent_orders} />}
+    <DashboardOverview
+      title="Dashboard admin"
+      subtitle="Pantau penjualan, aktivitas platform, dan pengajuan konser."
+      load={fetchAdminCharts}
+    >
+      <section aria-labelledby="operasional-platform" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="operasional-platform" className="font-display text-xl font-extrabold">Operasional platform</h2>
+          <RefreshButton loading={status === 'loading'} refresh={refresh} />
+        </div>
+        {status === 'error' && (
+          <DashboardNotice error>{data ? 'Pembaruan gagal. Data terakhir masih ditampilkan.' : 'Ringkasan platform gagal dimuat. Pilih Segarkan untuk mencoba lagi.'}</DashboardNotice>
+        )}
+        {status === 'loading' && !data && <DashboardNotice>Memuat ringkasan platform…</DashboardNotice>}
+        {data && <AdminDashboardSummary totals={data.totals} orders={data.recent_orders} />}
+      </section>
 
       <DashboardLinks items={[
         { label: 'Persetujuan konser', href: '/admin/approvals', icon: ClipboardCheck },
@@ -28,6 +35,6 @@ export default function AdminDashboard() {
         { label: 'Log pesanan', href: '/admin/orders', icon: ShoppingBag },
         { label: 'Pembayaran', href: '/admin/payments', icon: CreditCard },
       ]} />
-    </DashboardFrame>
+    </DashboardOverview>
   );
 }

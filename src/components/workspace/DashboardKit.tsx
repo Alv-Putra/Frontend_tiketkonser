@@ -141,3 +141,11 @@ export function DashboardStatus({ label, tone = 'neutral' }: { label: string; to
   }[tone];
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold text-ink ${toneClass}`}>{label}</span>;
 }
+
+export const dashboardOrderStatus = {
+  paid: { label: 'Lunas', tone: 'positive', color: 'var(--color-status-success)' },
+  pending: { label: 'Menunggu pembayaran', tone: 'warning', color: 'var(--color-status-warning)' },
+  expired: { label: 'Kedaluwarsa', tone: 'neutral', color: 'var(--color-mute)' },
+  cancelled: { label: 'Dibatalkan', tone: 'danger', color: 'var(--color-status-danger)' },
+  refunded: { label: 'Dikembalikan', tone: 'neutral', color: 'var(--color-tangerine)' },
+} as const;
