@@ -15,6 +15,9 @@ const ptSans = PT_Sans({
 export const metadata = {
   title: 'Tixo — Tiket konser favoritmu',
   description: 'Beli tiket konser resmi lewat app Tixo, atau jadi organizer dan jual tiket acaramu.',
+  icons: {
+    icon: '/LogoTixo.png',
+  },
 };
 
 export default function RootLayout({
