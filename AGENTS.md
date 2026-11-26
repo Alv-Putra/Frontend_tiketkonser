@@ -28,10 +28,11 @@ Package mgr:  npm (package-lock.json)
 ```
 
 ### Keputusan Arsitektur
+- **Dashboard:** ringkasan admin, penjualan per konser organizer, dan check-in memakai endpoint backend melalui store khusus dashboard. Data ringkasan yang gagal dimuat menampilkan status gagal atau data terakhir, tanpa fallback demo. Workspace organizer dilindungi role organizer. `AdminDashboardSummary` memuat UI metrik, pesanan terbaru, dan pengajuan admin. `OrganizerEventSales` memuat data penjualan konser terpilih dan memakai `OrganizerSalesSummary` untuk metrik serta rincian per kelas tiket di ringkasan dan laporan penjualan.
 - **Alur data:** `Page/Component → Store (Zustand) → Service → lib/api (apiFetch) → Backend`. Komponen tidak memanggil `fetch` langsung.
 - **Proxy API:** request ke `/api/*` diteruskan Next.js ke `${BACKEND_API_URL}/api/v1/*` (lihat `next.config.mjs`). Tidak perlu CORS. Default `BACKEND_API_URL=http://localhost:5000` (lihat `.env.example`).
 - **Validasi:** frontend hanya cek kolom wajib & kecocokan input (`src/lib/validators.ts`). Aturan format/kekuatan ada di backend; tampilkan error per kolom dengan `fieldErrorsFrom()` dari `src/lib/api.ts`.
-- **Auth:** access token & user disimpan di localStorage (`src/lib/storage.ts`), refresh token di cookie httpOnly dari backend. `/admin/*` dilindungi `src/app/admin/layout.tsx` (role admin); login admin memanggil backend dengan `role: 'admin'` dan **tanpa** cadangan mock.
+- **Auth:** access token & user disimpan di localStorage (`src/lib/storage.ts`), refresh token di cookie httpOnly dari backend. `/admin/*` dilindungi `src/app/admin/layout.tsx` (role admin); login admin dan organizer memakai UI Backstage bersama di `WorkspaceLogin`, dengan form di `WorkspaceLoginForm` serta latar dan kartu akses di `WorkspaceLoginArtwork`. Kedua login workspace mengirim role masing-masing ke backend tanpa cadangan mock. Akses organizer tanpa sesi dan aksi keluar organizer mengarah ke `/organizer/login`.
 - **Data mock:** `src/services/mockData.ts` + `storageService.ts` hanya cadangan saat backend kosong/mati (mis. etalase event di landing). Jangan pakai mock untuk autentikasi admin.
 - **Next.js 16:** file middleware bernama `src/proxy.ts` (bukan `middleware.ts`). Cek dokumentasi Next 16 sebelum memakai API yang mungkin berubah.
 
@@ -42,7 +43,7 @@ Package mgr:  npm (package-lock.json)
 ```
 Frontend_tiketkonser/
 ├── AGENTS.md
-├── docs/                    # DESIGN-SYSTEM.md, photo-credits.md, ERD.md, design.md (alur lama)
+├── docs/                    # DESIGN-SYSTEM.md, photo-credits.md
 ├── public/images/           # bands/ (foto lineup), events/ (sampul tiket JPEG)
 ├── jest.config.js, jest.setup.js
 └── src/
@@ -55,7 +56,9 @@ Frontend_tiketkonser/
     │   └── auth/, profile/, my-tickets/, ...
     ├── components/
     │   ├── landing/         # section landing + helper animasi (TextRoll, Reveal, MotionProvider, ...)
-    │   ├── workspace/       # layout, sidebar, topbar dashboard
+    │   ├── admin/           # komponen khusus dashboard admin
+    │   ├── organizer/       # komponen ringkasan, penjualan, dan check-in organizer
+    │   ├── workspace/       # shell, kit dashboard, dan login bersama
     │   ├── customer/        # layout halaman customer
     │   ├── common/          # ErrorBoundary, ProtectedRoute
     │   └── ui/              # komponen dasar (Button, Input, Badge, ...)
@@ -71,7 +74,7 @@ Frontend_tiketkonser/
 - File komponen/halaman `.tsx`, logika non-UI `.ts`. Nama komponen PascalCase, hook `useXxx`.
 - Test di folder `__tests__/` di samping kode (`*.test.ts(x)`).
 - Komponen yang dipakai lintas halaman masuk `components/`; helper lintas domain masuk `lib/`.
-- Animasi khusus satu halaman → CSS Module di folder halaman itu (contoh `src/app/admin/login/login.module.css`).
+- Animasi khusus satu halaman → CSS Module di folder halaman itu (contoh `src/components/workspace/login.module.css`).
 - Ikuti nama & pola yang sudah ada; bila contoh di dokumen ini berbeda dengan repo, **yang di repo yang menang**.
 
 ---

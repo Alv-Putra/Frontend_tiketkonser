@@ -11,99 +11,82 @@ import { Magnetic } from './motion';
 import RotatingWord from './RotatingWord';
 import TextRoll from './TextRoll';
 
-function SpinSticker() {
-  return (
-    <div data-hero="sticker" className="absolute -left-6 top-6 z-30 h-28 w-28 sm:-left-10 sm:h-32 sm:w-32">
-      {/* Intro CSS terpisah dari transform GSAP */}
-      <div className="hero-pop relative h-full w-full" style={{ ['--d' as string]: '0.8s' }}>
-      <svg data-hero="sticker-ring" viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
-        <defs>
-          <path id="sticker-circle" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
-        </defs>
-        <circle cx="50" cy="50" r="49" fill="#FF7A00" />
-        <text className="font-display" fontSize="10.5" fontWeight="800" letterSpacing="2" fill="#09090B">
-          <textPath href="#sticker-circle">TIKET RESMI • ANTI CALO • TIXO •</textPath>
-        </text>
-      </svg>
-      <span className="absolute inset-0 grid place-items-center font-display text-3xl font-extrabold text-ink">★</span>
-      </div>
-    </div>
-  );
-}
+// Lubang sobekan di sudut atas/bawah potongan tiket.
+const holes = (y: '0' | '100%') => {
+  const g = (x: string) => `radial-gradient(circle 14px at ${x} ${y}, #0000 98%, #000)`;
+  const mask = `${g('0')} left / 51% 100% no-repeat, ${g('100%')} right / 51% 100% no-repeat`;
+  return { WebkitMask: mask, mask };
+};
 
-function PhoneTicket() {
+function TicketStack() {
+  const photo = BAND_PHOTOS[1];
   return (
-    <div
-      data-hero="phone"
-      className="relative z-20 mx-auto w-[260px] rotate-3 rounded-[2.6rem] border-[6px] border-[#1F1F23] bg-ink p-3 shadow-[0_30px_60px_-24px_rgba(255,77,0,0.6)] sm:w-[290px]"
-    >
-      <div className="mx-auto mb-3 h-5 w-24 rounded-full bg-[#1F1F23]" />
-      <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-mute">Tiket kamu</p>
-
-      <div className="ticket-notch mt-2 overflow-hidden rounded-2xl bg-blaze text-ink">
-        <div className="p-4">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
-            <span>Sab, 15 Agu</span>
-            <span>Gate B</span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-extrabold leading-none">Dewa 19</p>
-          <p className="text-xs font-semibold opacity-80">JIExpo Kemayoran, Jakarta</p>
-        </div>
-        <div className="mx-4 border-t-2 border-dashed border-ink/40" />
-        <div className="flex items-center gap-3 p-4">
-          <div data-hero="qr" className="hero-pop overflow-hidden rounded-lg" style={{ ['--d' as string]: '0.95s' }}>
-            <DemoQR size={76} />
-          </div>
-          <div className="text-[10px] font-bold uppercase leading-relaxed tracking-wider">
-            <p>CAT 1 · Festival</p>
-            <p className="opacity-70">#TX-0815-2026</p>
-            <p className="mt-1 inline-block rounded bg-ink px-1.5 py-0.5 text-blaze">Siap scan</p>
+    <div className="relative mx-auto w-[270px] sm:w-[300px]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-24"
+        style={{ background: 'radial-gradient(closest-side, rgba(255,77,0,0.28), transparent)' }}
+      />
+      {/* Tiket di belakang: parallax GSAP > melayang */}
+      <div data-hero="ticket-back" className="absolute inset-x-0 top-0">
+        <div data-hero="float">
+          <div className="-translate-x-10 -translate-y-6 -rotate-[11deg] rounded-3xl bg-blaze p-5 text-ink">
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+              <span>Sab, 22 Agu</span>
+              <span>Gate A</span>
+            </div>
+            <p className="mt-2 font-display text-3xl font-extrabold leading-none">NOAH</p>
+            <div className="h-[340px]" />
           </div>
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2 px-1 pb-2">
-        {['Cari', 'Tiket', 'Profil'].map((t, i) => (
-          <span
-            key={t}
-            className={`rounded-full py-1.5 text-center text-[10px] font-bold ${i === 1 ? 'bg-white text-ink' : 'text-mute'}`}
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Polaroid({ index, className, tilt }: { index: number; className: string; tilt: string }) {
-  const photo = BAND_PHOTOS[index];
-  // Satu lapisan per sistem animasi: parallax > intro > melayang > hover.
-  return (
-    <div data-hero="polaroid" className={`absolute z-10 ${className}`}>
-      <div className="hero-pop" style={{ ['--d' as string]: `${0.6 + index * 0.12}s` }}>
-      <div data-hero="float">
-        <m.figure
-          initial={{ rotate: tilt }}
-          whileHover={{ rotate: 0, scale: 1.08 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative w-36 bg-paper p-2 pb-7 shadow-xl sm:w-44"
+      <div data-hero="ticket" className="relative">
+        <m.div
+          initial={{ rotate: 4 }}
+          whileHover={{ rotate: 0, scale: 1.03 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          className="text-ink"
         >
-          <div className="relative aspect-[4/3] overflow-hidden bg-line">
-            <Image
-              src={photo.src}
-              alt={`${photo.name} di atas panggung`}
-              fill
-              sizes="176px"
-              className="object-cover contrast-125"
-              priority={index === 0}
-            />
+          <div className="rounded-t-3xl bg-paper p-3 pb-5" style={holes('100%')}>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-line">
+              <Image src={photo.src} alt={`${photo.name} di atas panggung`} fill sizes="300px" className="object-cover contrast-125" priority />
+              <span className="absolute left-2 top-2 rounded-full bg-ink px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                Sab, 15 Agu
+              </span>
+            </div>
+            <p className="mt-4 px-1 font-display text-4xl font-extrabold leading-none">{photo.name}</p>
+            <p className="mt-1 px-1 text-xs font-semibold text-ink/70">JIExpo Kemayoran, Jakarta</p>
+            <dl className="mt-4 grid grid-cols-3 gap-2 px-1 text-ink">
+              {[
+                ['Gate', 'B'],
+                ['Kelas', 'CAT 1'],
+                ['Area', 'Festival'],
+              ].map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-[10px] font-semibold text-ink/60">{k}</dt>
+                  <dd className="font-display text-sm font-extrabold">{v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <figcaption className="absolute bottom-1.5 left-0 right-0 text-center font-display text-sm font-bold text-ink">
-            {photo.name}
-          </figcaption>
-        </m.figure>
-      </div>
+
+          <div className="relative rounded-b-3xl bg-paper px-4 pb-4 pt-5" style={holes('0')}>
+            <div className="absolute inset-x-5 top-0 border-t-2 border-dashed border-ink/25" />
+            <div className="flex items-center gap-3">
+              <div data-hero="qr" className="hero-pop overflow-hidden rounded-lg" style={{ ['--d' as string]: '0.95s' }}>
+                <DemoQR size={72} />
+              </div>
+              <div>
+                <p className="font-mono text-xs font-bold">#TX-0815-2026</p>
+                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-tangerine" />
+                  Siap scan
+                </p>
+              </div>
+            </div>
+          </div>
+        </m.div>
       </div>
     </div>
   );
@@ -124,7 +107,6 @@ export default function Hero() {
       // Intro memakai CSS (.hero-* di globals.css).
       // Loop, dijeda saat hero tidak terlihat.
       const loops = [
-        gsap.to('[data-hero="sticker-ring"]', { rotate: 360, duration: 14, ease: 'none', repeat: -1, transformOrigin: '50% 50%' }),
         ...gsap.utils.toArray<HTMLElement>('[data-hero="float"]').map((el, i) =>
           gsap.to(el, { y: -14, duration: 2.6 + i * 0.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.4 })
         ),
@@ -145,9 +127,8 @@ export default function Hero() {
 
       // Parallax saat scroll.
       const scrub = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 };
-      gsap.to('[data-hero="phone"]', { y: -140, rotate: -8, ease: 'none', scrollTrigger: scrub });
-      gsap.to('[data-hero="polaroid"]', { y: (i) => (i === 0 ? -240 : 150), ease: 'none', scrollTrigger: scrub });
-      gsap.to('[data-hero="sticker"]', { y: -180, scale: 1.25, ease: 'none', scrollTrigger: scrub });
+      gsap.to('[data-hero="ticket"]', { y: -120, rotate: -6, ease: 'none', scrollTrigger: scrub });
+      gsap.to('[data-hero="ticket-back"]', { y: 60, rotate: -6, ease: 'none', scrollTrigger: scrub });
       gsap.to('[data-hero="line-shift"]', { x: (i) => (i % 2 === 0 ? -70 : 70), ease: 'none', scrollTrigger: scrub });
     },
     root
@@ -260,11 +241,8 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto h-[520px] w-full max-w-[460px] sm:h-[560px]">
-          <SpinSticker />
-          <Polaroid index={0} tilt="-9deg" className="-left-2 bottom-16 sm:left-0" />
-          <Polaroid index={2} tilt="8deg" className="-right-2 top-4 sm:right-0" />
           <div className="hero-drop absolute inset-0 flex items-center justify-center" style={{ ['--d' as string]: '0.25s' }}>
-            <PhoneTicket />
+            <TicketStack />
           </div>
         </div>
       </div>
