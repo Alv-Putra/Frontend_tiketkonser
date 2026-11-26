@@ -2,6 +2,7 @@
 
 import { ArrowUp, Mail, Phone, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import TixoLogo from '@/components/landing/TixoLogo';
 
 const footerLinks = {
   Navigasi: [
@@ -68,11 +69,9 @@ export default function CustomerFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-black text-text-primary">
-                Conser<span className="text-primary-accent">Id</span>
-              </span>
-            </Link>
+            <div className="mb-4">
+              <TixoLogo />
+            </div>
             <p className="text-text-muted text-sm leading-relaxed mb-6 max-w-sm">
               Platform penjualan tiket festival dan konser terlengkap di Indonesia.
               Temukan pengalaman musik terbaik dan beli tiket dengan mudah.

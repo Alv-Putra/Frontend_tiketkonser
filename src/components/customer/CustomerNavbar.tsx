@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import useAuthStore from '@/stores/authStore';
+import TixoLogo from '@/components/landing/TixoLogo';
 
 const navLinks = [
   { label: 'Beranda', href: '/' },
@@ -61,9 +62,7 @@ export default function CustomerNavbar() {
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-[#09090B]/85 border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <Link href="/" className="text-2xl font-black tracking-tight text-slate-50 shrink-0">
-            Conser<span className="text-gradient">Id</span>
-          </Link>
+          <TixoLogo className="shrink-0" />
 
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
