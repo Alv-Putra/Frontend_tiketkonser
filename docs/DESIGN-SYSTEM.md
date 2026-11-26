@@ -2,9 +2,7 @@
 
 Panduan agar semua halaman (admin, organizer, customer) senada dengan **landing page** dan **login admin**. Semua contoh di sini diambil dari kode yang sudah berjalan — buka file rujukannya kalau ragu.
 
-> Bagian warna/branding di `docs/design.md` (ConserId, ungu) **sudah tidak berlaku**. Pakai dokumen ini.
-
-**Contoh hidup:** `/` (landing) dan `/admin/login`.
+**Contoh hidup:** `/` (landing), `/admin/login`, dan `/organizer/login`. Kedua login memakai form dan dekorasi Backstage bersama di `src/components/workspace/`.
 
 ---
 
@@ -164,6 +162,14 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 
 ---
 
+**Dashboard admin & organizer** (tema terang dari token Tixo)
+
+- Shell bersama `WorkspaceLayout`: sidebar `bg-white border-r border-ink/10` (menu aktif `bg-blaze text-ink`) (grup menu berjudul, bisa diringkas) + top bar `h-16 border-b` (cari, notifikasi, profil). Jangan bikin layout dashboard sendiri.
+- Halaman di `bg-paper`; kartu = `rounded-2xl border border-ink/10 bg-white p-5`, tanpa bayangan besar. Isian di dalam kartu pakai `bg-paper`. Teks `text-ink`, sekunder `text-ink/60`, tersier `text-ink/45`.
+- Warna status di latar terang: `bg-status-*/25 text-ink` (teks status asli terlalu pucat di putih). Aksen teks/link pakai `text-blaze`.
+- Simpan komponen khusus peran di `src/components/admin/` atau `src/components/organizer/`. Pakai `DashboardKit.tsx` dari `src/components/workspace/` untuk header, metrik, panel, status, dan akses cepat. Pakai `OrganizerEventPicker` di ringkasan, penjualan, serta check-in. Gunakan `AdminDashboardSummary` untuk isi ringkasan admin dan `OrganizerSalesSummary` untuk metrik serta rincian tiket yang dibagikan antara ringkasan organizer dan laporan penjualan.
+- Framer Motion menangani animasi masuk, umpan balik tombol, dan batang per kelas tiket. GSAP menangani panel di bawah viewport saat masuk area gulir workspace. Keduanya mengikuti preferensi gerak pengguna.
+- Angka di ringkasan berasal dari backend. Tampilkan keadaan memuat, kosong, atau gagal bila sesuai.
 ## 6. Animasi — banyak tapi ringan
 
 ### Aturan wajib
@@ -178,7 +184,7 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 
 | Kebutuhan | Alat | Contoh |
 |---|---|---|
-| Animasi masuk, loop (berayun, berputar, marquee) | **CSS keyframes** | `.hero-*` di `globals.css`, [`login.module.css`](../src/app/admin/login/login.module.css) |
+| Animasi masuk, loop (berayun, berputar, marquee) | **CSS keyframes** | `.hero-*` di `globals.css`, [`login.module.css`](../src/components/workspace/login.module.css) |
 | Hover, tap, layout/filter berpindah, muncul saat terlihat | **Framer Motion `m.*`** di dalam `MotionProvider` | `TicketCard`, filter genre di `EventStubs` |
 | Efek yang terikat posisi scroll (parallax, scrub) | **GSAP** lewat `useGsap` | `Manifesto.tsx`, `TapeMarquee.tsx` |
 
