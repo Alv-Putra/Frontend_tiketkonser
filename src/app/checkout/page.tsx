@@ -131,7 +131,7 @@ function CheckoutContent() {
           </div>
           <h2 className="text-2xl font-bold mb-2 text-white">Pemesanan Tiket Melalui Mobile App</h2>
           <p className="text-text-muted mb-8 leading-relaxed text-sm">
-            Untuk memastikan keaslian tiket dan keamanan transaksi Dynamic QR Code, pemesanan tiket konser resmi ConserId dilakukan secara eksklusif melalui aplikasi mobile ConserId.
+            Untuk memastikan keaslian tiket dan keamanan transaksi Dynamic QR Code, pemesanan tiket konser resmi Tixo dilakukan secara eksklusif melalui aplikasi mobile Tixo.
           </p>
           <div className="flex justify-center gap-3">
             <Button onClick={() => router.push('/')}>Jelajahi Konser di Beranda</Button>

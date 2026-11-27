@@ -1,4 +1,6 @@
 import { useState, type ChangeEventHandler, type FormEventHandler } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { AlertCircle, Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react';
 import type { FormErrors } from '@/types';
 import s from './login.module.css';
@@ -57,8 +59,16 @@ export default function WorkspaceLoginForm({
           </span>
 
           <div className={`mb-6 ${s.rise}`} style={{ ['--d' as string]: '0.35s' }}>
-            <span className="grid h-12 w-12 -rotate-6 place-items-center rounded-2xl bg-blaze text-ink">
-              <ShieldCheck aria-hidden="true" className="h-6 w-6" />
+            <span className="relative flex h-12 w-12 -rotate-6 items-center justify-center rounded-2xl bg-blaze p-2 text-ink shadow-md transition-transform duration-300 hover:rotate-0">
+              <Image
+                src="/LogoTixo.png"
+                alt="Tixo"
+                width={36}
+                height={36}
+                unoptimized
+                priority
+                className="size-8 object-contain"
+              />
             </span>
             <h1 className="mt-4 font-display text-xl leading-9 font-extrabold tracking-tight min-[375px]:text-2xl sm:text-3xl">{title} Workspace</h1>
             <p className="mt-1.5 text-sm leading-relaxed text-mute">
@@ -153,6 +163,15 @@ export default function WorkspaceLoginForm({
                   </>
                 )}
               </button>
+            </div>
+
+            <div className="pt-2 text-center">
+              <Link
+                href={role === 'admin' ? '/organizer/login' : '/admin/login'}
+                className="text-xs text-mute hover:text-white transition-colors"
+              >
+                {role === 'admin' ? 'Bukan admin? Masuk ke Organizer Workspace →' : 'Bukan organizer? Masuk ke Admin Workspace →'}
+              </Link>
             </div>
           </form>
         </div>

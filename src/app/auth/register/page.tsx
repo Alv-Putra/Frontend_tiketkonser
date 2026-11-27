@@ -8,6 +8,7 @@ import { Mail, Lock, Eye, EyeOff, User as UserIcon, ArrowLeft } from 'lucide-rea
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Toast from '@/components/ui/Toast';
+import TixoLogo from '@/components/landing/TixoLogo';
 import useAuthStore from '@/stores/authStore';
 import { validateName, validateEmail, validatePassword, validateConfirmPassword } from '@/lib/validators';
 import { RATE_LIMIT } from '@/lib/constants';
@@ -95,6 +96,9 @@ export default function RegisterPage() {
         >
           <div className="bg-secondary-bg border border-border rounded-[24px] p-8 md:p-10 shadow-xl">
             <div className="text-center mb-8">
+              <div className="flex justify-center mb-5">
+                <TixoLogo />
+              </div>
               <h1 className="text-3xl font-black mb-2">
                 <span className="text-gradient">Daftar</span>
               </h1>

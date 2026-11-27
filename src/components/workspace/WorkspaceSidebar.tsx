@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import MotionProvider from '@/components/landing/MotionProvider';
 import useAuthStore from '@/stores/authStore';
+import { useThemeStore } from '@/stores/themeStore';
 
 
 type NavItem = { label: string; icon: LucideIcon; href: string; badge?: number };
@@ -30,6 +31,8 @@ export default function WorkspaceSidebar() {
   const [tip, setTip] = useState<{ label: string; top: number; left: number } | null>(null);
 
   const logout = useAuthStore((state) => state.logout);
+  const workspaceTheme = useThemeStore((state) => state.workspaceTheme);
+  const isDark = workspaceTheme === 'dark';
   const isOrganizer = pathname.startsWith('/organizer');
 
   const isActive = (href: string) =>
@@ -82,7 +85,15 @@ export default function WorkspaceSidebar() {
   const logoutUser = async () => { await logout(); router.push(isOrganizer ? '/organizer/login' : '/admin/login'); };
 
   const rowClass = (active: boolean) =>
-    `relative isolate flex h-10 items-center gap-3 rounded-xl text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blaze ${collapsed ? 'justify-center' : 'px-3'} ${active ? 'text-ink' : 'text-ink/60 hover:bg-ink/5 hover:text-ink'}`;
+    `relative isolate flex h-10 items-center gap-3 rounded-xl text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blaze ${
+      collapsed ? 'justify-center' : 'px-3'
+    } ${
+      active
+        ? 'text-ink'
+        : isDark
+        ? 'text-mute hover:bg-white/5 hover:text-white'
+        : 'text-ink/65 hover:bg-ink/5 hover:text-ink'
+    }`;
 
   const navLink = ({ label, href, icon: Icon, badge }: NavItem) => {
     const active = isActive(href);
@@ -108,9 +119,13 @@ export default function WorkspaceSidebar() {
           initial={false}
           animate={{ width: collapsed ? 76 : 256 }}
           transition={{ duration: 0.35, ease }}
-          className="relative z-20 flex h-full shrink-0 flex-col overflow-hidden border-r border-ink/10 bg-white font-body"
+          className={`relative z-20 flex h-full shrink-0 flex-col overflow-hidden border-r font-body transition-colors duration-200 ${
+            isDark ? 'border-line bg-onyx text-white' : 'border-ink/10 bg-white text-ink'
+          }`}
         >
-          <div className={`flex h-16 shrink-0 items-center border-b border-ink/10 ${collapsed ? 'flex-col justify-center' : 'justify-between px-5'}`}>
+          <div className={`flex h-16 shrink-0 items-center border-b ${
+            isDark ? 'border-line' : 'border-ink/10'
+          } ${collapsed ? 'flex-col justify-center' : 'justify-between px-5'}`}>
             <Link href="/" aria-label="Tixo, kembali ke beranda" className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze">
               <span className="relative flex size-8 shrink-0 items-center justify-center transition-transform duration-200 hover:scale-105">
                 <Image
@@ -122,18 +137,26 @@ export default function WorkspaceSidebar() {
                   className="size-8 object-contain"
                 />
               </span>
-              {!collapsed && <span className="font-display text-lg font-extrabold tracking-tight text-ink">TIXO</span>}
+              {!collapsed && (
+                <span className={`font-display text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-ink'}`}>
+                  TIXO
+                </span>
+              )}
             </Link>
-            {!collapsed && <ToggleButton collapsed={collapsed} onClick={() => setCollapsed(true)} />}
+            {!collapsed && <ToggleButton isDark={isDark} collapsed={collapsed} onClick={() => setCollapsed(true)} />}
           </div>
-          {collapsed && <div className="flex justify-center pt-3"><ToggleButton collapsed={collapsed} onClick={() => { setCollapsed(false); setTip(null); }} /></div>}
+          {collapsed && (
+            <div className="flex justify-center pt-3">
+              <ToggleButton isDark={isDark} collapsed={collapsed} onClick={() => { setCollapsed(false); setTip(null); }} />
+            </div>
+          )}
 
           <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-3 py-4">
             {groups.map((group) => (
               <div key={group.title}>
                 {collapsed
-                  ? <div className="mx-2 mb-2 h-px bg-ink/5" />
-                  : <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-ink/45">{group.title}</p>}
+                  ? <div className={`mx-2 mb-2 h-px ${isDark ? 'bg-line' : 'bg-ink/10'}`} />
+                  : <p className={`mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-mute' : 'text-ink/50'}`}>{group.title}</p>}
                 <ul className="space-y-1">
                   {group.items.map((item) => <li key={item.href}>{navLink(item)}</li>)}
                 </ul>
@@ -141,9 +164,15 @@ export default function WorkspaceSidebar() {
             ))}
           </nav>
 
-          <div className="shrink-0 space-y-1 border-t border-ink/10 px-3 py-3">
+          <div className={`shrink-0 space-y-1 border-t px-3 py-3 ${isDark ? 'border-line' : 'border-ink/10'}`}>
             {navLink(settings)}
-            <button type="button" onClick={logoutUser} aria-label={collapsed ? 'Keluar' : undefined} className={`${rowClass(false)} w-full hover:text-ink`} {...tipProps('Keluar')}>
+            <button
+              type="button"
+              onClick={logoutUser}
+              aria-label={collapsed ? 'Keluar' : undefined}
+              className={`${rowClass(false)} w-full ${isDark ? 'hover:text-white' : 'hover:text-ink'}`}
+              {...tipProps('Keluar')}
+            >
               <LogOut className="size-4.5 shrink-0" strokeWidth={1.8} />
               {!collapsed && <span className="flex-1 text-left">Keluar</span>}
             </button>
@@ -160,7 +189,9 @@ export default function WorkspaceSidebar() {
               exit={{ opacity: 0, x: -6, y: '-50%' }}
               transition={{ duration: 0.15, ease }}
               style={{ top: tip.top, left: tip.left }}
-              className="pointer-events-none fixed z-50 rounded-lg border border-ink/10 bg-white px-3 py-1.5 font-body text-xs font-semibold text-ink shadow-lg"
+              className={`pointer-events-none fixed z-50 rounded-lg border px-3 py-1.5 font-body text-xs font-semibold shadow-lg ${
+                isDark ? 'border-line bg-onyx text-white' : 'border-ink/10 bg-white text-ink'
+              }`}
             >
               {tip.label}
             </m.div>
@@ -171,14 +202,16 @@ export default function WorkspaceSidebar() {
   );
 }
 
-function ToggleButton({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) {
+function ToggleButton({ collapsed, isDark, onClick }: { collapsed: boolean; isDark?: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={collapsed ? 'Buka sidebar' : 'Ringkas sidebar'}
       aria-expanded={!collapsed}
-      className="grid size-8 place-items-center rounded-lg text-ink/60 transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-blaze"
+      className={`grid size-8 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-blaze ${
+        isDark ? 'text-mute hover:bg-white/5 hover:text-white' : 'text-ink/60 hover:bg-ink/5 hover:text-ink'
+      }`}
     >
       <ChevronsLeft className={`size-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
     </button>

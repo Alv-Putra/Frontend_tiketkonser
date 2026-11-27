@@ -7,6 +7,8 @@ export const StorageKeys = {
   FESTIVALS: `${PREFIX}festivals`,
   ORDERS: `${PREFIX}orders`,
   TICKETS: `${PREFIX}tickets`,
+  THEME_LANDING: `${PREFIX}theme.landing`,
+  THEME_WORKSPACE: `${PREFIX}theme.workspace`,
 };
 
 function isBrowser() {

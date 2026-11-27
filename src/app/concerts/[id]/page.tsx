@@ -26,6 +26,7 @@ import {
   Download
 } from 'lucide-react';
 import StatusBadge from '@/components/workspace/StatusBadge';
+import TixoLogo from '@/components/landing/TixoLogo';
 import { mockFestivals } from '@/services/mockData';
 import festivalService from '@/services/festivalService';
 
@@ -412,15 +413,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
             <span>Kembali ke Beranda</span>
           </Link>
 
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#2A1000] text-[#FF7A00] flex items-center justify-center font-bold">
-              <Ticket className="w-4 h-4" />
-            </div>
-            <div className="flex items-baseline">
-              <span className="text-lg font-bold text-[#FFFFFF]">Conser</span>
-              <span className="text-lg font-bold text-[#FF7A00]">Id</span>
-            </div>
-          </Link>
+          <TixoLogo />
 
           <div className="flex items-center gap-2">
             <Link
@@ -533,7 +526,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
                 </span>
               </div>
               <p className="text-xs text-[#A1A1AA] mt-0.5 leading-relaxed">
-                Halaman web ConserId khusus untuk eksplorasi katalog konser dan informasi ketersediaan tiket. Pemesanan dan verifikasi tiket dilakukan melalui aplikasi mobile ConserId demi keamanan Dynamic QR Code.
+                Halaman web Tixo khusus untuk eksplorasi katalog konser dan informasi ketersediaan tiket. Pemesanan dan verifikasi tiket dilakukan melalui aplikasi mobile Tixo demi keamanan Dynamic QR Code.
               </p>
             </div>
           </div>
@@ -793,7 +786,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
                       1
                     </div>
                     <div className="text-[#A1A1AA]">
-                      Buka aplikasi <strong className="text-[#FFFFFF]">ConserId</strong> di smartphone Anda.
+                      Buka aplikasi <strong className="text-[#FFFFFF]">Tixo</strong> di smartphone Anda.
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">
@@ -845,7 +838,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-[#FFFFFF]">Pemesanan Tiket di Mobile</h3>
-                  <p className="text-[11px] text-[#71717A]">Aplikasi resmi ConserId</p>
+                  <p className="text-[11px] text-[#71717A]">Aplikasi resmi Tixo</p>
                 </div>
               </div>
               <button
@@ -865,7 +858,7 @@ export default function ConcertDetailPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
               <div className="text-xs text-[#A1A1AA] max-w-xs leading-relaxed">
-                Arahkan kamera smartphone Anda ke QR code di atas untuk membuka pemesanan tiket <strong>{concert.title}</strong> di aplikasi mobile ConserId.
+                Arahkan kamera smartphone Anda ke QR code di atas untuk membuka pemesanan tiket <strong>{concert.title}</strong> di aplikasi mobile Tixo.
               </div>
             </div>
 

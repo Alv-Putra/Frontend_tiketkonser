@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Ticket } from 'lucide-react';
+import TixoLogo from '@/components/landing/TixoLogo';
 import { WorkspaceLoginBackdrop, WorkspaceLoginIntro } from './WorkspaceLoginArtwork';
 import WorkspaceLoginForm from './WorkspaceLoginForm';
 import useAuthStore from '@/stores/authStore';
@@ -126,12 +126,7 @@ export default function WorkspaceLogin({ role }: { role: WorkspaceRole }) {
 
       <header className={`relative mx-auto flex w-full max-w-7xl items-center px-5 py-6 sm:px-8 ${s.rise}`}>
         <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 -rotate-6 place-items-center rounded-lg bg-blaze text-ink">
-            <Ticket aria-hidden="true" className="h-5 w-5" />
-          </span>
-          <span className="font-display text-2xl font-extrabold tracking-tight">
-            Tix<span className="text-blaze">o</span>
-          </span>
+          <TixoLogo />
           <span className="ml-1 rotate-3 rounded-md bg-paper px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-ink">
             Backstage
           </span>

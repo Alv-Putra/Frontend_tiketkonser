@@ -68,4 +68,12 @@ describe('Landing page Tixo', () => {
     expect(photo.getAttribute('src')).toBe('/images/events/java-jazz.jpg');
     expect(within(events).queryByRole('button', { name: /tiket berikutnya/i })).not.toBeInTheDocument();
   });
+
+  it('beralih tema terang dan gelap saat tombol tema diklik', () => {
+    render(<Home />);
+    const toggleButtons = screen.getAllByRole('button', { name: /ganti ke tema terang/i });
+    expect(toggleButtons.length).toBeGreaterThan(0);
+    fireEvent.click(toggleButtons[0]);
+    expect(screen.getAllByRole('button', { name: /ganti ke tema gelap/i })[0]).toBeInTheDocument();
+  });
 });

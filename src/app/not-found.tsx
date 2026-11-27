@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { Home, Search, Ticket } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 
 export default function NotFoundPage() {
@@ -14,8 +15,15 @@ export default function NotFoundPage() {
             404
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#2A1000] border border-[#4A1D00] text-[#FF7A00] flex items-center justify-center shadow-xl shadow-[#FF4D00]/20">
-              <Ticket className="w-8 h-8" />
+            <div className="relative w-16 h-16 rounded-2xl bg-ink border border-line flex items-center justify-center shadow-xl p-3">
+              <Image
+                src="/LogoTixo.png"
+                alt="Tixo"
+                width={40}
+                height={40}
+                unoptimized
+                className="object-contain"
+              />
             </div>
           </div>
         </div>
@@ -52,7 +60,7 @@ export default function NotFoundPage() {
         </div>
 
         <p className="text-[11px] text-[#71717A] pt-6">
-          ConserId © 2026. Platform Tiket Konser & Festival Musik Resmi.
+          Tixo © 2026. Platform Tiket Konser & Festival Musik Resmi.
         </p>
       </div>
     </div>

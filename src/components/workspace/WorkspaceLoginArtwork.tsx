@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import s from './login.module.css';
 
 /** Baris teks latar raksasa yang berjalan. */
@@ -54,8 +55,16 @@ function BackstagePass({ title, account, passCode, scanning, shaking, onShakeEnd
 
             <div className="relative px-6 py-5">
               <div className="flex items-center gap-4">
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-ink font-display text-3xl font-extrabold text-blaze">
-                  {title[0]}
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-ink p-2 shadow-inner">
+                  <Image
+                    src="/LogoTixo.png"
+                    alt="Tixo"
+                    width={48}
+                    height={48}
+                    unoptimized
+                    priority
+                    className="h-full w-full object-contain"
+                  />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-ink/50">Peran</p>

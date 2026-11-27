@@ -28,7 +28,7 @@ function VerifyEmailContent() {
       try {
         const result = await authService.confirmEmailVerification(token);
         setStatus('success');
-        setMessage('Email Anda berhasil diverifikasi! Anda sekarang dapat masuk ke akun ConserId.');
+        setMessage('Email Anda berhasil diverifikasi! Anda sekarang dapat masuk ke akun Tixo.');
       } catch (error) {
         setStatus('error');
         setMessage(error.message || 'Terjadi kesalahan saat memverifikasi email. Silakan coba lagi atau minta link verifikasi baru.');
@@ -148,7 +148,7 @@ function VerifyEmailContent() {
               <div className="space-y-3">
                 <Link href="/auth/login">
                   <Button className="w-full" size="lg">
-                    Masuk ke ConserId
+                    Masuk ke Tixo
                   </Button>
                 </Link>
               </div>

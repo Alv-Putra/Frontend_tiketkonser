@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, m, useMotionValueEvent, useScroll, useSpring } from 'framer-motion';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react';
+import { useThemeStore } from '@/stores/themeStore';
 import TixoLogo from './TixoLogo';
 import TextRoll from './TextRoll';
 import { ORGANIZER_HREF } from './data';
@@ -41,6 +42,10 @@ export default function LandingNav() {
   const active = useActiveSection();
   const { scrollY, scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, restDelta: 0.001 });
+
+  const landingTheme = useThemeStore((state) => state.landingTheme);
+  const toggleLandingTheme = useThemeStore((state) => state.toggleLandingTheme);
+  const isDark = landingTheme === 'dark';
 
   // Navbar mengecil saat di-scroll.
   useMotionValueEvent(scrollY, 'change', (y) => {
@@ -102,30 +107,60 @@ export default function LandingNav() {
           </ul>
 
           <div className="hidden items-center gap-2 md:flex">
+            <button
+              type="button"
+              onClick={toggleLandingTheme}
+              aria-label={isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'}
+              title={isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'}
+              className={`grid h-10 w-10 place-items-center rounded-full border transition-colors duration-200 hover:border-blaze hover:text-blaze focus-visible:outline-2 focus-visible:outline-blaze ${
+                isDark
+                  ? 'border-line bg-onyx/70 text-white'
+                  : 'border-ink/10 bg-white text-ink shadow-xs'
+              }`}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             <Link
               href={ORGANIZER_HREF}
-              className="group rounded-full px-4 py-2 text-sm font-semibold text-white transition-colors hover:text-tangerine"
+              className={`group rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:text-tangerine ${
+                isDark ? 'text-white' : 'text-ink'
+              }`}
             >
               <TextRoll>Masuk organizer</TextRoll>
             </Link>
             <a
               href="#penonton"
-              className="group inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-ink transition-colors duration-300 hover:bg-blaze"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-ink transition-colors duration-300 hover:bg-blaze shadow-xs"
             >
               <TextRoll>Unduh app</TextRoll>
               <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45" />
             </a>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Buka menu"
-            aria-expanded={open}
-            className="grid h-10 w-10 place-items-center rounded-full bg-blaze text-ink md:hidden"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={toggleLandingTheme}
+              aria-label={isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'}
+              title={isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'}
+              className={`grid h-10 w-10 place-items-center rounded-full border transition-colors duration-200 ${
+                isDark
+                  ? 'border-line bg-onyx text-white'
+                  : 'border-ink/10 bg-white text-ink shadow-xs'
+              }`}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Buka menu"
+              aria-expanded={open}
+              className="grid h-10 w-10 place-items-center rounded-full bg-blaze text-ink"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
 
           {/* Progres scroll halaman */}
           <m.span
@@ -149,14 +184,24 @@ export default function LandingNav() {
           >
             <div className="flex items-center justify-between">
               <span className="font-display text-2xl font-extrabold">Tixo</span>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Tutup menu"
-                className="grid h-11 w-11 place-items-center rounded-full bg-ink text-blaze"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleLandingTheme}
+                  aria-label={isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'}
+                  className="grid h-11 w-11 place-items-center rounded-full bg-ink text-white"
+                >
+                  {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Tutup menu"
+                  className="grid h-11 w-11 place-items-center rounded-full bg-ink text-blaze"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             <m.ul

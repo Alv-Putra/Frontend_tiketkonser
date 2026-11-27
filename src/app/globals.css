@@ -226,3 +226,238 @@
   font-style: italic;
 }
 
+/* ==========================================================================
+   Workspace Themes (Admin & Organizer)
+   ========================================================================== */
+
+/* Workspace Dark Mode */
+[data-workspace-theme="dark"] {
+  background-color: var(--color-ink);
+  color: #FFFFFF;
+}
+
+[data-workspace-theme="dark"] header {
+  background-color: rgba(9, 9, 11, 0.85) !important;
+  border-color: var(--color-line) !important;
+  color: #FFFFFF !important;
+}
+
+[data-workspace-theme="dark"] aside {
+  background-color: var(--color-onyx) !important;
+  border-color: var(--color-line) !important;
+  color: #FFFFFF !important;
+}
+
+[data-workspace-theme="dark"] .bg-white {
+  background-color: var(--color-onyx) !important;
+}
+
+[data-workspace-theme="dark"] .bg-paper {
+  background-color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="dark"] .border-ink\/10,
+[data-workspace-theme="dark"] .border-ink\/15,
+[data-workspace-theme="dark"] .border-ink\/20,
+[data-workspace-theme="dark"] .border-ink\/25 {
+  border-color: var(--color-line) !important;
+}
+
+[data-workspace-theme="dark"] .text-ink {
+  color: #FFFFFF !important;
+}
+
+[data-workspace-theme="dark"] .bg-blaze,
+[data-workspace-theme="dark"] .bg-tangerine,
+[data-workspace-theme="dark"] .bg-blaze *,
+[data-workspace-theme="dark"] .bg-tangerine *,
+[data-workspace-theme="dark"] button.bg-blaze,
+[data-workspace-theme="dark"] a.bg-blaze {
+  color: #09090B !important;
+}
+
+[data-workspace-theme="dark"] .text-ink\/60,
+[data-workspace-theme="dark"] .text-ink\/65,
+[data-workspace-theme="dark"] .text-ink\/70,
+[data-workspace-theme="dark"] .text-ink\/75 {
+  color: var(--color-mute) !important;
+}
+
+[data-workspace-theme="dark"] .text-ink\/45,
+[data-workspace-theme="dark"] .text-ink\/50 {
+  color: #71717A !important;
+}
+
+[data-workspace-theme="dark"] .hover\:bg-paper\/50:hover,
+[data-workspace-theme="dark"] .hover\:bg-paper:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-workspace-theme="dark"] .hover\:bg-white:hover {
+  background-color: #1C1C21 !important;
+}
+
+[data-workspace-theme="dark"] .hover\:border-ink\/20:hover {
+  border-color: #3F3F46 !important;
+}
+
+[data-workspace-theme="dark"] input,
+[data-workspace-theme="dark"] select,
+[data-workspace-theme="dark"] textarea {
+  color-scheme: dark;
+}
+
+[data-workspace-theme="dark"] select option {
+  background-color: #141417;
+  color: #FFFFFF;
+}
+
+/* Workspace Light Mode */
+[data-workspace-theme="light"] {
+  background-color: #F4F4F6;
+  color: var(--color-ink);
+}
+
+[data-workspace-theme="light"] header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(9, 9, 11, 0.1) !important;
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] header .text-white {
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] header input[type="search"] {
+  background-color: var(--color-paper) !important;
+  border-color: rgba(9, 9, 11, 0.1) !important;
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] header button:not(.bg-blaze),
+[data-workspace-theme="light"] header #workspace-profile {
+  background-color: #FFFFFF !important;
+  border-color: rgba(9, 9, 11, 0.1) !important;
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] header #workspace-profile a,
+[data-workspace-theme="light"] header #workspace-profile button {
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] header #workspace-profile a:hover,
+[data-workspace-theme="light"] header #workspace-profile button:hover {
+  background-color: rgba(9, 9, 11, 0.05) !important;
+}
+
+[data-workspace-theme="light"] aside {
+  background-color: #FFFFFF !important;
+  border-color: rgba(9, 9, 11, 0.1) !important;
+  color: var(--color-ink) !important;
+}
+
+[data-workspace-theme="light"] aside .border-line {
+  border-color: rgba(9, 9, 11, 0.1) !important;
+}
+
+[data-workspace-theme="light"] aside a.text-mute,
+[data-workspace-theme="light"] aside button.text-mute {
+  color: rgba(9, 9, 11, 0.65) !important;
+}
+
+[data-workspace-theme="light"] aside a:hover:not([aria-current="page"]),
+[data-workspace-theme="light"] aside button:hover {
+  color: var(--color-ink) !important;
+  background-color: rgba(9, 9, 11, 0.05) !important;
+}
+
+[data-workspace-theme="light"] aside .hover\:bg-white\/5:hover {
+  background-color: rgba(9, 9, 11, 0.05) !important;
+}
+
+/* ==========================================================================
+   Landing Page Light Theme
+   ========================================================================== */
+
+[data-theme="light"].landing-root {
+  background-color: #FAF7F2;
+  color: #09090B;
+}
+
+[data-theme="light"].landing-root .text-white {
+  color: #09090B;
+}
+
+[data-theme="light"].landing-root .text-mute {
+  color: rgba(9, 9, 11, 0.65) !important;
+}
+
+[data-theme="light"].landing-root .border-line {
+  border-color: rgba(9, 9, 11, 0.12) !important;
+}
+
+[data-theme="light"].landing-root section.border-b {
+  border-bottom-color: rgba(9, 9, 11, 0.12) !important;
+}
+
+[data-theme="light"].landing-root .bg-ink:not(.badge-dark) {
+  background-color: #FAF7F2;
+}
+
+[data-theme="light"].landing-root .bg-onyx {
+  background-color: #FFFFFF !important;
+  border-color: rgba(9, 9, 11, 0.12) !important;
+  box-shadow: 0 4px 24px -6px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"].landing-root .bg-blaze,
+[data-theme="light"].landing-root .bg-tangerine,
+[data-theme="light"].landing-root .bg-blaze *,
+[data-theme="light"].landing-root .bg-tangerine *,
+[data-theme="light"].landing-root button.bg-blaze,
+[data-theme="light"].landing-root a.bg-blaze {
+  color: #09090B !important;
+}
+
+[data-theme="light"].landing-root nav {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(9, 9, 11, 0.1) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"].landing-root nav a.text-mute {
+  color: rgba(9, 9, 11, 0.7) !important;
+}
+
+[data-theme="light"].landing-root nav a.text-mute:hover {
+  color: #09090B !important;
+}
+
+[data-theme="light"].landing-root nav a.text-white {
+  color: #09090B !important;
+}
+
+[data-theme="light"].landing-root .text-outline {
+  -webkit-text-stroke: 2px #09090B;
+}
+
+[data-theme="light"].landing-root footer {
+  background-color: #FFFFFF !important;
+  border-top-color: rgba(9, 9, 11, 0.12) !important;
+  color: #09090B;
+}
+
+[data-theme="light"].landing-root footer .text-white {
+  color: #09090B !important;
+}
+
+[data-theme="light"].landing-root footer .text-mute {
+  color: rgba(9, 9, 11, 0.65) !important;
+}
+
+[data-theme="light"].landing-root footer .border-line {
+  border-color: rgba(9, 9, 11, 0.12) !important;
+}
+
+

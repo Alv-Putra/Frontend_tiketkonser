@@ -176,7 +176,7 @@ function ResetPasswordContent() {
 
               <Link href="/auth/login">
                 <Button className="w-full" size="lg">
-                  Masuk ke ConserId
+                  Masuk ke Tixo
                 </Button>
               </Link>
             </div>

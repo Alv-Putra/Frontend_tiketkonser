@@ -187,7 +187,7 @@ export default function CustomerFooter() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-4 border-t border-border gap-4">
           <p className="text-xs text-text-muted">
-            © {new Date().getFullYear()} ConserId. All rights reserved.
+            © {new Date().getFullYear()} Tixo. All rights reserved.
           </p>
 
           <button
