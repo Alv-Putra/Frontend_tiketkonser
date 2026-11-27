@@ -1,4 +1,4 @@
-import { apiFetch } from '@/lib/api';
+import { ApiError, apiFetch } from '@/lib/api';
 import {
   checkInTicket,
   createOrganizerEvent,
@@ -14,6 +14,7 @@ import {
   fetchOrganizerEventDocuments,
   uploadOrganizerEventDocument,
   fetchOrganizerSeatMap,
+  findOrganizerSeatMap,
   fetchPublicSeatMap,
   saveOrganizerSeatMap,
   markNotificationRead,
@@ -28,7 +29,7 @@ import {
   updateOrganizerTicket,
 } from '../dashboardService';
 
-jest.mock('@/lib/api', () => ({ apiFetch: jest.fn() }));
+jest.mock('@/lib/api', () => ({ ...jest.requireActual('@/lib/api'), apiFetch: jest.fn() }));
 
 test('menggunakan endpoint dashboard dan check-in sesuai kontrak backend', async () => {
   const response = { sample: true };
@@ -110,6 +111,18 @@ test('memakai endpoint notifikasi dan denah organizer', async () => {
   expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/notifications?page=3&limit=10');
   expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/notifications/7/read', { method: 'PATCH' });
   expect(apiFetch).toHaveBeenNthCalledWith(3, '/api/v1/organizer/event/23/seat-map');
+});
+
+test('findOrganizerSeatMap mengubah 404 menjadi null dan meneruskan error lain', async () => {
+  const map = { id: '1' };
+  jest.mocked(apiFetch).mockReset()
+    .mockResolvedValueOnce(map)
+    .mockRejectedValueOnce(new ApiError('Tidak ada', { status: 404 }))
+    .mockRejectedValueOnce(new ApiError('Gagal', { status: 500 }));
+
+  await expect(findOrganizerSeatMap('23')).resolves.toBe(map);
+  await expect(findOrganizerSeatMap('23')).resolves.toBeNull();
+  await expect(findOrganizerSeatMap('23')).rejects.toThrow('Gagal');
 });
 
 test('memakai endpoint berkas verifikasi event organizer', async () => {

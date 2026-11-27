@@ -16,6 +16,7 @@ import {
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import useMonitoringStore from '@/stores/monitoringStore';
+import { closeOnBackdrop } from '@/lib/backdrop';
 
 export default function AdminConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
@@ -291,7 +292,7 @@ export default function AdminConcertsPage() {
 
       {/* Add Concert Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div {...closeOnBackdrop(() => setIsAddModalOpen(false))} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white border border-ink/10 p-6">
             <h2 className="font-display text-base font-bold text-ink mb-1">Tambah konser baru</h2>
             <p className="text-xs text-ink/60 mb-4">

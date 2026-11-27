@@ -63,7 +63,8 @@ test('memuat halaman sebelumnya saat event terakhir di halaman dihapus', async (
 test('menyegarkan daftar setelah membuat, mengubah, dan mengajukan event', async () => {
   const store = createOrganizerEventStore();
 
-  await store.getState().createEvent(input);
+  jest.mocked(createOrganizerEvent).mockResolvedValueOnce(event as never);
+  await expect(store.getState().createEvent(input)).resolves.toBe(event);
   await store.getState().updateEvent(event.id, { title: 'Judul baru' });
   await store.getState().submitEvent(event.id);
   expect(createOrganizerEvent).toHaveBeenCalledWith(input);

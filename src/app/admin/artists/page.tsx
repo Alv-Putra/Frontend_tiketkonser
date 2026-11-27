@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Mic, Music, Edit2, RotateCw } from 'lucide-react';
 import StatCard from '@/components/workspace/StatCard';
 import useMonitoringStore from '@/stores/monitoringStore';
+import { closeOnBackdrop } from '@/lib/backdrop';
 
 export default function AdminArtistsPage() {
   const artists = useMonitoringStore((state) => state.artists);
@@ -244,7 +245,7 @@ export default function AdminArtistsPage() {
 
       {/* Add Artist Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div {...closeOnBackdrop(() => setIsModalOpen(false))} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white border border-ink/10 p-6">
             <h2 className="font-display text-base font-bold text-ink mb-1">Tambah artis</h2>
             <p className="text-xs text-ink/60 mb-4">

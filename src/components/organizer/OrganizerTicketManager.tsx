@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useId, type FormEvent } from 'react';
-import { Plus, Trash2, Edit2, RefreshCw, X, Ticket } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Ticket } from 'lucide-react';
 import { m, useReducedMotion } from 'framer-motion';
 import { DashboardFrame, DashboardHeader, DashboardNotice, DashboardStatus, ghostButton, primaryButton } from '@/components/workspace/DashboardKit';
 import MotionProvider from '@/components/landing/MotionProvider';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import OrganizerEventPicker from './OrganizerEventPicker';
+import OrganizerEventRail, { editableEvent } from './OrganizerEventRail';
 import {
   fetchOrganizerTickets,
   createOrganizerTicket,
@@ -21,7 +21,6 @@ import OrganizerConfirmDialog from './OrganizerConfirmDialog';
 import OrganizerDialog from './OrganizerDialog';
 import OrganizerField, { organizerInput } from './OrganizerField';
 import Select from '@/components/ui/Select';
-import ColorField from '@/components/ui/ColorField';
 
 const statusConfig: Record<string, { label: string; tone: 'neutral' | 'positive' | 'warning' | 'danger' }> = {
   active: { label: 'Tersedia', tone: 'positive' },
@@ -47,7 +46,7 @@ function TicketModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const fieldErrors = fieldErrorsFrom(error);
-  const title = ticket ? `Edit ${ticket.name}` : 'Tambah Kelas Tiket';
+  const title = ticket ? `Edit ${ticket.name}` : 'Tambah kelas tiket';
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,7 +70,6 @@ function TicketModal({
         wave: optionalNumber('wave'),
         max_purchase: optionalNumber('max_purchase'),
         status: value('status') as TicketCreateInput['status'],
-        color: value('color') || undefined,
         sale_start_at: changedDate('sale_start_at', ticket?.sale_start_at),
         sale_end_at: changedDate('sale_end_at', ticket?.sale_end_at),
       };
@@ -115,45 +113,51 @@ function TicketModal({
           {error !== null && (
             <DashboardNotice error>{error instanceof Error ? error.message : 'Gagal menyimpan kelas tiket. Coba lagi.'}</DashboardNotice>
           )}
+          {/* Urutan, batas, dan bawaan mengikuti ticketCreateSchema & model ticket_types di backend. */}
           <fieldset disabled={submitting} className="min-w-0 space-y-4">
-            {input('name', 'Nama Kelas Tiket *', { required: true, defaultValue: ticket?.name })}
+            {input('name', 'Nama kelas tiket *', { required: true, maxLength: 255, defaultValue: ticket?.name, placeholder: 'Contoh: VIP' })}
+            <OrganizerField id={`${uid}-description`} label="Deskripsi / benefit" error={fieldErrors.description}>
+              <textarea id={`${uid}-description`} name="description" rows={2} defaultValue={ticket?.description ?? ''} className={organizerInput} />
+            </OrganizerField>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                {input('price', 'Harga (IDR) *', {
-                  type: 'number', step: 'any', required: true, readOnly: priceLocked, defaultValue: ticket?.price,
+                {input('price', 'Harga (Rp) *', {
+                  type: 'number', min: 0, step: '0.01', inputMode: 'decimal', required: true, readOnly: priceLocked, defaultValue: ticket?.price,
                   'aria-describedby': priceLocked ? `${uid}-price-note` : undefined,
                 })}
                 {priceLocked && <p id={`${uid}-price-note`} className="mt-1 text-xs text-ink/70">Harga dikunci setelah event diajukan.</p>}
               </div>
-              {input('quota', 'Kuota Tiket *', { type: 'number', required: true, defaultValue: ticket?.quota })}
+              <div>
+                {input('quota', 'Kuota *', {
+                  type: 'number', min: ticket?.sold ?? 0, step: 1, inputMode: 'numeric', required: true, defaultValue: ticket?.quota,
+                  'aria-describedby': ticket?.sold ? `${uid}-quota-note` : undefined,
+                })}
+                {!!ticket?.sold && <p id={`${uid}-quota-note`} className="mt-1 text-xs text-ink/70">Minimal {ticket.sold.toLocaleString('id-ID')} (sudah terjual).</p>}
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {input('wave', 'Gelombang', { type: 'number', defaultValue: ticket ? ticket.wave ?? '' : 1 })}
-              {input('max_purchase', 'Maks. Beli', { type: 'number', defaultValue: ticket ? ticket.max_purchase ?? '' : 5 })}
-              <OrganizerField id={`${uid}-status`} label="Status" error={fieldErrors.status}>
-                <Select
-                  id={`${uid}-status`}
-                  name="status"
-                  variant="field"
-                  defaultValue={ticket?.status ?? 'active'}
-                  options={[{ value: 'active', label: 'Tersedia' }, { value: 'sold_out', label: 'Habis' }, { value: 'inactive', label: 'Nonaktif' }]}
-                />
-              </OrganizerField>
-            </div>
-            <OrganizerField id={`${uid}-description`} label="Deskripsi / Benefit" error={fieldErrors.description}>
-              <textarea id={`${uid}-description`} name="description" rows={2} defaultValue={ticket?.description ?? ''} className={organizerInput} />
-            </OrganizerField>
-            <ColorField id={`${uid}-color`} name="color" label="Warna di denah kursi" defaultValue={ticket?.color ?? undefined} />
             <div className="grid gap-3 sm:grid-cols-2">
-              {input('sale_start_at', 'Mulai Jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_start_at) })}
-              {input('sale_end_at', 'Selesai Jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_end_at) })}
+              {input('max_purchase', 'Maks. beli per pesanan', { type: 'number', min: 1, max: 100, step: 1, inputMode: 'numeric', defaultValue: ticket?.max_purchase ?? 5 })}
+              {input('wave', 'Gelombang', { type: 'number', min: 1, max: 100, step: 1, inputMode: 'numeric', defaultValue: ticket?.wave ?? 1 })}
             </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {input('sale_start_at', 'Mulai jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_start_at) })}
+              {input('sale_end_at', 'Selesai jual', { type: 'datetime-local', defaultValue: formatDateTimeInput(ticket?.sale_end_at) })}
+            </div>
+            <OrganizerField id={`${uid}-status`} label="Status" error={fieldErrors.status}>
+              <Select
+                id={`${uid}-status`}
+                name="status"
+                variant="field"
+                defaultValue={ticket?.status ?? 'active'}
+                options={Object.entries(statusConfig).map(([value, { label }]) => ({ value, label }))}
+              />
+            </OrganizerField>
           </fieldset>
 
           <div className="flex flex-wrap justify-end gap-3 border-t border-ink/10 pt-4">
             <button type="button" onClick={onClose} disabled={submitting} className={ghostButton}>Batal</button>
             <button type="submit" disabled={submitting} className={primaryButton}>
-              {submitting ? 'Menyimpan…' : ticket ? 'Simpan Perubahan' : 'Tambah Tiket'}
+              {submitting ? 'Menyimpan…' : ticket ? 'Simpan perubahan' : 'Tambah kelas tiket'}
             </button>
           </div>
         </form>
@@ -172,6 +176,8 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
   const tickets = data ?? [];
   const [deleting, setDeleting] = useState(false);
   const loading = status === 'loading';
+  // Backend: harga dan hapus kelas tiket hanya saat event draf/ditolak.
+  const editable = editableEvent(event.status);
   const error = actionError || (status === 'error' ? 'Gagal memuat kelas tiket konser.' : null);
 
   const handleDelete = async () => {
@@ -198,15 +204,6 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
           <p className="text-xs text-ink/60">Daftar kategori dan kuota tiket untuk konser ini.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={loadTickets}
-            disabled={loading}
-            aria-label="Segarkan"
-            className="grid size-9 place-items-center rounded-sm border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-40"
-          >
-            <RefreshCw className={`size-4 ${loading ? 'motion-safe:animate-spin' : ''}`} />
-          </button>
           <m.button
             type="button"
             onClick={() => { setEditingTicket(null); setModalOpen(true); }}
@@ -244,7 +241,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-ink/10 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45">
-                  <th className="px-5 py-3">Nama Tiket</th>
+                  <th className="px-5 py-3">Nama tiket</th>
                   <th className="px-5 py-3">Harga</th>
                   <th className="px-5 py-3">Kuota</th>
                   <th className="px-5 py-3">Terjual</th>
@@ -285,14 +282,14 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
                           >
                             <Edit2 className="size-3.5" />
                           </button>
-                          <button
+                          {editable && <button
                             type="button"
                             onClick={() => setDeleteTarget(t)}
                             aria-label={`Hapus ${t.name}`}
-                            className="grid size-7 place-items-center rounded-sm border border-ink/10 text-ink/50 hover:border-[#EF4444] hover:text-[#EF4444]"
+                            className="grid size-7 place-items-center rounded-sm border border-ink/10 text-ink/50 hover:border-status-danger-bg hover:text-status-danger-bg"
                           >
                             <Trash2 className="size-3.5" />
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>
@@ -309,7 +306,7 @@ function EventTicketsSection({ event }: { event: OrganizerDashboardEvent }) {
         <TicketModal
           eventId={event.id}
           ticket={editingTicket}
-          priceLocked={!!editingTicket && event.status !== 'draft' && event.status !== 'rejected'}
+          priceLocked={!!editingTicket && !editable}
           onClose={() => setModalOpen(false)}
           onSaved={loadTickets}
         />
@@ -337,9 +334,9 @@ export default function OrganizerTicketManager() {
           title="Kelas tiket"
           subtitle="Atur tipe tiket, kuota, gelombang penjualan, dan harga tiket per konser."
         />
-        <OrganizerEventPicker>
-          {(event) => <EventTicketsSection key={event.id} event={event} />}
-        </OrganizerEventPicker>
+        <OrganizerEventRail>
+          {(event) => <EventTicketsSection event={event} />}
+        </OrganizerEventRail>
       </DashboardFrame>
     </MotionProvider>
   );

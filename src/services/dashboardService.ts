@@ -1,4 +1,4 @@
-import { apiFetch } from '@/lib/api';
+import { ApiError, apiFetch } from '@/lib/api';
 import type {
   AdminDashboardData,
   CityOption,
@@ -47,6 +47,14 @@ export function markNotificationRead(id: string): Promise<WorkspaceNotification>
 
 export function fetchOrganizerSeatMap(eventId: string): Promise<SeatMap> {
   return apiFetch(`/api/v1/organizer/event/${encodeURIComponent(eventId)}/seat-map`);
+}
+
+/** Denah organizer, atau null bila belum dibuat (404). */
+export function findOrganizerSeatMap(eventId: string): Promise<SeatMap | null> {
+  return fetchOrganizerSeatMap(eventId).catch((error) => {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  });
 }
 
 export function saveOrganizerSeatMap(eventId: string, map: SeatMapPayload): Promise<SeatMap> {

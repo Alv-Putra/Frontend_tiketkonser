@@ -6,7 +6,7 @@ import WorkspaceTopBar from './WorkspaceTopBar';
 
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${brandFonts} flex h-dvh w-full overflow-hidden bg-paper font-body text-ink`}>
+    <div className={`${brandFonts} workspace-theme flex h-dvh w-full overflow-hidden bg-paper font-body text-ink`}>
       <a href="#workspace-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-paper focus:p-3 focus:outline-2 focus:outline-blaze">
         Langsung ke konten utama
       </a>

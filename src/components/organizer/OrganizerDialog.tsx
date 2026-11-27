@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { closeOnBackdrop } from '@/lib/backdrop';
 
 export default function OrganizerDialog({ title, onClose, busy = false, error, className, children }: {
   title: string;
@@ -30,6 +31,7 @@ export default function OrganizerDialog({ title, onClose, busy = false, error, c
     <dialog
       ref={dialogRef}
       aria-label={title}
+      {...closeOnBackdrop(() => { if (!busy) onClose(); })}
       onCancel={(event) => {
         event.preventDefault();
         if (!busy) onClose();

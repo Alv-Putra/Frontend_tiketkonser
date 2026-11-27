@@ -28,8 +28,8 @@ const metrics: { key: MetricKey; title: string; format: (value: number) => strin
   { key: 'paid_orders', title: 'Pesanan lunas', format: number.format },
 ];
 const eventColors: Record<string, string> = {
-  draft: 'var(--color-mute)', pending_review: 'var(--color-status-warning)', published: 'var(--color-status-success)',
-  rejected: 'var(--color-status-danger)', ongoing: 'var(--color-blaze)', completed: 'var(--color-ink)', cancelled: 'var(--color-tangerine)',
+  draft: 'var(--color-mute)', pending_review: 'var(--color-status-warning)', published: 'var(--color-blaze)',
+  rejected: 'var(--color-ink)', ongoing: 'var(--color-tangerine)', completed: 'var(--color-line)', cancelled: '#D4D4D8',
 };
 const eventLegend: Legend = Object.fromEntries(Object.entries(eventStatuses).map(([key, { label }]) => [key, { label, color: eventColors[key] }]));
 const countOf = (chart: DashboardChart, key: string) => chart.series[0]?.data[chart.labels.indexOf(key)] ?? 0;

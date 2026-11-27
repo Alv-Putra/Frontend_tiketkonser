@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import type { OrganizerDashboardEvent } from '@/types/dashboard';
+import type { OrganizerDashboardEvent, OrganizerEventDetail } from '@/types/dashboard';
 import {
   fetchOrganizerDashboardEvents,
   createOrganizerEvent,
@@ -17,7 +17,7 @@ interface OrganizerEventState {
   submitting: boolean;
 
   loadEvents: (page?: number) => Promise<void>;
-  createEvent: (data: EventCreateInput) => Promise<void>;
+  createEvent: (data: EventCreateInput) => Promise<OrganizerEventDetail | undefined>;
   updateEvent: (id: string, data: Partial<EventCreateInput>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   submitEvent: (id: string) => Promise<void>;
@@ -27,12 +27,13 @@ export function createOrganizerEventStore() {
   return createStore<OrganizerEventState>((set, get) => {
     let request = 0;
 
-    async function mutate(action: () => Promise<unknown>) {
-      if (get().submitting) return;
+    async function mutate<T>(action: () => Promise<T>) {
+      if (get().submitting) return undefined;
       set({ submitting: true });
       try {
-        await action();
+        const result = await action();
         await get().loadEvents(get().page);
+        return result;
       } finally {
         set({ submitting: false });
       }
@@ -64,9 +65,9 @@ export function createOrganizerEventStore() {
       },
 
       createEvent: (data) => mutate(() => createOrganizerEvent(data)),
-      updateEvent: (id, data) => mutate(() => updateOrganizerEvent(id, data)),
-      deleteEvent: (id) => mutate(() => deleteOrganizerEvent(id)),
-      submitEvent: (id) => mutate(() => submitOrganizerEvent(id)),
+      updateEvent: async (id, data) => { await mutate(() => updateOrganizerEvent(id, data)); },
+      deleteEvent: async (id) => { await mutate(() => deleteOrganizerEvent(id)); },
+      submitEvent: async (id) => { await mutate(() => submitOrganizerEvent(id)); },
     };
   });
 }

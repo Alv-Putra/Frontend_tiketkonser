@@ -100,7 +100,7 @@ export default function OrganizerEventDocuments({ event, onClose }: { event: Org
                         ? `${document.original_name}, ${size.format(document.size / 1024 / 1024)} MB, ${date.format(new Date(document.uploaded_at))}`
                         : eventDocumentLabels[type].hint}
                     </p>
-                    {errors[type] && <p role="alert" className="mt-1 text-xs font-semibold text-[#EF4444]">{errors[type]}</p>}
+                    {errors[type] && <p role="alert" className="mt-1 text-xs font-semibold text-status-danger-bg">{errors[type]}</p>}
                   </div>
                   <div className="flex shrink-0 gap-2">
                     {document && (

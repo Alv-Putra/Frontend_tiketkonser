@@ -9,7 +9,7 @@ import type { SeatMap, SeatStatus, SeatStatusDelta } from '@/types/dashboard';
 export const seatStatusStyle: Record<SeatStatus, { label: string; fill: string }> = {
   available: { label: 'Tersedia', fill: 'var(--color-status-success)' },
   held: { label: 'Ditahan', fill: 'var(--color-status-warning)' },
-  sold: { label: 'Terjual', fill: 'var(--color-blaze)' },
+  sold: { label: 'Terjual', fill: 'var(--color-ink)' },
   blocked: { label: 'Diblokir', fill: 'var(--color-mute)' },
 };
 

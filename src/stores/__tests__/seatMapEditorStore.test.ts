@@ -155,3 +155,11 @@ test('mengelola elemen denah: tambah, ubah, pilih, hapus', async () => {
   expect(state().draft.shapes.map((shape) => shape.type)).toEqual(['toilet']);
   expect(state().selectedShape).toBeNull();
 });
+
+test('mengganti seluruh draf dari impor gambar', async () => {
+  const store = await loaded();
+  store.getState().selectSection(store.getState().draft.sections[0].key);
+  const draft = { width: 400, height: 300, sections: [], seats: [], shapes: [] };
+  store.getState().replaceDraft(draft);
+  expect(store.getState()).toMatchObject({ draft, dirty: true, selectedSection: null, selectedSeats: [], selectedShape: null });
+});

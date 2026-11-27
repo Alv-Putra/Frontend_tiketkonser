@@ -43,18 +43,18 @@ export interface SeatMapDraft {
 export const SHAPE_PRESETS: Record<SeatShapeType, { name: string; label: string; width: number; height: number; color: string }> = {
   stage: { name: 'Panggung', label: 'PANGGUNG', width: 480, height: 120, color: '#09090B' },
   standing: { name: 'Area berdiri', label: 'FESTIVAL', width: 360, height: 220, color: '#FFD9BF' },
-  entrance: { name: 'Pintu masuk', label: 'MASUK', width: 120, height: 44, color: '#8DE2BD' },
-  exit: { name: 'Pintu keluar', label: 'KELUAR', width: 120, height: 44, color: '#FFA4B8' },
+  entrance: { name: 'Pintu masuk', label: 'MASUK', width: 120, height: 44, color: '#FF7A00' },
+  exit: { name: 'Pintu keluar', label: 'KELUAR', width: 120, height: 44, color: '#FF4D00' },
   booth: { name: 'FOH / sound', label: 'FOH', width: 140, height: 90, color: '#27272A' },
   toilet: { name: 'Toilet', label: 'WC', width: 100, height: 80, color: '#A1A1AA' },
-  bar: { name: 'Bar / F&B', label: 'BAR', width: 160, height: 70, color: '#F1C875' },
+  bar: { name: 'Bar / F&B', label: 'BAR', width: 160, height: 70, color: '#FFB27A' },
   text: { name: 'Teks', label: 'Label', width: 180, height: 40, color: '#09090B' },
   rect: { name: 'Kotak', label: '', width: 160, height: 100, color: '#E4E4E7' },
   circle: { name: 'Lingkaran', label: '', width: 120, height: 120, color: '#E4E4E7' },
 };
 
 /** Palet cepat untuk warna kelas tiket dan elemen. */
-export const COLOR_SWATCHES = ['#FF4D00', '#FF7A00', '#F1C875', '#8DE2BD', '#5EC8F2', '#9B8CFF', '#FFA4B8', '#09090B'];
+export const COLOR_SWATCHES = ['#FF4D00', '#FF7A00', '#FFB27A', '#FFD9BF', '#09090B', '#52525B', '#A1A1AA', '#E4E4E7'];
 
 /** Warna teks yang terbaca di atas warna latar (#RRGGBB). */
 export function readableText(background: string) {

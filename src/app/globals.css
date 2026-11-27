@@ -58,6 +58,15 @@
   --radius-full: 9999px;
 }
 
+/* Dashboard admin & organizer hanya hitam, putih, oranye. :has agar dropdown yang di-portal ke body ikut. */
+:root:has(.workspace-theme) {
+  --color-paper: #F4F4F5;
+  --color-status-success: #FF4D00;
+  --color-status-warning: #FFB27A;
+  --color-status-danger: #09090B;
+  --color-status-danger-bg: #C2410C;
+}
+
 /* Font landing (variabel dari next/font di page.tsx) */
 @theme inline {
   --font-display: var(--font-bricolage), system-ui, sans-serif;

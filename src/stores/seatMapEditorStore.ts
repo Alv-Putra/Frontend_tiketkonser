@@ -30,6 +30,7 @@ export interface SeatMapEditorState {
   load: () => Promise<void>;
   save: () => Promise<boolean>;
   setCanvasSize: (width: number, height: number) => void;
+  replaceDraft: (draft: SeatMapDraft) => void;
   addSection: (at: { x: number; y: number }) => void;
   updateSection: (key: string, patch: Partial<Pick<DraftSection, 'label' | 'ticket_type_id' | 'width' | 'height'>>) => void;
   moveSection: (key: string, x: number, y: number) => void;
@@ -103,6 +104,11 @@ export function createSeatMapEditorStore(eventId: string) {
           width: Math.max(200, Math.round(width)),
           height: Math.max(200, Math.round(height)),
         }));
+      },
+
+      // Ganti seluruh draf (mis. hasil impor gambar); belum tersimpan sampai organizer menekan Simpan.
+      replaceDraft(draft) {
+        set({ draft, dirty: true, selectedSection: null, selectedSeats: [], selectedShape: null });
       },
 
       addSection(at) {

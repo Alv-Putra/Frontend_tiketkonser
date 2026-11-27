@@ -45,7 +45,7 @@ export function RefreshButton({ loading, refresh }: { loading: boolean; refresh:
 
 export function DashboardNotice({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return (
-    <p role={error ? 'alert' : 'status'} className={`rounded-2xl border border-ink/10 p-4 text-sm text-ink ${error ? 'bg-status-danger/25' : 'bg-white'}`}>
+    <p role={error ? 'alert' : 'status'} className={`rounded-2xl border border-ink/10 p-4 text-sm text-ink ${error ? 'border-blaze/40 bg-blaze/10' : 'bg-white'}`}>
       {children}
     </p>
   );
@@ -147,5 +147,5 @@ export const dashboardOrderStatus = {
   pending: { label: 'Menunggu pembayaran', tone: 'warning', color: 'var(--color-status-warning)' },
   expired: { label: 'Kedaluwarsa', tone: 'neutral', color: 'var(--color-mute)' },
   cancelled: { label: 'Dibatalkan', tone: 'danger', color: 'var(--color-status-danger)' },
-  refunded: { label: 'Dikembalikan', tone: 'neutral', color: 'var(--color-tangerine)' },
+  refunded: { label: 'Dikembalikan', tone: 'neutral', color: 'var(--color-line)' },
 } as const;

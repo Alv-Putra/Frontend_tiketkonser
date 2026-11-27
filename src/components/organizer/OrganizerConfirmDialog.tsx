@@ -5,7 +5,7 @@ import OrganizerDialog from './OrganizerDialog';
 export default function OrganizerConfirmDialog({ title, description, action, busy, onConfirm, onCancel }: {
   title: string;
   description: string;
-  action: 'Ajukan' | 'Hapus';
+  action: 'Ajukan' | 'Hapus' | 'Ganti';
   busy: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -13,7 +13,7 @@ export default function OrganizerConfirmDialog({ title, description, action, bus
   const deleting = action === 'Hapus';
   const Icon = deleting ? AlertCircle : SendHorizontal;
   const confirmButton = deleting
-    ? primaryButton.replace('bg-blaze', 'bg-status-danger').replace('hover:bg-tangerine', 'hover:bg-status-danger/80')
+    ? primaryButton.replace('bg-blaze', 'bg-ink').replace('text-ink', 'text-white').replace('hover:bg-tangerine', 'hover:bg-ink/85')
     : primaryButton;
 
   return (

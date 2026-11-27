@@ -4,23 +4,41 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { Ellipse, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
 import type Konva from 'konva';
 import { useStore, type StoreApi } from 'zustand';
-import { Grid2x2Plus, Maximize2, Minus, Plus, Save, SquareDashedMousePointer, Trash2 } from 'lucide-react';
+import { Grid2x2Plus, ImageUp, Maximize2, Minus, Plus, Save, SquareDashedMousePointer, Trash2 } from 'lucide-react';
 import { DashboardNotice, ghostButton, primaryButton } from '@/components/workspace/DashboardKit';
 import ColorField from '@/components/ui/ColorField';
 import Select from '@/components/ui/Select';
-import { SHAPE_PRESETS, readableText, visible, type DraftShape, type Rect as Box } from '@/lib/seatMap';
+import { SHAPE_PRESETS, readableText, visible, type DraftShape, type Rect as Box, type SeatMapDraft } from '@/lib/seatMap';
+import { imageToDraft } from '@/lib/seatMapImport';
 import type { SeatMapEditorState } from '@/stores/seatMapEditorStore';
 import type { OrganizerTicket, SeatShapeType } from '@/types/dashboard';
+import OrganizerConfirmDialog from './OrganizerConfirmDialog';
 import OrganizerField, { organizerInput } from './OrganizerField';
 
 // Canvas tidak membaca CSS variable; nilai ini salinan token Tixo di globals.css.
 const color = {
-  ink: '#09090B', paper: '#FFF4EC', white: '#FFFFFF', line: '#E4E4E7', mute: '#A1A1AA',
-  blaze: '#FF4D00', success: '#8DE2BD', grid: '#F4E6DA',
+  ink: '#09090B', paper: '#F4F4F5', white: '#FFFFFF', line: '#E4E4E7', mute: '#A1A1AA',
+  blaze: '#FF4D00', success: '#FF4D00', grid: '#E4E4E7',
 };
 const GRID = 50;
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 4;
+// Gambar diperkecil dulu agar deteksi tetap cepat di browser.
+const IMPORT_MAX_SIDE = 800;
+
+/** Baca piksel gambar; nearest-neighbor agar warna kursi tidak tercampur saat diperkecil. */
+async function readPixels(file: File) {
+  const bitmap = await createImageBitmap(file);
+  const ratio = Math.min(1, IMPORT_MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+  canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+  const context = canvas.getContext('2d')!;
+  context.imageSmoothingEnabled = false;
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return context.getImageData(0, 0, canvas.width, canvas.height);
+}
 
 type View = { scale: number; x: number; y: number };
 
@@ -34,6 +52,9 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
   // null = pas layar; dihitung saat render sehingga ikut ukuran wadah dan denah.
   const [manualView, setView] = useState<View | null>(null);
   const [block, setBlock] = useState({ rows: 4, cols: 10 });
+  const [imported, setImported] = useState<SeatMapDraft | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importNote, setImportNote] = useState<{ error: boolean; text: string } | null>(null);
   const selected = useMemo(() => new Set(selectedSeats), [selectedSeats]);
   const section = draft.sections.find((item) => item.key === selectedSection);
   const shape = draft.shapes.find((item) => item.key === selectedShape);
@@ -127,6 +148,33 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
     }
   }
 
+  async function importImage(file: File | undefined) {
+    if (!file) return;
+    setImporting(true);
+    setImportNote(null);
+    try {
+      const result = imageToDraft(await readPixels(file));
+      if (!result.seats.length) {
+        setImportNote({ error: true, text: 'Tidak ada kursi yang terdeteksi. Pakai denah digital berwarna dengan latar polos, bukan foto.' });
+      } else if (draft.seats.length || draft.shapes.length) {
+        setImported(result);
+      } else {
+        applyImport(result);
+      }
+    } catch {
+      setImportNote({ error: true, text: 'Gambar tidak bisa dibaca. Pakai file PNG, JPG, atau WebP.' });
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function applyImport(result: SeatMapDraft) {
+    state.replaceDraft(result);
+    setImported(null);
+    fit();
+    setImportNote({ error: false, text: `Terdeteksi ${result.seats.length} kursi di ${result.sections.length} area dan ${result.shapes.length} elemen. Periksa, rapikan, lalu simpan.` });
+  }
+
   const center = () => ({ x: viewport.x + viewport.width / 2 - 180, y: viewport.y + viewport.height / 2 - 110 });
   const tool = 'grid size-10 cursor-pointer place-items-center rounded-sm border border-ink/10 bg-white text-ink hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze';
 
@@ -151,6 +199,17 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
             <button type="button" aria-label="Perbesar kanvas" className={tool} onClick={() => zoomBy(1.25)}><Plus aria-hidden="true" className="size-4" /></button>
             <button type="button" aria-label="Pas-kan denah ke layar" className={tool} onClick={fit}><Maximize2 aria-hidden="true" className="size-4" /></button>
           </div>
+          <input
+            id="seat-map-import"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="peer sr-only"
+            disabled={importing}
+            onChange={(event) => { void importImage(event.target.files?.[0]); event.target.value = ''; }}
+          />
+          <label htmlFor="seat-map-import" className={`${ghostButton} peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blaze peer-disabled:opacity-55`}>
+            <ImageUp aria-hidden="true" className="size-4" />{importing ? 'Membaca gambar…' : 'Impor dari gambar'}
+          </label>
           <span className="ml-auto text-xs text-ink/60" aria-live="polite">
             {state.saving ? 'Menyimpan…' : state.dirty ? 'Ada perubahan belum disimpan' : 'Semua perubahan tersimpan'}
           </span>
@@ -158,6 +217,17 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
             <Save aria-hidden="true" className="size-4" />{state.saving ? 'Menyimpan…' : 'Simpan denah'}
           </button>
         </div>
+        {importNote && <DashboardNotice error={importNote.error}>{importNote.text}</DashboardNotice>}
+        {imported && (
+          <OrganizerConfirmDialog
+            title="Ganti denah dengan hasil impor?"
+            description={`Terdeteksi ${imported.seats.length} kursi. Denah yang sedang dibuka akan diganti; perubahan baru tersimpan setelah kamu menekan Simpan denah.`}
+            action="Ganti"
+            busy={false}
+            onConfirm={() => applyImport(imported)}
+            onCancel={() => setImported(null)}
+          />
+        )}
         {state.error && <DashboardNotice error>{state.error}{Object.values(state.fieldErrors)[0] ? `: ${Object.values(state.fieldErrors)[0]}` : ''}</DashboardNotice>}
 
         <div
@@ -258,7 +328,7 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
               </OrganizerField>
             </div>
             <p className="text-xs text-ink/55">Tarik titik di sudut untuk mengubah ukuran, titik atas untuk memutar.</p>
-            <button type="button" className={`${ghostButton} w-full text-[#B91C1C]`} onClick={() => state.deleteShape(shape.key)}>
+            <button type="button" className={`${ghostButton} w-full text-status-danger-bg`} onClick={() => state.deleteShape(shape.key)}>
               <Trash2 aria-hidden="true" className="size-4" />Hapus elemen
             </button>
           </>
@@ -298,7 +368,7 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
               <button type="button" className={ghostButton} onClick={() => state.selectSeats(draft.seats.filter((seat) => seat.sectionKey === section.key).map((seat) => seat.key))}>
                 <SquareDashedMousePointer aria-hidden="true" className="size-4" />Pilih kursi area
               </button>
-              <button type="button" className={`${ghostButton} text-[#B91C1C]`} onClick={() => state.deleteSection(section.key)}>
+              <button type="button" className={`${ghostButton} text-status-danger-bg`} onClick={() => state.deleteSection(section.key)}>
                 <Trash2 aria-hidden="true" className="size-4" />Hapus area
               </button>
             </div>
@@ -313,7 +383,7 @@ export default function OrganizerSeatMapEditor({ store, tickets }: { store: Stor
             <OrganizerField id="seat-ticket" label="Kelas tiket">
               <Select id="seat-ticket" variant="field" value="" placeholder="Ubah kelas tiket" onChange={(value) => state.setSelectedTicketType(value || null)} options={ticketOptions} />
             </OrganizerField>
-            <button type="button" className={`${ghostButton} w-full text-[#B91C1C]`} onClick={state.deleteSelectedSeats}>
+            <button type="button" className={`${ghostButton} w-full text-status-danger-bg`} onClick={state.deleteSelectedSeats}>
               <Trash2 aria-hidden="true" className="size-4" />Hapus kursi
             </button>
           </>

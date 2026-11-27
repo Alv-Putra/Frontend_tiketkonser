@@ -1,26 +1,32 @@
 'use client';
 
 import { useId, useState, type FormEvent } from 'react';
-import { CalendarDays, FileText, Image as ImageIcon, MapPin, X } from 'lucide-react';
+import { CalendarDays, FileCheck2, FileText, Image as ImageIcon, MapPin, X } from 'lucide-react';
 import { DashboardNotice, ghostButton, primaryButton } from '@/components/workspace/DashboardKit';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { fieldErrorsFrom } from '@/lib/api';
 import { formatDateTimeInput } from '@/lib/formatters';
 import { fetchOrganizerCategories, fetchOrganizerCities, type EventCreateInput } from '@/services/dashboardService';
-import type { OrganizerEventDetail } from '@/types/dashboard';
+import type { EventDocumentType, OrganizerEventDetail } from '@/types/dashboard';
 import OrganizerDialog from './OrganizerDialog';
 import OrganizerField, { organizerInput } from './OrganizerField';
+import { eventDocumentLabels } from './OrganizerEventDocuments';
 import Select from '@/components/ui/Select';
 
 interface Props {
   event?: OrganizerEventDetail;
   submitting: boolean;
   onClose: () => void;
-  onSubmit: (data: Partial<EventCreateInput>) => Promise<void>;
+  onSubmit: (data: Partial<EventCreateInput>, documents: [EventDocumentType, File][]) => Promise<void>;
 }
 
-export default function OrganizerEventForm({ event, submitting, onClose, onSubmit }: Props) {
+const documentTypes = Object.keys(eventDocumentLabels) as EventDocumentType[];
+
+export default function OrganizerEventForm({ event, submitting: external, onClose, onSubmit }: Props) {
   const uid = useId();
+  // Tetap sibuk selama berkas diunggah setelah event dibuat, agar tidak terkirim dua kali.
+  const [saving, setSaving] = useState(false);
+  const submitting = external || saving;
   const [error, setError] = useState<unknown>(null);
   const fieldErrors = fieldErrorsFrom(error);
   const categories = useDashboardData(fetchOrganizerCategories);
@@ -43,7 +49,11 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
     const old = event?.venue;
     // Venue yang berubah dibuat ulang oleh backend; kirim hanya bila memang diubah.
     const venueChanged = !old || old.name !== venue.name || (old.address ?? undefined) !== venue.address || String(old.city_id) !== venue.city_id;
+    const documents = documentTypes
+      .map((type) => [type, fd.get(`doc_${type}`)] as const)
+      .filter((entry): entry is [EventDocumentType, File] => entry[1] instanceof File && entry[1].size > 0);
     setError(null);
+    setSaving(true);
 
     try {
       await onSubmit({
@@ -62,10 +72,12 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
         end_at: date('end_at', event?.end_at)!,
         sales_start_at: date('sales_start_at', event?.sales_start_at),
         sales_end_at: date('sales_end_at', event?.sales_end_at),
-      });
+      }, documents);
       onClose();
     } catch (err) {
       setError(err ?? new Error('Gagal menyimpan event. Coba lagi.'));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -88,6 +100,7 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
       </div>
 
       <form autoComplete="off" onSubmit={handleSubmit} className="space-y-5 px-5 py-5 sm:px-6">
+        {!event && <p className="text-xs font-semibold text-ink/60">Langkah 1 dari 2 · Detail event dan berkas verifikasi, lalu susun denah kursi.</p>}
         {event?.rejected_reason && <DashboardNotice>Alasan penolakan: {event.rejected_reason}</DashboardNotice>}
         {error !== null && (
           <DashboardNotice error>{error instanceof Error ? error.message : 'Gagal menyimpan event. Coba lagi.'}</DashboardNotice>
@@ -176,11 +189,37 @@ export default function OrganizerEventForm({ event, submitting, onClose, onSubmi
           </div>
         </fieldset>
 
+        {!event && (
+          <fieldset disabled={submitting} className="min-w-0">
+            <legend className="mb-1 inline-flex items-center gap-2 text-sm font-bold">
+              <FileCheck2 className="size-4 text-blaze" aria-hidden="true" /> Berkas verifikasi
+            </legend>
+            <p className="mb-3 text-xs text-ink/60">Wajib lengkap sebelum diajukan ke admin; boleh menyusul lewat tombol berkas di daftar event. PDF, JPG, atau PNG, maksimal 5 MB.</p>
+            <ul className="divide-y divide-ink/10 rounded-2xl border border-ink/10">
+              {documentTypes.map((type) => (
+                <li key={type} className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-center">
+                  <label htmlFor={`${uid}-doc_${type}`} className="min-w-0">
+                    <span className="block text-sm font-semibold">{eventDocumentLabels[type].label}</span>
+                    <span className="block text-xs text-ink/60">{eventDocumentLabels[type].hint}</span>
+                  </label>
+                  <input
+                    id={`${uid}-doc_${type}`}
+                    name={`doc_${type}`}
+                    type="file"
+                    accept="application/pdf,image/jpeg,image/png"
+                    className="block w-full min-w-0 cursor-pointer text-xs text-ink/70 file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-ink/15 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-ink hover:file:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze"
+                  />
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+        )}
+
         {event && <p className="text-xs text-ink/70">Kolom opsional yang dikosongkan tetap memakai nilai sebelumnya.</p>}
         <div className="flex flex-wrap justify-end gap-3 border-t border-ink/10 pt-4">
           <button type="button" onClick={onClose} disabled={submitting} className={ghostButton}>Batal</button>
           <button type="submit" disabled={submitting} className={primaryButton}>
-            {submitting ? 'Menyimpan…' : event ? 'Simpan perubahan' : 'Buat event'}
+            {saving && !external ? 'Mengunggah berkas…' : submitting ? 'Menyimpan…' : event ? 'Simpan perubahan' : 'Buat & lanjut ke denah'}
           </button>
         </div>
       </form>

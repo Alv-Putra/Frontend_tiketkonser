@@ -73,5 +73,5 @@ test('mewarnai kursi tersedia sesuai kelas tiket dan menampilkan elemen denah', 
 
   const fills = Array.from(container.querySelectorAll('rect')).map((rect) => rect.getAttribute('style'));
   expect(fills).toContain('fill: #9B8CFF;');
-  expect(fills).toContain('fill: var(--color-blaze);');
+  expect(fills).toContain('fill: var(--color-ink);');
 });

@@ -142,6 +142,8 @@ export interface OrganizerEventDetail {
   sales_end_at: string | null;
   status: string;
   rejected_reason: string | null;
+  approved_at: string | null;
+  updated_at: string | null;
   category_id: string;
   venue_id: string;
   category: { id: string; name: string; slug: string } | null;
