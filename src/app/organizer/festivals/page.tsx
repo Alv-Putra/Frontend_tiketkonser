@@ -1,3 +1,6 @@
-import OrganizerConcertsPage from '../concerts/page';
+import { redirect } from 'next/navigation';
 
-export default OrganizerConcertsPage;
+export default function OrganizerFestivalsPage() {
+  redirect('/organizer/concerts');
+}
+

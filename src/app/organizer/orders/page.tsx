@@ -1,7 +1,6 @@
-'use client';
-
-import AdminOrdersPage from '@/app/admin/orders/page';
+import { redirect } from 'next/navigation';
 
 export default function OrganizerOrdersPage() {
-  return <AdminOrdersPage />;
+  redirect('/organizer/sales');
 }
+

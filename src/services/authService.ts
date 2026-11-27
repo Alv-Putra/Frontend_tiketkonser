@@ -122,6 +122,15 @@ export class AuthService {
     return { message: data && data.message ? data.message : null, user: normalizeUser(data.user) };
   }
 
+  /** Daftar organizer: multipart berisi data akun dan keempat berkas legalitas. */
+  async registerOrganizer(fields: Record<string, string | undefined>, files: Record<string, File>) {
+    const body = new FormData();
+    for (const [key, value] of Object.entries(fields)) if (value) body.append(key, value);
+    for (const [key, file] of Object.entries(files)) body.append(key, file);
+    const data = await apiFetch('/api/auth/register-organizer', { method: 'POST', auth: false, body });
+    return { message: data && data.message ? String(data.message) : null };
+  }
+
   async logout() {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });

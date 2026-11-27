@@ -63,7 +63,9 @@ export async function apiFetch(path: string, options: ApiFetchOptions = {}) {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
-  if (body !== undefined) {
+  // FormData: browser yang mengisi Content-Type beserta boundary multipart.
+  const isForm = body instanceof FormData;
+  if (body !== undefined && !isForm) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -71,7 +73,7 @@ export async function apiFetch(path: string, options: ApiFetchOptions = {}) {
     method,
     headers,
     credentials: 'include',
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   const contentType = res.headers.get('content-type') || '';

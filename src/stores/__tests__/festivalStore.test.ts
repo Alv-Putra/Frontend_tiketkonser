@@ -45,12 +45,12 @@ describe('useFestivalStore', () => {
     expect(useFestivalStore.getState().isLoading).toBe(false);
   });
 
-  it('falls back to mock data when storage is empty', async () => {
+  it('returns an empty list when storage is empty', async () => {
     storageDB.festivals = null;
     const promise = useFestivalStore.getState().fetchFestivals();
     jest.runAllTimers();
     const result = await promise;
-    expect(result.length).toBeGreaterThan(0);
+    expect(result).toEqual([]);
     expect(useFestivalStore.getState().error).toBeNull();
   });
 

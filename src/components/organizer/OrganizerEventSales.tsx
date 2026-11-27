@@ -6,7 +6,7 @@ import { DashboardNotice, DashboardStatus, RefreshButton } from '@/components/wo
 import { eventDate } from './OrganizerEventPicker';
 import OrganizerSalesSummary from './OrganizerSalesSummary';
 
-const eventStatuses = {
+export const eventStatuses = {
   draft: { label: 'Draf', tone: 'neutral' },
   pending_review: { label: 'Menunggu persetujuan', tone: 'warning' },
   published: { label: 'Dipublikasikan', tone: 'positive' },

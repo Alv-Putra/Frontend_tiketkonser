@@ -5,6 +5,7 @@ import { Plus, Search, Tag, RotateCw } from 'lucide-react';
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import useMonitoringStore from '@/stores/monitoringStore';
+import { closeOnBackdrop } from '@/lib/backdrop';
 
 export default function AdminCategoriesPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
@@ -231,7 +232,7 @@ export default function AdminCategoriesPage() {
 
       {/* Add Category Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div {...closeOnBackdrop(() => setIsModalOpen(false))} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white border border-ink/10 p-6">
             <h2 className="font-display text-base font-bold text-ink mb-1">Tambah kategori tiket</h2>
             <p className="text-xs text-ink/60 mb-4">

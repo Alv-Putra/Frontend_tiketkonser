@@ -1,7 +1,6 @@
-'use client';
-
-import AdminUsersPage from '@/app/admin/users/page';
+import { redirect } from 'next/navigation';
 
 export default function OrganizerUsersPage() {
-  return <AdminUsersPage />;
+  redirect('/organizer');
 }
+

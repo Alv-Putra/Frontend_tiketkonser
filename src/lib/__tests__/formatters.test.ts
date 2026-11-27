@@ -1,8 +1,10 @@
 import {
+  slugify,
   formatCurrency,
   formatDate,
   formatDateShort,
   formatDateTime,
+  formatDateTimeInput,
   formatTimeAgo,
   isExpired,
   isPaymentExpired,
@@ -54,6 +56,17 @@ describe('formatters', () => {
   describe('formatDateTime', () => {
     it('formats date and time with hour', () => {
       expect(formatDateTime('2026-05-15T14:00:00Z')).toMatch(/Mei 2026, \d{2}:\d{2}/);
+    });
+  });
+
+  describe('formatDateTimeInput', () => {
+    it('uses the same local time as a datetime-local input', () => {
+      const localDate = new Date(2026, 10, 25, 19, 30);
+      expect(formatDateTimeInput(localDate.toISOString())).toBe('2026-11-25T19:30');
+    });
+
+    it('leaves optional dates empty', () => {
+      expect(formatDateTimeInput(null)).toBe('');
     });
   });
 
@@ -191,5 +204,13 @@ describe('formatters', () => {
       const data = JSON.parse(generateQRData('TKT-ABC12345', 'f1', 'o1'));
       expect(data).toEqual({ code: 'TKT-ABC12345', festival: 'f1', order: 'o1' });
     });
+  });
+});
+describe('slugify', () => {
+  it('membuat slug URL dari teks bebas', () => {
+    expect(slugify('  Nusantara Live Entertainment!  ')).toBe('nusantara-live-entertainment');
+    expect(slugify('Café Déjà Vu & Co.')).toBe('cafe-deja-vu-co');
+    expect(slugify('!!!')).toBe('');
+    expect(slugify(`${'a'.repeat(79)} b`)).toBe('a'.repeat(79));
   });
 });

@@ -177,6 +177,13 @@ export default function WorkspaceLoginForm({
         </div>
       </div>
 
+      {role === 'organizer' && (
+        <p className={`mt-6 text-center text-sm text-mute ${s.rise}`} style={{ ['--d' as string]: '0.8s' }}>
+          Belum punya akun organizer?{' '}
+          <Link href="/organizer/register" className="font-semibold text-white underline-offset-4 hover:text-tangerine hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tangerine">Daftar di sini</Link>
+        </p>
+      )}
+
       <p className={`mt-6 text-center font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#52525B] ${s.rise}`} style={{ ['--d' as string]: '0.9s' }}>
         Tixo Backstage
       </p>

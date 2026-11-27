@@ -7,8 +7,8 @@ import { ArrowRight, RefreshCw, type LucideIcon } from 'lucide-react';
 import MotionProvider from '@/components/landing/MotionProvider';
 import { useGsap } from '@/lib/gsap';
 
-export const primaryButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-blaze px-4 py-2 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
-export const ghostButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
+export const primaryButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-blaze px-4 py-2 text-sm font-semibold text-ink hover:bg-tangerine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
+export const ghostButton = 'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze disabled:cursor-default disabled:opacity-55';
 export const ease = [0.22, 1, 0.36, 1] as const;
 
 export function DashboardFrame({ children }: { children: ReactNode }) {
@@ -45,7 +45,7 @@ export function RefreshButton({ loading, refresh }: { loading: boolean; refresh:
 
 export function DashboardNotice({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return (
-    <p role={error ? 'alert' : 'status'} className={`rounded-2xl border border-ink/10 p-4 text-sm text-ink ${error ? 'bg-status-danger/25' : 'bg-white'}`}>
+    <p role={error ? 'alert' : 'status'} className={`rounded-2xl border border-ink/10 p-4 text-sm text-ink ${error ? 'border-blaze/40 bg-blaze/10' : 'bg-white'}`}>
       {children}
     </p>
   );
@@ -141,3 +141,11 @@ export function DashboardStatus({ label, tone = 'neutral' }: { label: string; to
   }[tone];
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold text-ink ${toneClass}`}>{label}</span>;
 }
+
+export const dashboardOrderStatus = {
+  paid: { label: 'Lunas', tone: 'positive', color: 'var(--color-status-success)' },
+  pending: { label: 'Menunggu pembayaran', tone: 'warning', color: 'var(--color-status-warning)' },
+  expired: { label: 'Kedaluwarsa', tone: 'neutral', color: 'var(--color-mute)' },
+  cancelled: { label: 'Dibatalkan', tone: 'danger', color: 'var(--color-status-danger)' },
+  refunded: { label: 'Dikembalikan', tone: 'neutral', color: 'var(--color-line)' },
+} as const;

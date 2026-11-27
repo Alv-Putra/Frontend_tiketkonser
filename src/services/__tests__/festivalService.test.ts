@@ -373,7 +373,7 @@ describe('festivalService', () => {
       const directArrayRes = await festivalService.getPublishedFestivals({ useApi: true });
       expect(directArrayRes.length).toBe(1);
 
-      // Empty API fallback
+      // API kosong tidak lagi jatuh ke data mock
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -381,12 +381,12 @@ describe('festivalService', () => {
         json: async () => ({ success: true, data: [] }),
       });
       const fallbackRes = await festivalService.getPublishedFestivals({ useApi: true });
-      expect(fallbackRes.length).toBeGreaterThan(0);
+      expect(fallbackRes).toEqual([]);
 
-      // Error API fallback
+      // API gagal mengembalikan daftar kosong
       global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
       const errorFallbackRes = await festivalService.getPublishedFestivals({ useApi: true });
-      expect(errorFallbackRes.length).toBeGreaterThan(0);
+      expect(errorFallbackRes).toEqual([]);
 
       // Null data response from API
       global.fetch = jest.fn().mockResolvedValue({

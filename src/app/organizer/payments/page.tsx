@@ -1,7 +1,6 @@
-'use client';
-
-import AdminPaymentsPage from '@/app/admin/payments/page';
+import { redirect } from 'next/navigation';
 
 export default function OrganizerPaymentsPage() {
-  return <AdminPaymentsPage />;
+  redirect('/organizer/sales');
 }
+

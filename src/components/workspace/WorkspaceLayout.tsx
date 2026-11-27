@@ -17,7 +17,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   return (
     <div
       data-workspace-theme={workspaceTheme}
-      className={`${brandFonts} workspace-root flex h-dvh w-full overflow-hidden font-body transition-colors duration-200 ${
+      className={`${brandFonts} workspace-theme workspace-root flex h-dvh w-full overflow-hidden font-body transition-colors duration-200 ${
         workspaceTheme === 'dark' ? 'bg-ink text-white' : 'bg-[#F4F4F6] text-ink'
       }`}
     >

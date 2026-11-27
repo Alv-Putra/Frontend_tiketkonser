@@ -111,6 +111,16 @@ describe('lib/api', () => {
       expect(init.body).toBe(JSON.stringify({ email: 'a@b.c', password: 'x' }));
     });
 
+    it('sends FormData as-is without a json content type', async () => {
+      fetchMock.mockResolvedValue(jsonResponse({ body: { success: true, data: {} } }));
+      const form = new FormData();
+      form.append('file', 'isi');
+      await apiFetch('/api/upload', { method: 'PUT', body: form });
+      const [, init] = fetchMock.mock.calls[0];
+      expect(init.headers['Content-Type']).toBeUndefined();
+      expect(init.body).toBe(form);
+    });
+
     it('omits the body when none is given', async () => {
       fetchMock.mockResolvedValue(jsonResponse({ body: { success: true, data: null } }));
       await apiFetch('/api/auth/me');

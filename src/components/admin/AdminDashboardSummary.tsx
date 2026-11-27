@@ -1,55 +1,82 @@
 import Link from 'next/link';
-import { ArrowRight, Banknote, ClipboardCheck, Music, ShoppingBag, Users } from 'lucide-react';
+import { ArrowUpRight, ClipboardCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import type { AdminDashboardData } from '@/types/dashboard';
-import { DashboardStatus, MetricGrid, Panel, PanelHead, ghostButton } from '@/components/workspace/DashboardKit';
+import { DashboardStatus, Panel, dashboardOrderStatus, ghostButton } from '@/components/workspace/DashboardKit';
 
 const dateFormat = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' });
-const numberFormat = new Intl.NumberFormat('id-ID');
-const orderStatus = {
-  paid: { label: 'Lunas', tone: 'positive' },
-  pending: { label: 'Menunggu pembayaran', tone: 'warning' },
-  expired: { label: 'Kedaluwarsa', tone: 'neutral' },
-  cancelled: { label: 'Dibatalkan', tone: 'danger' },
-  refunded: { label: 'Dikembalikan', tone: 'neutral' },
-} as const;
+const number = new Intl.NumberFormat('id-ID');
 
 function LatestOrders({ orders }: { orders: AdminDashboardData['recent_orders'] }) {
   return (
     <Panel>
-      <PanelHead title="Pesanan terbaru" subtitle="Pesanan masuk dari seluruh platform." />
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-lg font-bold">Pesanan terbaru</h3>
+        <Link href="/admin/orders" className={ghostButton}>Lihat pesanan <ArrowUpRight aria-hidden="true" className="size-4" /></Link>
+      </div>
       {orders.length ? (
-        <ul className="divide-y divide-ink/10">
-          {orders.map((order) => (
-            <li key={order.id} className="grid gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-              <div className="min-w-0">
-                <p className="break-all text-sm font-semibold">{order.order_number}</p>
-                <p className="break-all text-sm text-ink/65">{order.user.email}</p>
-                <time dateTime={order.created_at} className="text-xs text-ink/65">{dateFormat.format(new Date(order.created_at))} WIB</time>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                <span className="text-sm font-semibold tabular-nums">{formatCurrency(order.total)}</span>
-                <DashboardStatus {...(orderStatus[order.status] ?? { label: order.status })} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : <p className="text-sm text-ink/65">Belum ada pesanan.</p>}
+        <table className="w-full table-fixed text-left text-xs sm:text-sm">
+          <thead>
+            <tr className="border-b border-ink/10 text-ink/70">
+              <th scope="col" className="w-[55%] py-2.5 pr-2 font-semibold md:w-[37%]">Pesanan</th>
+              <th scope="col" className="hidden w-[20%] py-2.5 pr-2 font-semibold md:table-cell">Waktu (WIB)</th>
+              <th scope="col" className="w-[45%] py-2.5 pl-2 text-right font-semibold md:w-[23%]">Total</th>
+              <th scope="col" className="hidden w-[20%] py-2.5 pl-2 text-right font-semibold md:table-cell">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-ink/10">
+            {orders.map((order) => {
+              const time = dateFormat.format(new Date(order.created_at));
+              const orderStatus = dashboardOrderStatus[order.status] ?? { label: order.status };
+              return (
+                <tr key={order.id} className="align-top">
+                  <th scope="row" className="py-3 pr-2 font-normal">
+                    <div className="wrap-anywhere font-semibold">{order.order_number}</div>
+                    <div className="mt-1 wrap-anywhere text-ink/70">{order.user.email}</div>
+                    <time dateTime={order.created_at} className="mt-1 block text-ink/70 md:hidden">{time} WIB</time>
+                  </th>
+                  <td className="hidden py-3 pr-2 text-ink/70 md:table-cell"><time dateTime={order.created_at}>{time}</time></td>
+                  <td className="py-3 pl-2 text-right">
+                    <div className="wrap-anywhere font-semibold tabular-nums">{formatCurrency(order.total)}</div>
+                    <div className="mt-1 md:hidden"><DashboardStatus {...orderStatus} /></div>
+                  </td>
+                  <td className="hidden py-3 pl-2 text-right md:table-cell"><DashboardStatus {...orderStatus} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : <p className="text-sm text-ink/70">Belum ada pesanan.</p>}
     </Panel>
   );
 }
 
-function ApprovalCard({ pending }: { pending: number }) {
+function PlatformTotals({ totals }: { totals: AdminDashboardData['totals'] }) {
+  const items = [
+    ['Akun pengguna', number.format(totals.users)],
+    ['Organizer terdaftar', number.format(totals.organizers)],
+    ['Total konser', number.format(totals.events)],
+    ['Total pesanan lunas', number.format(totals.paid_orders)],
+    ['Total pendapatan lunas', formatCurrency(totals.paid_revenue)],
+  ];
+
   return (
-    <section className="ticket-notch rounded-2xl bg-ink p-6 text-paper sm:p-8">
-      <div className="flex items-start justify-between gap-4">
-        <h2 className="font-display text-xl font-bold">Pengajuan konser</h2>
-        <ClipboardCheck aria-hidden="true" className="size-6 shrink-0 text-tangerine" />
-      </div>
-      <p className="mt-3 font-display text-5xl font-extrabold tracking-tight tabular-nums">{numberFormat.format(pending)}</p>
-      <p className="mb-5 mt-1 text-sm text-paper/80">{pending ? 'Konser menunggu persetujuan' : 'Semua pengajuan sudah ditinjau'}</p>
-      <Link href="/admin/approvals" className={ghostButton}>Tinjau pengajuan <ArrowRight aria-hidden="true" className="size-4" /></Link>
-    </section>
+    <Panel>
+      <h3 className="mb-3 font-display text-lg font-bold">Total platform</h3>
+      <dl className="divide-y divide-ink/10">
+        {items.map(([label, value]) => (
+          <div key={label} className="flex flex-wrap justify-between gap-x-2 gap-y-1 py-2 text-sm">
+            <dt className="text-ink/75">{label}</dt>
+            <dd className="wrap-anywhere font-semibold tabular-nums">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <Link href="/admin/approvals" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm font-semibold hover:border-blaze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze">
+        <ClipboardCheck className="size-4 shrink-0" aria-hidden="true" />
+        <span className="flex-1">{number.format(totals.pending_events)} menunggu persetujuan</span>
+        <ArrowUpRight className="size-4 shrink-0" aria-hidden="true" />
+      </Link>
+    </Panel>
   );
 }
 
@@ -58,17 +85,9 @@ export default function AdminDashboardSummary({ totals, orders }: {
   orders: AdminDashboardData['recent_orders'];
 }) {
   return (
-    <>
-      <MetricGrid items={[
-        { label: 'Pendapatan dari pesanan lunas', value: formatCurrency(totals.paid_revenue), icon: Banknote },
-        { label: 'Pesanan lunas', value: numberFormat.format(totals.paid_orders), icon: ShoppingBag },
-        { label: 'Akun pengguna', value: numberFormat.format(totals.users), icon: Users, note: `${numberFormat.format(totals.organizers)} organizer terdaftar` },
-        { label: 'Total konser', value: numberFormat.format(totals.events), icon: Music },
-      ]} />
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <LatestOrders orders={orders} />
-        <ApprovalCard pending={totals.pending_events} />
-      </div>
-    </>
+    <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,2.15fr)_minmax(0,1fr)]">
+      <LatestOrders orders={orders} />
+      <PlatformTotals totals={totals} />
+    </div>
   );
 }

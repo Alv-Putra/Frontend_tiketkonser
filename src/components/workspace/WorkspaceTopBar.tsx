@@ -42,22 +42,27 @@ export default function WorkspaceTopBar() {
         : 'border-ink/10 bg-white/90 backdrop-blur-sm text-ink'
     }`}>
       <span className="min-w-0 truncate text-sm font-semibold md:hidden">{roleLabel}</span>
-      <div className="relative hidden w-72 md:block lg:w-96">
-        <Search aria-hidden="true" className={`absolute left-3 top-1/2 size-4 -translate-y-1/2 ${isDark ? 'text-mute' : 'text-ink/45'}`} />
-        <input
-          type="search"
-          name="workspace-search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Cari di workspace…"
-          aria-label="Cari di workspace"
-          className={`min-h-11 w-full rounded-xl border py-2.5 pl-9 pr-4 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-blaze ${
-            isDark
-              ? 'border-line bg-onyx text-white placeholder:text-mute'
-              : 'border-ink/10 bg-paper text-ink placeholder:text-ink/45'
-          }`}
-        />
-      </div>
+      {/* Pencarian memakai data monitoring admin; organizer belum punya endpoint cari. */}
+      {isOrganizer ? (
+        <span className="hidden md:block" />
+      ) : (
+        <div className="relative hidden w-72 md:block lg:w-96">
+          <Search aria-hidden="true" className={`absolute left-3 top-1/2 size-4 -translate-y-1/2 ${isDark ? 'text-mute' : 'text-ink/45'}`} />
+          <input
+            type="search"
+            name="workspace-search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari di workspace…"
+            aria-label="Cari di workspace"
+            className={`min-h-11 w-full rounded-xl border py-2.5 pl-9 pr-4 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-blaze ${
+              isDark
+                ? 'border-line bg-onyx text-white placeholder:text-mute'
+                : 'border-ink/10 bg-paper text-ink placeholder:text-ink/45'
+            }`}
+          />
+        </div>
+      )}
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button
