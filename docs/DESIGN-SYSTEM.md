@@ -175,7 +175,6 @@ Ada di [`src/components/landing/`](../src/components/landing/) — boleh dipakai
 - Halaman utama admin memakai `DashboardOverview` untuk filter periode, metrik, dan komposisi status pesanan. Kartu metrik memilih seri di `DashboardTrend`. Gunakan panel `bg-ink` dengan garis `tangerine` untuk grafik utama, dan tabel semantik untuk rincian.
 - Ringkasan organizer (`OrganizerDashboard`): kolom kiri terang (kartu KPI dengan pil perubahan dan angka count-up, `OrganizerTrend` dengan garis `blaze` halus dan tooltip, gauge kuota, bar status bersegmen) dan kolom kanan panel `bg-ink` berisi kartu `bg-onyx` (stat check-in dan pesanan menunggu, funnel batang tipis "Perjalanan tiket", tabel konser terlaris bergaris putus-putus). Framer menangani masuk, count-up, pil filter `layoutId`, tirai grafik, jarum gauge, dan bar `scaleX`; GSAP menangani batang funnel dan baris kelas tiket saat digulir.
 - Angka di ringkasan berasal dari backend. Tampilkan keadaan memuat, kosong, atau gagal bila sesuai.
-
 ## 6. Animasi — banyak tapi ringan
 
 ### Aturan wajib

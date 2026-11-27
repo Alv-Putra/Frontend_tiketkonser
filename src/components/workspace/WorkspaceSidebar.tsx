@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FocusEvent, type MouseEvent } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, MotionConfig, m } from 'framer-motion';
@@ -133,7 +134,16 @@ export default function WorkspaceSidebar() {
         >
           <div className={`flex h-16 shrink-0 items-center border-b border-ink/10 ${collapsed ? 'flex-col justify-center' : 'justify-between px-5'}`}>
             <Link href="/" aria-label="Tixo, kembali ke beranda" className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blaze">
-              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-blaze text-ink"><Ticket className="size-4" strokeWidth={2.5} /></span>
+              <span className="relative flex size-8 shrink-0 items-center justify-center transition-transform duration-200 hover:scale-105">
+                <Image
+                  src="/LogoTixo.png"
+                  alt="Tixo"
+                  width={32}
+                  height={32}
+                  unoptimized
+                  className="size-8 object-contain"
+                />
+              </span>
               {!collapsed && <span className="font-display text-lg font-extrabold tracking-tight text-ink">TIXO{isOrganizer && <span className="ml-1.5 text-xs font-bold tracking-wide text-ink/50">ORGANIZER</span>}</span>}
             </Link>
             {!collapsed && <ToggleButton collapsed={collapsed} onClick={() => setCollapsed(true)} />}

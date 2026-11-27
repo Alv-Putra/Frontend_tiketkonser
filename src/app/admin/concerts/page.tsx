@@ -22,6 +22,7 @@ export default function AdminConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
   const addConcert = useMonitoringStore((state) => state.addConcert);
+  const createAndPublishConcert = useMonitoringStore((state) => state.createAndPublishConcert);
   const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
@@ -67,22 +68,30 @@ export default function AdminConcertsPage() {
   const soldOutCount = concerts.filter((c) => !c.salesOpen || c.sold >= c.quota).length;
   const capacityPct = totalQuota > 0 ? ((totalSold / totalQuota) * 100).toFixed(1) : '0';
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!newConcertName.trim()) return;
-    addConcert({
-      name: newConcertName,
-      artist: newArtist || 'Berbagai Artis',
-      location: newLocation || 'Jakarta',
-      schedule: newSchedule || '1 Oktober 2026',
-      quota: parseInt(newQuota, 10) || 1000,
-      priceFrom: 'Rp500.000'
-    });
-    setNewConcertName('');
-    setNewArtist('');
-    setNewLocation('');
-    setNewSchedule('');
-    setIsAddModalOpen(false);
+    setIsLoading(true);
+    try {
+      await createAndPublishConcert({
+        name: newConcertName,
+        artist: newArtist || newConcertName,
+        location: newLocation || 'Jakarta',
+        schedule: newSchedule || '1 Oktober 2026',
+        quota: parseInt(newQuota, 10) || 1000,
+        priceFrom: 500000,
+      });
+      await fetchAdminData();
+      setNewConcertName('');
+      setNewArtist('');
+      setNewLocation('');
+      setNewSchedule('');
+      setIsAddModalOpen(false);
+    } catch (err: any) {
+      alert(err?.message || 'Gagal menambahkan konser ke backend');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleExport = () => {
@@ -193,7 +202,14 @@ export default function AdminConcertsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/10">
-                {filteredConcerts.map((c) => {
+                {filteredConcerts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-sm text-ink/45">
+                      Belum ada konser yang terdaftar. Klik tombol &quot;Tambah konser&quot; di atas untuk menambahkan.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredConcerts.map((c) => {
                   const pct = Math.round((c.sold / c.quota) * 100);
                   return (
                     <tr key={c.id} className="hover:bg-ink/[0.03] transition-colors">
@@ -233,7 +249,7 @@ export default function AdminConcertsPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
