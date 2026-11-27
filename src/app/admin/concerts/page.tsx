@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Plus,
   Search,
   Download,
   ArrowRight,
@@ -16,23 +15,14 @@ import {
 import StatCard from '@/components/workspace/StatCard';
 import StatusBadge from '@/components/workspace/StatusBadge';
 import useMonitoringStore from '@/stores/monitoringStore';
-import { closeOnBackdrop } from '@/lib/backdrop';
 
 export default function AdminConcertsPage() {
   const concerts = useMonitoringStore((state) => state.concerts);
   const toggleConcertSales = useMonitoringStore((state) => state.toggleConcertSales);
-  const addConcert = useMonitoringStore((state) => state.addConcert);
-  const createAndPublishConcert = useMonitoringStore((state) => state.createAndPublishConcert);
   const fetchAdminData = useMonitoringStore((state) => state.fetchAdminData);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newConcertName, setNewConcertName] = useState('');
-  const [newArtist, setNewArtist] = useState('');
-  const [newLocation, setNewLocation] = useState('');
-  const [newSchedule, setNewSchedule] = useState('');
-  const [newQuota, setNewQuota] = useState('2000');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -68,32 +58,6 @@ export default function AdminConcertsPage() {
   const soldOutCount = concerts.filter((c) => !c.salesOpen || c.sold >= c.quota).length;
   const capacityPct = totalQuota > 0 ? ((totalSold / totalQuota) * 100).toFixed(1) : '0';
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    if (!newConcertName.trim()) return;
-    setIsLoading(true);
-    try {
-      await createAndPublishConcert({
-        name: newConcertName,
-        artist: newArtist || newConcertName,
-        location: newLocation || 'Jakarta',
-        schedule: newSchedule || '1 Oktober 2026',
-        quota: parseInt(newQuota, 10) || 1000,
-        priceFrom: 500000,
-      });
-      await fetchAdminData();
-      setNewConcertName('');
-      setNewArtist('');
-      setNewLocation('');
-      setNewSchedule('');
-      setIsAddModalOpen(false);
-    } catch (err: any) {
-      alert(err?.message || 'Gagal menambahkan konser ke backend');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleExport = () => {
     alert('Daftar konser berhasil diekspor.');
   };
@@ -124,14 +88,6 @@ export default function AdminConcertsPage() {
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blaze' : ''}`} />
             <span>Segarkan</span>
-          </button>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            type="button"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-blaze hover:bg-tangerine text-ink text-xs font-semibold shadow-lg shadow-blaze/20 transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tambah konser</span>
           </button>
         </div>
       </div>
@@ -205,7 +161,7 @@ export default function AdminConcertsPage() {
                 {filteredConcerts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-sm text-ink/45">
-                      Belum ada konser yang terdaftar. Klik tombol &quot;Tambah konser&quot; di atas untuk menambahkan.
+                      Belum ada konser yang terdaftar. Konser dibuat oleh organizer lalu diajukan untuk persetujuan admin.
                     </td>
                   </tr>
                 ) : (
@@ -306,84 +262,6 @@ export default function AdminConcertsPage() {
         </div>
       </div>
 
-      {/* Add Concert Modal */}
-      {isAddModalOpen && (
-        <div {...closeOnBackdrop(() => setIsAddModalOpen(false))} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white border border-ink/10 p-6">
-            <h2 className="font-display text-base font-bold text-ink mb-1">Tambah konser baru</h2>
-            <p className="text-xs text-ink/60 mb-4">
-              Masukkan informasi konser untuk dimasukkan ke direktori pemantauan.
-            </p>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-ink/60 mb-1">Nama Konser</label>
-                <input
-                  type="text"
-                  required
-                  value={newConcertName}
-                  onChange={(e) => setNewConcertName(e.target.value)}
-                  placeholder="Contoh: Soundrenaline 2026"
-                  className="w-full px-3 py-2 rounded-lg bg-paper border border-ink/10 text-xs text-ink focus:outline-none focus:border-blaze"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-ink/60 mb-1">Artis Utama</label>
-                <input
-                  type="text"
-                  value={newArtist}
-                  onChange={(e) => setNewArtist(e.target.value)}
-                  placeholder="Contoh: Sheila on 7"
-                  className="w-full px-3 py-2 rounded-lg bg-paper border border-ink/10 text-xs text-ink focus:outline-none focus:border-blaze"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-ink/60 mb-1">Jadwal</label>
-                <input
-                  type="text"
-                  value={newSchedule}
-                  onChange={(e) => setNewSchedule(e.target.value)}
-                  placeholder="Contoh: 15 November 2026"
-                  className="w-full px-3 py-2 rounded-lg bg-paper border border-ink/10 text-xs text-ink focus:outline-none focus:border-blaze"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-ink/60 mb-1">Lokasi</label>
-                <input
-                  type="text"
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="Contoh: GBK Madya, Jakarta"
-                  className="w-full px-3 py-2 rounded-lg bg-paper border border-ink/10 text-xs text-ink focus:outline-none focus:border-blaze"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-ink/60 mb-1">Total Kuota Tiket</label>
-                <input
-                  type="number"
-                  value={newQuota}
-                  onChange={(e) => setNewQuota(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-paper border border-ink/10 text-xs text-ink focus:outline-none focus:border-blaze"
-                />
-              </div>
-              <div className="flex items-center justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-ink/60 hover:text-ink"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 rounded-full bg-blaze hover:bg-tangerine text-xs font-semibold text-ink"
-                >
-                  Simpan Konser
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }

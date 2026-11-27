@@ -1,6 +1,7 @@
 import { act } from '@testing-library/react';
 import defaultUseMonitoringStore, { useMonitoringStore } from '../monitoringStore';
 import monitoringService from '@/services/monitoringService';
+import { concertFixtures } from '@/services/__tests__/fixtures/monitoringConcerts';
 
 describe('useMonitoringStore', () => {
   it('exports both default and named useMonitoringStore hooks', () => {
@@ -8,6 +9,7 @@ describe('useMonitoringStore', () => {
   });
   beforeEach(() => {
     monitoringService.reset();
+    monitoringService.concerts = structuredClone(concertFixtures);
     act(() => {
       useMonitoringStore.getState().refreshMetrics();
       useMonitoringStore.getState().setWorkspace('admin');

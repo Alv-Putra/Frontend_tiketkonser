@@ -74,16 +74,16 @@ describe('orderService', () => {
     );
   });
 
-  it('falls back to mock festivals when storage is empty', async () => {
+  it('rejects orders when storage has no festivals', async () => {
     storageDB.festivals = null;
-    const order = await settle(() =>
-      orderService.createOrder({
+    await expectReject(
+      () => orderService.createOrder({
         festivalId: 'f1',
         userId: 'u3',
         items: [{ ticketTypeId: 'f1t4', quantity: 1 }],
-      })
+      }),
+      'Festival tidak ditemukan'
     );
-    expect(order.festivalId).toBe('f1');
   });
 
   it('throws for unpublished festival', async () => {

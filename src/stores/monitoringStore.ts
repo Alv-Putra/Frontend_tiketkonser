@@ -32,7 +32,6 @@ export interface MonitoringState {
   toggleConcertSales: (concertId: string) => void;
   verifyPayment: (paymentId: string, isApproved: boolean) => void;
   addConcert: (concertData: ApiRecord) => void;
-  createAndPublishConcert: (concertData: ApiRecord) => Promise<void>;
   addArtist: (artistData: ApiRecord) => Artist;
   addCategory: (concertId: string, categoryData: ApiRecord) => void;
   refreshMetrics: () => void;
@@ -91,14 +90,6 @@ export const useMonitoringStore = create<MonitoringState>()((set, get) => ({
 
   addConcert: (concertData) => {
     monitoringService.addConcert(concertData);
-    set({
-      concerts: monitoringService.getConcerts(),
-      adminMetrics: monitoringService.getAdminMetrics()
-    });
-  },
-
-  createAndPublishConcert: async (concertData) => {
-    await monitoringService.createAndPublishConcertApi(concertData as any);
     set({
       concerts: monitoringService.getConcerts(),
       adminMetrics: monitoringService.getAdminMetrics()

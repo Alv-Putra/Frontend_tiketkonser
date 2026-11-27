@@ -1,4 +1,5 @@
 import defaultMonitoringService, { monitoringService } from '../monitoringService';
+import { concertFixtures } from './fixtures/monitoringConcerts';
 
 describe('MonitoringService', () => {
   it('exports both default and named monitoringService instances', () => {
@@ -6,6 +7,7 @@ describe('MonitoringService', () => {
   });
   beforeEach(() => {
     monitoringService.reset();
+    monitoringService.concerts = structuredClone(concertFixtures);
   });
 
   describe('getAdminMetrics', () => {
@@ -894,5 +896,18 @@ describe('MonitoringService', () => {
       const catchLogs = await monitoringService.fetchTransactionLogsFromApi();
       expect(catchLogs).toBeNull();
     });
+  });
+  it('mengosongkan konser bila respons event tanpa data', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ success: true }),
+    });
+    await monitoringService.fetchEventsFromApi();
+    expect(monitoringService.concerts).toEqual([]);
+    monitoringService.concerts = structuredClone(concertFixtures);
+    await monitoringService.fetchOrganizerEventsApi();
+    expect(monitoringService.concerts).toEqual([]);
   });
 });
